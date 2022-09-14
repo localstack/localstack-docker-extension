@@ -1,0 +1,19 @@
+{
+  "icon": "docker.svg",
+  "vm": {
+    "composefile": "docker-compose.yaml",
+    "exposes": {
+      "socket": "extension-LocalStack.sock"
+    }
+  },
+  "ui": {
+    "dashboard-tab": {
+      "title": "Localstack",
+      "src": "index.html",
+      "root": "ui",
+      "backend": {
+        "socket": "extension-LocalStack.sock"
+      }
+    }
+  }
+}
