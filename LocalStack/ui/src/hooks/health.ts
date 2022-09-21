@@ -1,26 +1,7 @@
 import useSWR from 'swr';
 import axios, { AxiosError } from 'axios';
 import { SwrCacheKey } from "../constants/index";
-
-export enum HealthState {
-  INITIALIZED = 'initialized',
-  AVAILABLE = 'available',
-  RUNNING = 'running',
-  ERROR = 'error',
-  DISABLED = 'disabled',
-}
-
-declare type Optional<T> = T | null | undefined;
-
-interface Health {
-  features: {
-    [key: string]: HealthState;
-  },
-  services: {
-    [key: string]: HealthState;
-  },
-  version: string;
-}
+import { Optional,Health } from '../types';
 
 interface UseResourcesGraph {
   health: Optional<Health>,

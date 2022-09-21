@@ -4,6 +4,7 @@ import { Accordion, AccordionSummary, Box, Card, Chip, TextField, Typography, Bu
 import { START_ARGS, STATUS_ARGS, STOP_ARGS } from './constants';
 import { useLocalStackHealth } from './hooks';
 import {ExpandMore as ExpandMoreIcon} from '@mui/icons-material';
+import { DockerImage } from './types';
 
 // Note: This line relies on Docker Desktop's presence as a host application.
 // If you're running this React app in a browser, it won't work properly.
@@ -30,6 +31,11 @@ export function App() {
   }, [health]);
 
   const start = async () => {
+    const images = await ddClient.docker.listImages() as [DockerImage];
+    if(!images.some(image => image.RepoTags?.at(0)=== 'localstack/localstack:latest')){
+      ddClient.desktopUI.toast.warning('localstack/localstack:latest not found; now pulling..');
+    }
+
     ddClient.docker.cli.exec('run', START_ARGS, {
       stream: {
         onOutput(data): void {
