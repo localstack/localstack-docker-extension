@@ -33,14 +33,7 @@ export function App() {
     ddClient.docker.cli.exec('run', START_ARGS, {
       stream: {
         onOutput(data): void {
-          console.log(data);
-          if (data.stderr) {
-            console.log(data.stderr);
-          }
-          if (data.stdout) {
-            console.log(data.stdout);
-            setStatus(status.concat(data.stdout));
-          }
+          setStatus(status.concat(data.stdout || data.stderr || ''));
           checkStatus();
         },
         onError(error: unknown): void {
@@ -48,13 +41,9 @@ export function App() {
           console.log(error);
 
         },
-        onClose(exitCode: number): void {
-          console.log("onClose with exit code " + exitCode);
-        },
       },
     });
   };
-
 
   const stop = async () => {
     // eslint-disable-next-line no-unused-vars
@@ -84,7 +73,6 @@ export function App() {
         </AccordionSummary>
         <Card>
           <TextField
-            label="Status"
             multiline
             fullWidth
             value={status}
