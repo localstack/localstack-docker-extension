@@ -1,13 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import { createDockerDesktopClient } from '@docker/extension-api-client';
-import { Accordion, AccordionSummary, Box, Card, Chip, TextField, Typography, Button } from '@mui/material';
+import { Accordion, AccordionSummary, Box, Card, Chip, TextField, Typography, Button, IconButton } from '@mui/material';
 import { START_ARGS, STATUS_ARGS, STOP_ARGS } from './constants';
-import { useLocalStackHealth } from './hooks';
-import {ExpandMore as ExpandMoreIcon} from '@mui/icons-material';
+import { useLocalStackHealth, useEnvVars } from './hooks';
+import { ExpandMore as ExpandMoreIcon } from '@mui/icons-material';
 import { DockerImage } from './types';
+import { StartOptions } from './views';
 
-// Note: This line relies on Docker Desktop's presence as a host application.
-// If you're running this React app in a browser, it won't work properly.
 const client = createDockerDesktopClient();
 
 function useDockerDesktopClient() {
@@ -16,7 +15,9 @@ function useDockerDesktopClient() {
 
 export function App() {
   const [status, setStatus] = useState<string>('');
+  const [showStartModal, setShowStartModal] = useState<boolean>(false);
   const ddClient = useDockerDesktopClient();
+  const { envVars } = useEnvVars();
 
   const { health, mutate } = useLocalStackHealth();
 
@@ -32,11 +33,12 @@ export function App() {
 
   const start = async () => {
     const images = await ddClient.docker.listImages() as [DockerImage];
-    if(!images.some(image => image.RepoTags?.at(0)=== 'localstack/localstack:latest')){
+    if (!images.some(image => image.RepoTags?.at(0) === 'localstack/localstack:latest')) {
       ddClient.desktopUI.toast.warning('localstack/localstack:latest not found; now pulling..');
     }
 
-    ddClient.docker.cli.exec('run', START_ARGS, {
+    const addedArgs = envVars.map(item => ['-e', `${item.variable}=${item.value}`]).flat();
+    ddClient.docker.cli.exec('run', addedArgs.concat(START_ARGS), {
       stream: {
         onOutput(data): void {
           setStatus(status.concat(data.stdout || data.stderr || ''));
@@ -59,14 +61,23 @@ export function App() {
 
   return (
     <>
-      <Box>
+      <Box mt={2} display="flex" alignItems="center">
         <Chip
           label={health ? 'Running' : 'Stopped'}
           color={health ? 'success' : 'error'}
         />
-        <Button variant="contained" onClick={start} style={{ margin: 10 }}>
-          Start LocalStack
-        </Button>
+        <Box style={{ margin: 10 }} bgcolor="primary">
+          <Button variant="contained" onClick={start} >
+            Start LocalStack
+          </Button>
+          <IconButton color="primary" onClick={() => setShowStartModal(true)}>
+            <ExpandMoreIcon />
+          </IconButton>
+          <StartOptions
+            open={showStartModal}
+            onClose={() => setShowStartModal(false)}
+          />
+        </Box>
         <Button variant="contained" onClick={stop}>
           Stop LocalStack
         </Button>

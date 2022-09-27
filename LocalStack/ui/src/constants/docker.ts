@@ -1,4 +1,6 @@
 const COMMON_ARGS = [
+  '-e',
+  'EXTRA_CORS_ALLOWED_ORIGINS=http://localhost:3000',
   '--rm',
   '-i',
   '--entrypoint=',
