@@ -1,6 +1,8 @@
 import { useCallback } from "react";
 import useSWR, { useSWRConfig } from "swr";
-import { STORAGE_KEY_ENVVARS } from "../constants";
+import { STORAGE_KEY_ENVVARS, STORAGE_KEY_LOCALSTACK } from "../../constants";
+import { DockerContainer } from "../../types";
+import { useDDClient } from "./utils";
 
 type UseGlobalSwr = {
   mutateRelated: (key: unknown, value?: any[]) => void; // eslint-disable-line @typescript-eslint/no-explicit-any
@@ -43,7 +45,7 @@ interface envVar {
 }
 
 interface useEnvVarsReturn {
-  envVars: envVar[];
+  envVars: envVar[],
   setEnvVars: (data: envVar[]) => unknown;
 }
 
@@ -64,5 +66,27 @@ export const useEnvVars = (): useEnvVarsReturn => {
   return {
     envVars: data || [],
     setEnvVars: mutateEnvVars,
+  };
+};
+
+interface useLocalStackReturn {
+  data: DockerContainer | null,
+  mutate: () => void;
+}
+
+
+export const useLocalStack = (): useLocalStackReturn => {
+  const ddClient = useDDClient();
+  const cacheKey = STORAGE_KEY_LOCALSTACK;
+
+  const { data, mutate } = useSWR(
+    cacheKey,
+    async () => (await ddClient.docker.listContainers() as [DockerContainer])
+      .find(container => container.Image === 'localstack/localstack'), { refreshInterval: 2000 },
+  );
+
+  return {
+    data,
+    mutate,
   };
 };

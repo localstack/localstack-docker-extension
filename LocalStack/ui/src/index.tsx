@@ -4,6 +4,7 @@ import CssBaseline from '@mui/material/CssBaseline';
 import { DockerMuiThemeProvider } from '@docker/docker-mui-theme';
 
 import { App } from './App';
+import { GlobalDDProvide } from './components/provider';
 
 ReactDOM.render(
   <React.StrictMode>
@@ -13,8 +14,10 @@ ReactDOM.render(
       some minimal Docker theming.
     */}
     <DockerMuiThemeProvider>
-      <CssBaseline />
-      <App />
+      <GlobalDDProvide>
+        <CssBaseline />
+        <App />
+      </GlobalDDProvide>
     </DockerMuiThemeProvider>
   </React.StrictMode>,
   document.getElementById('root'),

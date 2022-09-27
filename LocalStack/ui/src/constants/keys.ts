@@ -3,3 +3,4 @@ export enum SwrCacheKey {
 }
 
 export const STORAGE_KEY_ENVVARS = 'envVars';
+export const STORAGE_KEY_LOCALSTACK = 'localstack';

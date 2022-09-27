@@ -2,7 +2,7 @@ import { Box, Button, Dialog, DialogActions, IconButton, List, ListItem, TextFie
 import { AddCircleOutline, RemoveCircleOutline } from "@mui/icons-material";
 import React, { ReactElement, useState } from "react";
 import { v4 as uuid } from 'uuid';
-import { useEnvVars } from "../hooks/api";
+import { useEnvVars } from "../service/hooks";
 
 interface Props {
   open: boolean,
