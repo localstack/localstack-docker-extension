@@ -82,7 +82,7 @@ export const useLocalStack = (): useLocalStackReturn => {
   const { data, mutate } = useSWR(
     cacheKey,
     async () => (await ddClient.docker.listContainers() as [DockerContainer])
-      .find(container => container.Image === 'localstack/localstack'), { refreshInterval: 2000 },
+      .find(container => container.Image === 'localstack/localstack'),
   );
 
   return {
