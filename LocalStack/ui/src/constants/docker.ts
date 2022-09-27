@@ -1,6 +1,8 @@
 const COMMON_ARGS = [
-  '-e',
-  'EXTRA_CORS_ALLOWED_ORIGINS=http://localhost:3000',
+/* remove comment to allow accessing health without cors blocking when changing UI-source to localhost
+  '-e',   
+  'EXTRA_CORS_ALLOWED_ORIGINS=http://localhost:3000', 
+  */
   '--rm',
   '-i',
   '--entrypoint=',
