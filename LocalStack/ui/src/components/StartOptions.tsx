@@ -1,20 +1,12 @@
-import { Box, Button, Dialog, DialogActions, IconButton, List, ListItem, TextField } from "@mui/material";
+import { Box, Card, IconButton, List, ListItem, TextField } from "@mui/material";
 import { AddCircleOutline, RemoveCircleOutline } from "@mui/icons-material";
 import React, { ReactElement, useState } from "react";
 import { v4 as uuid } from 'uuid';
 import { useEnvVars } from "../service/hooks";
 
-interface Props {
-  open: boolean,
-  onClose: () => void;
-}
-
 const DEFAULT_COLUMN_WIDTH = 2000;
 
-export const StartOptions = ({
-  open,
-  onClose,
-}: Props): ReactElement => {
+export const StartOptions = (): ReactElement => {
 
   const { envVars, setEnvVars } = useEnvVars();
   const [newVar, setNewVar] = useState<string>('');
@@ -31,7 +23,7 @@ export const StartOptions = ({
   };
 
   return (
-    <Dialog open={open} onClose={onClose}>
+    <Card>
       <List>
         {envVars.map(item => (
           <ListItem key={item.id}>
@@ -66,11 +58,6 @@ export const StartOptions = ({
           </Box>
         </ListItem>
       </List>
-      <DialogActions>
-        <Button onClick={onClose} variant="contained">
-          Close
-        </Button>
-      </DialogActions>
-    </Dialog>
+    </Card>
   );
 };

@@ -7,10 +7,7 @@ interface Props {
 }
 const client = createDockerDesktopClient();
 
-
-
 export const GlobalDDProvide = ({ children }: Props) => {
-
   return (
     <GlobalDDContext.Provider value={{client}}>
       {children}
