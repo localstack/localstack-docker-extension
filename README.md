@@ -13,4 +13,4 @@ In order to work you must add /tmp to your shared files on docker desktop under 
 
 After cloning the directory and have installed all the dependencies (using npm) some useful commands are:
 - `docker extension dev debug pive01/localstack-docker-extension` allows to open the Developer Tools
-- after you started the ui using `npm start` under Localstack/ui/ you can enable hard-reload using `docker extension dev ui-source pive01/localstack-docker-extension http://localhost:3000` or whatever port the react app is running to
+- after you started the ui using `npm start` under Localstack/ui/ you can enable hard-reload using `docker extension dev ui-source pive01/localstack-docker-extension http://localhost:3000` or whatever port the react app is running on
