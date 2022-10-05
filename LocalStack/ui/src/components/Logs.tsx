@@ -18,9 +18,6 @@ export const Logs = (): ReactElement => {
             ddClient.desktopUI.toast.error('An error occurred');
             console.log(error);
           },
-          onClose(exitCode) {
-            console.log("onClose with exit code " + exitCode);
-          },
           splitOutputLines: true,
         },
       });
