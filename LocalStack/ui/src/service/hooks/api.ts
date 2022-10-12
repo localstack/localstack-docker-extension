@@ -1,8 +1,9 @@
 import { useCallback } from "react";
 import useSWR, { useSWRConfig } from "swr";
 import { STORAGE_KEY_ENVVARS, STORAGE_KEY_LOCALSTACK } from "../../constants";
-import { DockerContainer } from "../../types";
+import { DockerContainer, RunConfig } from "../../types";
 import { useDDClient } from "./utils";
+import { v4 as uuid } from 'uuid';
 
 type UseGlobalSwr = {
   mutateRelated: (key: unknown, value?: any[]) => void; // eslint-disable-line @typescript-eslint/no-explicit-any
@@ -38,19 +39,14 @@ const useGlobalSwr = (): UseGlobalSwr => {
   return { mutateRelated, clearAll };
 };
 
-interface envVar {
-  variable: string,
-  value: string,
-  id: string;
-}
 
-interface useEnvVarsReturn {
-  envVars: envVar[],
-  setEnvVars: (data: envVar[]) => unknown;
+interface useRunConfigReturn {
+  runConfig: RunConfig[],
+  setRunConfig: (data: RunConfig[]) => unknown;
 }
 
 
-export const useEnvVars = (): useEnvVarsReturn => {
+export const useRunConfig = (): useRunConfigReturn => {
   const cacheKey = STORAGE_KEY_ENVVARS;
   const { mutateRelated } = useGlobalSwr();
 
@@ -58,14 +54,22 @@ export const useEnvVars = (): useEnvVarsReturn => {
     cacheKey,
     () => JSON.parse(localStorage.getItem(STORAGE_KEY_ENVVARS) as string),
   );
-  const mutateEnvVars = (newData: envVar[]) => {
+  const mutateRunConfig = (newData: RunConfig[]) => {
     localStorage.setItem(cacheKey, JSON.stringify(newData));
     mutateRelated(cacheKey);
   };
 
+  if (!data) {
+    mutateRunConfig([{
+      name: 'Default',
+      id: uuid(),
+      vars: [],
+    }]);
+  }
+
   return {
-    envVars: data || [],
-    setEnvVars: mutateEnvVars,
+    runConfig: data || [],
+    setRunConfig: mutateRunConfig,
   };
 };
 

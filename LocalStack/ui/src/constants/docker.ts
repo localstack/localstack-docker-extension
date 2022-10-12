@@ -11,6 +11,8 @@ const COMMON_ARGS = [
 export const START_ARGS = [
   '-e',
   'LOCALSTACK_VOLUME_DIR=/tmp',
+  '-e',
+  'EXTRA_CORS_ALLOWED_ORIGINS=http://localhost:3000',
   ...COMMON_ARGS,
   'start',
   '-d',
