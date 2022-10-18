@@ -1,8 +1,8 @@
 import React, { ReactElement, useState } from 'react';
 import { Chip, Button, ButtonGroup, Select, MenuItem, FormControl } from '@mui/material';
-import { START_ARGS, STOP_ARGS } from '../constants';
-import { DockerImage } from '../types';
-import { useDDClient, useRunConfig, useLocalStack } from '../service/hooks';
+import { START_ARGS, STOP_ARGS } from '../../constants';
+import { DockerImage } from '../../types';
+import { useDDClient, useRunConfig, useLocalStack } from '../../service/hooks';
 import { PlayArrow, Stop } from '@mui/icons-material';
 
 

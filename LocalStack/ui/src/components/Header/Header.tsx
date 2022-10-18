@@ -1,9 +1,8 @@
 import { OpenInNew } from "@mui/icons-material";
 import { Box, Typography, Button, AppBar, Toolbar } from "@mui/material";
 import React, { ReactElement } from "react";
-import { useDDClient } from "../service/hooks";
-import { Controller } from "./Controller";
-
+import { useDDClient } from "../../service/hooks";
+import { Controller } from './Controller';
 
 export const Header = (): ReactElement => {
   const ddClient = useDDClient();

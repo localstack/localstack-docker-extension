@@ -2,8 +2,8 @@ import { Box, Card, IconButton, List, ListItem, TextField } from "@mui/material"
 import { AddCircleOutline, RemoveCircleOutline } from "@mui/icons-material";
 import React, { ReactElement, useState } from "react";
 import { v4 as uuid } from 'uuid';
-import { useRunConfig } from "../service/hooks";
-import { RunConfig } from "../types";
+import { useRunConfig } from "../../service/hooks";
+import { RunConfig } from "../../types";
 
 const DEFAULT_COLUMN_WIDTH = 2000;
 

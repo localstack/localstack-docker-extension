@@ -35,7 +35,6 @@ export const SystemStatus = (): ReactElement => {
   const { health, mutate } = useLocalStackHealth();
   const { data } = useLocalStack();
 
-  console.log(data);
   const isRunning = data && data.State === 'running';
 
   useEffect(

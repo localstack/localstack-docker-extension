@@ -3,7 +3,6 @@ import useSWR, { useSWRConfig } from "swr";
 import { STORAGE_KEY_ENVVARS, STORAGE_KEY_LOCALSTACK } from "../../constants";
 import { DockerContainer, RunConfig } from "../../types";
 import { useDDClient } from "./utils";
-import { v4 as uuid } from 'uuid';
 
 type UseGlobalSwr = {
   mutateRelated: (key: unknown, value?: any[]) => void; // eslint-disable-line @typescript-eslint/no-explicit-any
@@ -58,14 +57,6 @@ export const useRunConfig = (): useRunConfigReturn => {
     localStorage.setItem(cacheKey, JSON.stringify(newData));
     mutateRelated(cacheKey);
   };
-
-  if (!data) {
-    mutateRunConfig([{
-      name: 'Default',
-      id: uuid(),
-      vars: [],
-    }]);
-  }
 
   return {
     runConfig: data || [],
