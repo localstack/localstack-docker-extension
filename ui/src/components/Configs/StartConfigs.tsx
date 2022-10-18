@@ -44,9 +44,11 @@ export const StartConfigs = (): ReactElement => {
           <Box key={item.id}>
             <Box p={2} display="flex" width='full' >
               <TextField fullWidth variant="outlined" disabled={true} value={item.name} />
-              <IconButton onClick={() => openModalSetup(item)} >
-                <Edit />
-              </IconButton>
+              {item.id !== '0' &&
+                <IconButton onClick={() => openModalSetup(item)} >
+                  <Edit />
+                </IconButton>
+              }
             </Box>
           </Box>
         ))

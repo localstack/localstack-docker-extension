@@ -1,17 +1,30 @@
-import React, { ReactElement, useState } from 'react';
+import React, { ReactElement, useEffect, useState } from 'react';
 import { Chip, Button, ButtonGroup, Select, MenuItem, FormControl } from '@mui/material';
 import { START_ARGS, STOP_ARGS } from '../../constants';
 import { DockerImage } from '../../types';
 import { useDDClient, useRunConfig, useLocalStack } from '../../service/hooks';
 import { PlayArrow, Stop } from '@mui/icons-material';
+import { v4 as uuid } from 'uuid';
 
 
 export const Controller = (): ReactElement => {
   const ddClient = useDDClient();
-  const { runConfig } = useRunConfig();
+  const { runConfig, setRunConfig } = useRunConfig();
   const { data, mutate } = useLocalStack();
   const [runningConfig, setRunningConfig] = useState<string>('Default');
   const isRunning = data && data.State === 'running';
+
+  useEffect(() => {
+    if (!runConfig.find(item => item.name === 'Default')) {
+      setRunConfig([...runConfig,
+        {
+          name: 'Default', id: '0', vars:
+          [{ variable: 'EXTRA_CORS_ALLOWED_ORIGINS', value: 'http://localhost:3000', id: uuid() }],
+        },
+      ]);
+    }
+  });
+
 
   const start = async () => {
     const images = await ddClient.docker.listImages() as [DockerImage];
@@ -20,7 +33,23 @@ export const Controller = (): ReactElement => {
     }
     const addedArgs = runConfig.find(x => x.name === runningConfig)
       .vars.map(item => ['-e', `${item.variable}=${item.value}`]).flat();
-    ddClient.docker.cli.exec('run', addedArgs.concat(START_ARGS)).then(() => mutate());
+    ddClient.docker.cli.exec('run', addedArgs.concat(START_ARGS), {
+      stream: {
+        onOutput(data) {
+          if (data.stdout) {
+            console.error(data.stdout);
+          } else {
+            console.log(data.stderr);
+          }
+        },
+        onError(error) {
+          console.error(error);
+        },
+        onClose(exitCode) {
+          console.log("onClose with exit code " + exitCode);
+        },
+      },
+    }); //.then(() => mutate());
   };
 
   const stop = async () => {
