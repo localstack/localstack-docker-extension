@@ -1,6 +1,6 @@
 import { createDockerDesktopClient } from "@docker/extension-api-client";
 import React, { ReactNode } from "react";
-import { GlobalDDContext } from "../service/context/GlobalDDContext";
+import { GlobalDDContext } from "../services/context/GlobalDDContext";
 
 interface Props {
   children: ReactNode;

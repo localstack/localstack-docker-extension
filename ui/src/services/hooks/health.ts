@@ -23,7 +23,7 @@ export const getDockerStatus = async (): Promise<Health> => {
 export const useLocalStackHealth = (): UseResourcesGraph => {
   const { data, error, isValidating, mutate } = useSWR<Health>(
     SwrCacheKey.HEALTH,
-    () => getDockerStatus(), { refreshInterval: 2000 },
+    () => getDockerStatus(), { revalidateOnMount: true },
   );
 
   return {

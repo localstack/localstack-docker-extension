@@ -1,6 +1,6 @@
 import { Card, TextField } from '@mui/material';
 import React, { ReactElement, useEffect, useState } from 'react';
-import { useDDClient, useLocalStack } from '../service/hooks';
+import { useDDClient, useLocalStack } from '../../services/hooks';
 
 export const Logs = (): ReactElement => {
   const [logs, setLogs] = useState<string[]>([]);

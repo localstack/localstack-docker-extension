@@ -1,22 +1,25 @@
+import { Divider } from '@mui/material';
 import React, { useState } from 'react';
-import { ControlledTabPanels, Controller, Logs, StartOptions } from './components';
+import { ControlledTabPanels, SystemStatus, Header, Logs, StartConfigs } from './components';
 
 export function App() {
   const [selected, setSelected] = useState<number>(0);
 
   return (
     <>
+      <Header />
+      <Divider/>
       <ControlledTabPanels
         onTabChange={(_, to) => setSelected(to)}
         selected={selected}
         options={[
           {
             label: 'System Status',
-            panel: <Controller />,
+            panel: <SystemStatus />,
           },
           {
-            label: 'Starting Options',
-            panel: <StartOptions />,
+            label: 'Configurations',
+            panel: <StartConfigs />,
           },
           {
             label: 'Logs',
