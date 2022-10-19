@@ -16,7 +16,6 @@ export const useRunConfig = (): useRunConfigReturn => {
     () => JSON.parse(localStorage.getItem(STORAGE_KEY_ENVVARS) as string),
   );
   const mutateRunConfig = (newData: RunConfig[]) => {
-    console.log(newData);
     localStorage.setItem(cacheKey, JSON.stringify(newData));
     mutate();
   };
