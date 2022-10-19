@@ -1,7 +1,7 @@
 import useSWR from 'swr';
 import axios, { AxiosError } from 'axios';
-import { SwrCacheKey } from "../constants/index";
-import { Optional,Health } from '../types';
+import { SwrCacheKey } from '../../constants/index';
+import { Optional, Health } from '../../types';
 
 interface UseResourcesGraph {
   health: Optional<Health>,
