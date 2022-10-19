@@ -1,7 +1,7 @@
 import { Add as AddIcon, Edit } from "@mui/icons-material";
 import { Box, Button, Card, IconButton, TextField, Theme } from "@mui/material";
 import React, { ReactElement, useState } from "react";
-import { useRunConfig } from "../../service/hooks";
+import { useRunConfig } from "../../services/hooks";
 import { createStyles, makeStyles } from '@mui/styles';
 import { UpsertConfig } from "./UpsertConfig";
 import { Optional, RunConfig } from "../../types";

@@ -4,12 +4,12 @@ import {
   Button,
   Card, CardActions, CardContent, List, ListItem, ListItemText, Theme, Typography,
 } from '@mui/material';
-import { useLocalStackHealth } from '../../service/hooks/health';
+import { useLocalStackHealth } from '../../services/hooks/health';
 import { HealthState } from '../../types';
-import { Capitalize } from '../../service/generic/utils';
+import { Capitalize } from '../../services/generic/utils';
 import { createStyles, makeStyles } from '@mui/styles';
 import { Status as SystemStatusIcon } from './Status';
-import { useLocalStack } from '../../service/hooks';
+import { useLocalStack } from '../../services/hooks';
 import { Refresh } from '@mui/icons-material';
 
 const ORDER = [

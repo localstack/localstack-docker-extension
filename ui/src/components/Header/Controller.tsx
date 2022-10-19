@@ -2,7 +2,7 @@ import React, { ReactElement, useEffect, useState } from 'react';
 import { Chip, Button, ButtonGroup, Select, MenuItem, FormControl } from '@mui/material';
 import { START_ARGS, STOP_ARGS } from '../../constants';
 import { DockerImage } from '../../types';
-import { useDDClient, useRunConfig, useLocalStack } from '../../service/hooks';
+import { useDDClient, useRunConfig, useLocalStack } from '../../services/hooks';
 import { PlayArrow, Stop } from '@mui/icons-material';
 import { v4 as uuid } from 'uuid';
 
