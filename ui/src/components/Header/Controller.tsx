@@ -33,23 +33,7 @@ export const Controller = (): ReactElement => {
     }
     const addedArgs = runConfig.find(x => x.name === runningConfig)
       .vars.map(item => ['-e', `${item.variable}=${item.value}`]).flat();
-    ddClient.docker.cli.exec('run', addedArgs.concat(START_ARGS), {
-      stream: {
-        onOutput(data) {
-          if (data.stdout) {
-            console.error(data.stdout);
-          } else {
-            console.log(data.stderr);
-          }
-        },
-        onError(error) {
-          console.error(error);
-        },
-        onClose(exitCode) {
-          console.log("onClose with exit code " + exitCode);
-        },
-      },
-    }); //.then(() => mutate());
+    ddClient.docker.cli.exec('run', addedArgs.concat(START_ARGS)).then(() => mutate());
   };
 
   const stop = async () => {

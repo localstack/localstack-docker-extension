@@ -56,8 +56,6 @@ export const UpsertConfig = ({ config, open, onClose }: Props): ReactElement => 
   };
 
   const handleDeleteButtonPress = () => {
-    console.log(config);
-    console.log(newConfig);
     if (newConfig.id) {
       setRunConfig(runConfig.filter(config_1 => config_1.id !== newConfig.id));
     }
