@@ -27,6 +27,7 @@ LABEL org.opencontainers.image.title="LocalStack" \
     org.opencontainers.image.description="Extension of Localstack for Docker desktop" \
     org.opencontainers.image.vendor="LocalStack GmbH" \
     com.docker.desktop.extension.api.version=">= 0.2.3" \
+    com.docker.desktop.extension.icon="https://avatars.githubusercontent.com/u/28732122?v=4" \
     com.docker.extension.screenshots="" \
     com.docker.extension.detailed-description="" \
     com.docker.extension.publisher-url="" \
