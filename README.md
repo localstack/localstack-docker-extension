@@ -11,7 +11,7 @@ LocalStack empowers developers to use over 75+ AWS services locally while helpin
 You can install the LocalStack Extension for Docker Desktop via pulling our public Docker image from Docker Hub:
 
 ```bash
-docker extension install localstack/localstack-docker-extension:main
+docker extension install localstack/localstack-docker-desktop:0.1.0
 ```
 
 To setup the Docker Extension by building the image locally, you can run the following commands:
@@ -46,13 +46,13 @@ To contribute, check out our [issue tracker](https://github.com/localstack/local
 
 2. Open the Developer Tools or create new features:
     ```bash
-    $ docker extension dev debug localstack/localstack-docker-extension
+    $ docker extension dev debug localstack/localstack-docker-desktop
     ```
 
 3. Start the Extension on Docker Desktop and enable hot-reload using the following command:
     ```bash
     $ npm start 
-    $ docker extension dev ui-source localstack/localstack-docker-extension http://localhost:3000
+    $ docker extension dev ui-source localstack/localstack-docker-desktop http://localhost:3000
     ```
 
 ## License
