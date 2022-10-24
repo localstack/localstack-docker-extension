@@ -1,4 +1,4 @@
-IMAGE?=pive01/localstack-docker-extension
+IMAGE?=localstack/localstack
 TAG?=latest
 
 BUILDER=buildx-multi-arch
