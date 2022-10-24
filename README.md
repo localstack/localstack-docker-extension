@@ -1,16 +1,60 @@
-# LocalStack Docker extension
+# LocalStack Docker Extension
 
-The repository contains a simple Docker extension to control and manage your LocalStack instance
+The LocalStack Extension for Docker Desktop enables developers working with LocalStack to run their AWS applications or Lambdas entirely on their local machine without connecting to a remote cloud provider!
 
-# Installation
+LocalStack empowers developers to use over 75+ AWS services locally while helping them simplify their testing and development workflow. LocalStack supports a comprehensive list of APIs, which you can view on our [Feature coverage](https://docs.localstack.cloud/aws/feature-coverage/) page.
 
-Once the repo is cloned you can start by going under /LocalStack and run
-`make install-extension` (this will build and install the extension in your docker desktop application). Alternatively you can pull the image (`docker pull pive01/localstack-docker-extension:latest`) and then install it (`docker extension install pive01/localstack-docker-extension:latest`) but may not have the latest version.
+![Snap of LocalStack running on Docker Desktop as a Docker Extension](.github/images/localstack-docker-extension.png)
 
-In order to work you must add /tmp to your shared files on docker desktop under Settings > Resources > File sharing. This is a temporary solution since it's where the LocalStack volume directory mounts.
+## Installation
 
-# Contributing
+You can install the LocalStack Extension for Docker Desktop via pulling our public Docker image from Docker Hub:
 
-After cloning the directory and have installed all the dependencies (using npm) some useful commands are:
-- `docker extension dev debug pive01/localstack-docker-extension` allows to open the Developer Tools
-- after you started the ui using `npm start` under Localstack/ui/ you can enable hard-reload using `docker extension dev ui-source pive01/localstack-docker-extension http://localhost:3000` or whatever port the react app is running on
+```bash
+docker extension install localstack/localstack-docker-extension:main
+```
+
+To setup the Docker Extension by building the image locally, you can run the following commands:
+
+```bash
+make install-extension
+```
+
+It will build the Docker image and install the extension on your Docker Desktop application.
+
+**Note**: We recommend you to add add `/tmp` to your shared files on Docker Desktop under **Settings** > **Resources** > **File sharing**. It is a temporary solution since it's where the LocalStack volume directory mounts.
+
+## Features
+
+Currently, the LocalStack Extension for Docker Desktop supports the following features:
+
+* **Control LocalStack**: Start, stop, and restart LocalStack from the Docker Desktop. You can also see the current status of your LocalStack instance and navigate to LocalStack Web Application.
+* **LocalStack insights**: You can see the log information of the LocalStack instance and all the available services and their status on the service page. 
+* **LocalStack configurations**: You can manage and use your profiles via configurations and create new configurations for your LocalStack instance.
+
+## Contributing
+
+To contribute, check out our [issue tracker](https://github.com/localstack/localstack-docker-extension/). To set up LocalStack Docker Extension for development, you can follow the steps below:
+
+1. Clone the repository and install all the dependencies using `npm`:
+
+    ```bash
+    $ git clone https://github.com/localstack/localstack-docker-extension/
+    $ cd ui
+    $ npm install
+    ```
+
+2. Open the Developer Tools or create new features:
+    ```bash
+    $ docker extension dev debug localstack/localstack-docker-extension
+    ```
+
+3. Start the Extension on Docker Desktop and enable hot-reload using the following command:
+    ```bash
+    $ npm start 
+    $ docker extension dev ui-source localstack/localstack-docker-extension http://localhost:3000
+    ```
+
+## License
+
+This software is released under the Apache License, Version 2.0 (see [`LICENSE`](LICENSE)).
