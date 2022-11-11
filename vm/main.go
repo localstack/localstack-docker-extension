@@ -72,7 +72,7 @@ func setSettings(ctx echo.Context) error {
 	err := os.WriteFile("data.json", []byte(payload.Data), 0644)
 	if err != nil {
 		logrus.New().Infof(err.Error())
-		return ctx.NoContent(http.StatusFailedDependency)
+		return ctx.NoContent(http.StatusInternalServerError)
 	}
 
 	return ctx.NoContent(http.StatusOK)
