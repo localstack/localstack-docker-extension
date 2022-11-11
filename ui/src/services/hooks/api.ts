@@ -13,7 +13,6 @@ interface HTTPMessageBody {
 	Message: string,
 }
 
-
 export const useRunConfig = (): useRunConfigReturn => {
   const cacheKey = STORAGE_KEY_ENVVARS;
   const ddClient = useDDClient();
