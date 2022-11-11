@@ -2,8 +2,7 @@ services:
   LocalStack:
     image: ${DESKTOP_PLUGIN_IMAGE}
     volumes:
-    - saved_config:/saved_config
+    - ls_app_config:/saved_config
 
-    
 volumes:
-  saved_config:
+  ls_app_config:
