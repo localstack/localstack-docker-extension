@@ -5,23 +5,30 @@ import { useDDClient } from "./utils";
 
 interface useRunConfigReturn {
   runConfig: RunConfig[],
+  isLoading: boolean,
   setRunConfig: (data: RunConfig[]) => unknown;
 }
 
+interface HTTPMessageBody {
+	Message: string,
+}
+
+
 export const useRunConfig = (): useRunConfigReturn => {
   const cacheKey = STORAGE_KEY_ENVVARS;
-
-  const { data, mutate } = useSWR(
+  const ddClient = useDDClient();
+  const { data, mutate, isValidating, error } = useSWR(
     cacheKey,
-    () => JSON.parse(localStorage.getItem(STORAGE_KEY_ENVVARS) as string),
+    () =>  ddClient.extension.vm.service.get("/getConfig"),
   );
-  const mutateRunConfig = (newData: RunConfig[]) => {
-    localStorage.setItem(cacheKey, JSON.stringify(newData));
+  const mutateRunConfig = async (newData: RunConfig[]) => {
+    await ddClient.extension.vm.service.post("/setConfig",{Data: JSON.stringify(newData)});
     mutate();
   };
 
   return {
-    runConfig: data || [],
+    runConfig: data ? JSON.parse((data as HTTPMessageBody)?.Message) : [],
+    isLoading: isValidating || (!error && !data),
     setRunConfig: mutateRunConfig,
   };
 };

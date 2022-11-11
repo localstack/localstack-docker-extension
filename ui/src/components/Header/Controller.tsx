@@ -9,13 +9,13 @@ import { v4 as uuid } from 'uuid';
 
 export const Controller = (): ReactElement => {
   const ddClient = useDDClient();
-  const { runConfig, setRunConfig } = useRunConfig();
+  const { runConfig, isLoading, setRunConfig } = useRunConfig();
   const { data, mutate } = useLocalStack();
   const [runningConfig, setRunningConfig] = useState<string>('Default');
   const isRunning = data && data.State === 'running';
 
   useEffect(() => {
-    if (!runConfig.find(item => item.name === 'Default')) {
+    if (!isLoading && !runConfig.find(item => item.name === 'Default')) {
       setRunConfig([...runConfig,
         {
           name: 'Default', id: '0', vars:
@@ -33,27 +33,11 @@ export const Controller = (): ReactElement => {
     }
     const addedArgs = runConfig.find(x => x.name === runningConfig)
       .vars.map(item => ['-e', `${item.variable}=${item.value}`]).flat();
-    ddClient.docker.cli.exec('run', addedArgs.concat(START_ARGS), {
-      stream: {
-        onOutput(data): void {
-          console.log(data.stdout ? data.stdout : data.stderr);
-        },
-        onError(error: unknown): void {
-          ddClient.desktopUI.toast.error('An error occurred');
-          console.log(error);
-        },
-        splitOutputLines: true,
-      },
-    }); // ).then(() => mutate());
+    ddClient.docker.cli.exec('run', addedArgs.concat(START_ARGS)).then(() => mutate());
   };
 
   const stop = async () => {
     ddClient.docker.cli.exec('run', STOP_ARGS).then(() => mutate());
-  };
-
-  const createVolume = async () => {
-    await ddClient.extension.vm.service.post("/setConfig",{Data: 'It works'});
-    console.log(await ddClient.extension.vm.service.get("/getConfig"));
   };
 
   return (
@@ -88,11 +72,6 @@ export const Controller = (): ReactElement => {
           onClick={stop}
           endIcon={<Stop />}>
           Stop
-        </Button>
-        <Button
-          variant="contained"
-          onClick={createVolume}>
-          Test create container
         </Button>
       </ButtonGroup>
     </>

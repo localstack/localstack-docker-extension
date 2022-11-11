@@ -7,7 +7,6 @@ import (
 	"net"
 	"net/http"
 	"os"
-	"os/exec"
 
 	"github.com/labstack/echo"
 	"github.com/sirupsen/logrus"
@@ -32,8 +31,6 @@ func main() {
 	}
 	router.Listener = ln
 	os.Chdir("/saved_config")
-	router.GET("/cat", cat)
-	router.GET("/ls", ls)
 	router.GET("/getConfig", getSettings)
 	router.POST("/setConfig", setSettings)
 
@@ -42,32 +39,6 @@ func main() {
 
 func listen(path string) (net.Listener, error) {
 	return net.Listen("unix", path)
-}
-
-func ls(ctx echo.Context) error {
-	cmd := exec.Command("ls")
-	stdout, err := cmd.Output()
-	messageBody := ""
-	if err != nil {
-		messageBody = err.Error()
-	} else {
-
-		messageBody = string(stdout)
-	}
-	return ctx.JSON(http.StatusOK, HTTPMessageBody{Message: messageBody})
-}
-
-func cat(ctx echo.Context) error {
-	cmd := exec.Command("cat", "data.json")
-	stdout, err := cmd.Output()
-	messageBody := ""
-	if err != nil {
-		messageBody = err.Error()
-	} else {
-
-		messageBody = string(stdout)
-	}
-	return ctx.JSON(http.StatusOK, HTTPMessageBody{Message: messageBody})
 }
 
 func getSettings(ctx echo.Context) error {
@@ -88,7 +59,6 @@ func getSettings(ctx echo.Context) error {
 	if err != nil {
 		return ctx.JSON(http.StatusConflict, HTTPMessageBody{Message: "failed"})
 	}
-
 	return ctx.JSON(http.StatusOK, HTTPMessageBody{Message: string(content[:])})
 }
 
