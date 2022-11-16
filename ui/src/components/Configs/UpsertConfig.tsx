@@ -9,12 +9,12 @@ import {
   List,
   ListItem,
   TextField,
-} from "@mui/material";
-import { AddCircleOutline, RemoveCircleOutline } from "@mui/icons-material";
-import React, { ReactElement, useState } from "react";
+} from '@mui/material';
+import { AddCircleOutline, RemoveCircleOutline } from '@mui/icons-material';
+import React, { ReactElement, useState } from 'react';
 import { v4 as uuid } from 'uuid';
-import { useRunConfig } from "../../services/hooks";
-import { RunConfig } from "../../types";
+import { useRunConfig } from '../../services/hooks';
+import { RunConfig } from '../../types';
 
 const DEFAULT_COLUMN_WIDTH = 2000;
 
@@ -42,7 +42,7 @@ export const UpsertConfig = ({ config, open, onClose }: Props): ReactElement => 
   };
 
   const handleSaveButtonPress = () => {
-    setRunConfig([...runConfig.filter(config_1 => config_1.id !== newConfig.id),
+    setRunConfig([...runConfig.filter(config1 => config1.id !== newConfig.id),
       {
         name: configName, id: newConfig.id, vars: newConfig.vars,
       }]);
@@ -57,7 +57,7 @@ export const UpsertConfig = ({ config, open, onClose }: Props): ReactElement => 
 
   const handleDeleteButtonPress = () => {
     if (newConfig.id) {
-      setRunConfig(runConfig.filter(config_1 => config_1.id !== newConfig.id));
+      setRunConfig(runConfig.filter(config1 => config1.id !== newConfig.id));
     }
     onClose();
   };
@@ -79,8 +79,8 @@ export const UpsertConfig = ({ config, open, onClose }: Props): ReactElement => 
             {newConfig?.vars.map(item => (
               <ListItem key={item.id}>
                 <Box p={2} display="flex" width={DEFAULT_COLUMN_WIDTH} key={item.id}>
-                  <TextField fullWidth variant="outlined" disabled={true} value={item.variable} />
-                  <TextField fullWidth variant="outlined" disabled={true} value={item.value} />
+                  <TextField fullWidth variant="outlined" disabled value={item.variable} />
+                  <TextField fullWidth variant="outlined" disabled value={item.value} />
                   <IconButton onClick={() => handleRemoveButtonPress(item.id)} >
                     <RemoveCircleOutline />
                   </IconButton>

@@ -1,10 +1,10 @@
-import { Add as AddIcon, Edit } from "@mui/icons-material";
-import { Box, Button, Card, IconButton, TextField, Theme } from "@mui/material";
-import React, { ReactElement, useState } from "react";
-import { useRunConfig } from "../../services/hooks";
+import { Add as AddIcon, Edit } from '@mui/icons-material';
+import { Box, Button, Card, IconButton, TextField, Theme } from '@mui/material';
 import { createStyles, makeStyles } from '@mui/styles';
-import { UpsertConfig } from "./UpsertConfig";
-import { Optional, RunConfig } from "../../types";
+import React, { ReactElement, useState } from 'react';
+import { useRunConfig } from '../../services/hooks';
+import { UpsertConfig } from './UpsertConfig';
+import { Optional, RunConfig } from '../../types';
 
 const useStyles = makeStyles((theme: Theme) => createStyles({
   root: {
@@ -43,7 +43,7 @@ export const StartConfigs = (): ReactElement => {
         runConfig.map(item => (
           <Box key={item.id}>
             <Box p={2} display="flex" width='full' >
-              <TextField fullWidth variant="outlined" disabled={true} value={item.name} />
+              <TextField fullWidth variant="outlined" disabled value={item.name} />
               {item.id !== '0' &&
                 <IconButton onClick={() => openModalSetup(item)} >
                   <Edit />

@@ -1,9 +1,9 @@
-import { Box, Card, IconButton, List, ListItem, TextField } from "@mui/material";
-import { AddCircleOutline, RemoveCircleOutline } from "@mui/icons-material";
-import React, { ReactElement, useState } from "react";
+import { Box, Card, IconButton, List, ListItem, TextField } from '@mui/material';
+import { AddCircleOutline, RemoveCircleOutline } from '@mui/icons-material';
+import React, { ReactElement, useState } from 'react';
 import { v4 as uuid } from 'uuid';
-import { useRunConfig } from "../../services/hooks";
-import { RunConfig } from "../../types";
+import { useRunConfig } from '../../services/hooks';
+import { RunConfig } from '../../types';
 
 const DEFAULT_COLUMN_WIDTH = 2000;
 
@@ -28,11 +28,11 @@ export const ConfigOptions = ({ config }: Props): ReactElement => {
   };
 
   const handleRemoveButtonPress = (id: string) => {
-    setRunConfig(runConfig.map(config1 => {
-      return config1.id !== config.id ?
+    setRunConfig(runConfig.map(config1 => 
+      config1.id !== config.id ?
         config1 :
-        { id: config1.id, name: config1.name, vars: config1.vars?.filter(item => item?.id !== id) || [] } as RunConfig;
-    }));
+        { id: config1.id, name: config1.name, vars: config1.vars?.filter(item => item?.id !== id) || [] } as RunConfig,
+    ));
   };
 
   return (

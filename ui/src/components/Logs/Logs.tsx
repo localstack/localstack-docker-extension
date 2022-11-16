@@ -1,4 +1,4 @@
-import { Card, TextField } from '@mui/material';
+import { Card, CardContent, Typography } from '@mui/material';
 import React, { ReactElement, useEffect, useState } from 'react';
 import { useDDClient, useLocalStack } from '../../services/hooks';
 
@@ -7,35 +7,43 @@ export const Logs = (): ReactElement => {
   const ddClient = useDDClient();
   const { data } = useLocalStack();
 
-  const checkLogs = async () => {
+  useEffect(() => {
     if (data) {
-      ddClient.docker.cli.exec('logs', ['-f', data.Id], {
+      const listener = ddClient.docker.cli.exec('logs', ['-f', data.Id], {
         stream: {
           onOutput(data): void {
-            setLogs([...logs, data.stdout]);
+            setLogs((current) => [...current, data.stdout]);
           },
           onError(error: unknown): void {
             ddClient.desktopUI.toast.error('An error occurred');
             console.log(error);
           },
+          onClose(exitCode) {
+            console.log(`onClose with exit code ${exitCode}`);
+          },
           splitOutputLines: true,
         },
       });
-    }
-  };
 
-  useEffect(() => {
-    checkLogs();
+      return () => {
+        listener.close();
+        setLogs([]);
+      };
+    }
   }, [data]);
 
   return (
     <Card>
-      <TextField
-        multiline
-        fullWidth
-        value={logs.join('\n')}
-        variant="outlined"
-      />
+      <CardContent>
+        {logs.map(log => (
+          <>
+            <Typography>
+              {`${log}`}
+            </Typography>
+            <br />
+          </>
+        ))}
+      </CardContent>
     </Card>
   );
 };
