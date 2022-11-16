@@ -1,7 +1,7 @@
-import useSWR from "swr";
-import { STORAGE_KEY_ENVVARS, STORAGE_KEY_LOCALSTACK } from "../../constants";
-import { DockerContainer, RunConfig } from "../../types";
-import { useDDClient } from "./utils";
+import useSWR from 'swr';
+import { STORAGE_KEY_ENVVARS, STORAGE_KEY_LOCALSTACK } from '../../constants';
+import { DockerContainer, RunConfig } from '../../types';
+import { useDDClient } from './utils';
 
 interface useRunConfigReturn {
   runConfig: RunConfig[],
@@ -10,7 +10,7 @@ interface useRunConfigReturn {
 }
 
 interface HTTPMessageBody {
-    Message: string,
+  Message: string,
 }
 
 export const useRunConfig = (): useRunConfigReturn => {
@@ -18,13 +18,14 @@ export const useRunConfig = (): useRunConfigReturn => {
   const ddClient = useDDClient();
   const { data, mutate, isValidating, error } = useSWR(
     cacheKey,
-    () => ddClient.extension.vm.service.get("/getConfig"),
+    () => ddClient.extension.vm.service.get('/getConfig'),
   );
   const mutateRunConfig = async (newData: RunConfig[]) => {
-    await ddClient.extension.vm.service.post("/setConfig", { Data: JSON.stringify(newData) });
+    await ddClient.extension.vm.service.post('/setConfig', { Data: JSON.stringify(newData) });
     mutate();
   };
 
+  console.log(data);
   return {
     runConfig: data ? JSON.parse((data as HTTPMessageBody)?.Message) : [],
     isLoading: isValidating || (!error && !data),

@@ -4,13 +4,13 @@ import {
   Button,
   Card, CardActions, CardContent, List, ListItem, ListItemText, Theme, Typography,
 } from '@mui/material';
+import { createStyles, makeStyles } from '@mui/styles';
+import { Refresh } from '@mui/icons-material';
 import { useLocalStackHealth } from '../../services/hooks/health';
 import { HealthState } from '../../types';
 import { Capitalize } from '../../services/generic/utils';
-import { createStyles, makeStyles } from '@mui/styles';
 import { Status as SystemStatusIcon } from './Status';
 import { useLocalStack } from '../../services/hooks';
-import { Refresh } from '@mui/icons-material';
 
 const ORDER = [
   HealthState.RUNNING,
@@ -53,50 +53,48 @@ export const SystemStatus = (): ReactElement => {
 
 
   return (
-    <>
-      <Card style={{ padding: 10 }}>
-        <CardContent>
-          <Button
-            onClick={mutate}
-            variant='outlined'
-            style={{ marginBottom: 30 }}
-            endIcon={<Refresh />}
-          >
+    <Card style={{ padding: 10 }}>
+      <CardContent>
+        <Button
+          onClick={mutate}
+          variant='outlined'
+          style={{ marginBottom: 30 }}
+          endIcon={<Refresh />}
+        >
             Refresh
-          </Button>
-          {
-            ORDER.map((status) => (
-              <Fragment key={status}>
-                {statusesMap[status] && (
-                  <Box>
-                    <Typography variant="caption">
-                      {Capitalize(status)}
-                    </Typography>
-                    <List className={classes.list} dense>
-                      {Object.entries(statusesMap[status] ?? {}).map(([k, v]) => (
-                        <ListItem key={k}>
-                          <ListItemText
-                            primary={k}
-                            secondary={<SystemStatusIcon state={v} />}
-                          />
-                        </ListItem>
-                      ))}
-                    </List>
-                  </Box>
-                )}
-              </Fragment>
-            ))
-          }
-        </CardContent>
-        <CardActions>
-          {health ?
-            <>version : {health?.version}</>
-            :
-            <>No data available</>
-          }
+        </Button>
+        {
+          ORDER.map((status) => (
+            <Fragment key={status}>
+              {statusesMap[status] && (
+                <Box>
+                  <Typography variant="caption">
+                    {Capitalize(status)}
+                  </Typography>
+                  <List className={classes.list} dense>
+                    {Object.entries(statusesMap[status] ?? {}).map(([k, v]) => (
+                      <ListItem key={k}>
+                        <ListItemText
+                          primary={k}
+                          secondary={<SystemStatusIcon state={v} />}
+                        />
+                      </ListItem>
+                    ))}
+                  </List>
+                </Box>
+              )}
+            </Fragment>
+          ))
+        }
+      </CardContent>
+      <CardActions>
+        {health ?
+          <>version : {health?.version}</>
+          :
+          <>No data available</>
+        }
 
-        </CardActions>
-      </Card>
-    </>
+      </CardActions>
+    </Card>
   );
 };
