@@ -57,7 +57,7 @@ func getSettings(ctx echo.Context) error {
 
 	content, err := os.ReadFile("data.json")
 	if err != nil {
-		return ctx.JSON(http.StatusConflict, HTTPMessageBody{Message: "failed"})
+		return ctx.JSON(http.StatusConflict, HTTPMessageBody{Message: "Failed"})
 	}
 	return ctx.JSON(http.StatusOK, HTTPMessageBody{Message: string(content[:])})
 }
