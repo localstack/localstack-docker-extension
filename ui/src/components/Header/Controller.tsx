@@ -1,21 +1,21 @@
 import React, { ReactElement, useEffect, useState } from 'react';
 import { Chip, Button, ButtonGroup, Select, MenuItem, FormControl } from '@mui/material';
+import { PlayArrow, Stop } from '@mui/icons-material';
+import { v4 as uuid } from 'uuid';
 import { START_ARGS, STOP_ARGS } from '../../constants';
 import { DockerImage } from '../../types';
 import { useDDClient, useRunConfig, useLocalStack } from '../../services/hooks';
-import { PlayArrow, Stop } from '@mui/icons-material';
-import { v4 as uuid } from 'uuid';
 
 
 export const Controller = (): ReactElement => {
   const ddClient = useDDClient();
-  const { runConfig, setRunConfig } = useRunConfig();
+  const { runConfig, isLoading, setRunConfig } = useRunConfig();
   const { data, mutate } = useLocalStack();
   const [runningConfig, setRunningConfig] = useState<string>('Default');
   const isRunning = data && data.State === 'running';
 
   useEffect(() => {
-    if (!runConfig.find(item => item.name === 'Default')) {
+    if (!isLoading && !runConfig.find(item => item.name === 'Default')) {
       setRunConfig([...runConfig,
         {
           name: 'Default', id: '0', vars:
@@ -39,7 +39,6 @@ export const Controller = (): ReactElement => {
   const stop = async () => {
     ddClient.docker.cli.exec('run', STOP_ARGS).then(() => mutate());
   };
-
 
   return (
     <>
