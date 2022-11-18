@@ -1,7 +1,6 @@
 import {
   Box,
   Button,
-  Card,
   Dialog,
   DialogActions,
   DialogContent,
@@ -9,10 +8,13 @@ import {
   List,
   ListItem,
   TextField,
+  Typography,
+  Theme,
 } from '@mui/material';
-import { AddCircleOutline, RemoveCircleOutline } from '@mui/icons-material';
+import { Add, Remove, Settings } from '@mui/icons-material';
 import React, { ReactElement, useState } from 'react';
 import { v4 as uuid } from 'uuid';
+import { createStyles, makeStyles } from '@mui/styles';
 import { useRunConfig } from '../../services/hooks';
 import { RunConfig } from '../../types';
 
@@ -24,6 +26,16 @@ type Props = {
   onClose: () => void;
 };
 
+const useStyles = makeStyles((theme: Theme) => createStyles({
+  emptyBox: {
+    height: theme.spacing(5),
+  },
+  textField: {
+    marginRight: theme.spacing(1),
+    marginTop: theme.spacing(1),
+  },
+}));
+
 export const UpsertConfig = ({ config, open, onClose }: Props): ReactElement => {
 
   const { runConfig, setRunConfig } = useRunConfig();
@@ -31,6 +43,7 @@ export const UpsertConfig = ({ config, open, onClose }: Props): ReactElement => 
   const [newValue, setNewValue] = useState<string>('');
   const [configName, setConfigName] = useState<string>(config?.name || '');
   const [newConfig, setNewConfig] = useState<RunConfig>(config || { name: '', vars: [] } as RunConfig);
+  const classes = useStyles();
 
   const handleAddButtonPress = () => {
     setNewConfig({
@@ -65,57 +78,64 @@ export const UpsertConfig = ({ config, open, onClose }: Props): ReactElement => 
   return (
     <Dialog open={open} onClose={onClose}>
       <DialogContent>
-        <Card>
-          <Box p={2} display="flex" width='full' >
-            <TextField
-              fullWidth
-              variant="outlined"
-              label='Configuration Name'
-              value={configName}
-              onChange={(e) => setConfigName(e.target.value)}
-            />
-          </Box>
-          <List>
-            {newConfig?.vars.map(item => (
-              <ListItem key={item.id}>
-                <Box p={2} display="flex" width={DEFAULT_COLUMN_WIDTH} key={item.id}>
-                  <TextField fullWidth variant="outlined" disabled value={item.variable} />
-                  <TextField fullWidth variant="outlined" disabled value={item.value} />
-                  <IconButton onClick={() => handleRemoveButtonPress(item.id)} >
-                    <RemoveCircleOutline />
-                  </IconButton>
-                </Box>
-              </ListItem>
-            ))}
-            <ListItem key='addItem'>
-              <Box p={2} display="flex" width={DEFAULT_COLUMN_WIDTH} key='addItem' >
-                <TextField
-                  fullWidth
-                  variant="outlined"
-                  label='Variable'
-                  onChange={(e) => setNewVar(e.target.value)}
-                  style={{ margin: 5 }}
-                  value={newVar}
-                />
-                <TextField
-                  fullWidth
-                  variant="outlined"
-                  label='Value'
-                  onChange={(e) => setNewValue(e.target.value)}
-                  style={{ margin: 5 }}
-                  value={newValue}
-                />
-                <IconButton onClick={handleAddButtonPress} >
-                  <AddCircleOutline />
+        <Box display="flex" width='full' flexDirection="column">
+          <Settings fontSize='large'/>
+          <Box className={classes.emptyBox}/>
+          <TextField
+            fullWidth
+            variant="outlined"
+            label='Configuration Name'
+            value={configName}
+            onChange={(e) => setConfigName(e.target.value)}
+          />
+        </Box>
+        <Box className={classes.emptyBox}/>
+        <List
+          subheader={
+            <Typography>Environment Variables </Typography>
+          }
+        >
+          {newConfig?.vars.map(item => (
+            <ListItem key={item.id} disableGutters>
+              <Box display="flex" width={DEFAULT_COLUMN_WIDTH} key={item.id}>
+                <TextField fullWidth variant="outlined" className={classes.textField} disabled value={item.variable} />
+                <TextField fullWidth variant="outlined" className={classes.textField} disabled value={item.value} />
+                <IconButton onClick={() => handleRemoveButtonPress(item.id)} >
+                  <Remove />
                 </IconButton>
               </Box>
             </ListItem>
-          </List>
-        </Card>
+          ))}
+          <ListItem key='addItem' disableGutters>
+            <Box display="flex" width={DEFAULT_COLUMN_WIDTH} key='addItem' >
+              <TextField
+                fullWidth
+                variant="outlined"
+                label='Variable'
+                onChange={(e) => setNewVar(e.target.value)}
+                className={classes.textField}
+                value={newVar}
+              />
+
+              <TextField
+                fullWidth
+                variant="outlined"
+                label='Value'
+                onChange={(e) => setNewValue(e.target.value)}
+                className={classes.textField}
+                value={newValue}
+              />
+              <IconButton onClick={handleAddButtonPress} >
+                <Add />
+              </IconButton>
+            </Box>
+          </ListItem>
+        </List>
       </DialogContent>
       <DialogActions>
         <Button
           variant='contained'
+          color='error'
           onClick={handleDeleteButtonPress}
         >
           Delete
