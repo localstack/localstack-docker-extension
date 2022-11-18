@@ -1,10 +1,10 @@
 import React, { ReactElement, useEffect, useState } from 'react';
 import { Chip, Button, ButtonGroup, Select, MenuItem, FormControl } from '@mui/material';
+import { PlayArrow, Stop } from '@mui/icons-material';
+import { v4 as uuid } from 'uuid';
 import { START_ARGS, STOP_ARGS } from '../../constants';
 import { DockerImage } from '../../types';
 import { useDDClient, useRunConfig, useLocalStack } from '../../services/hooks';
-import { PlayArrow, Stop } from '@mui/icons-material';
-import { v4 as uuid } from 'uuid';
 
 
 export const Controller = (): ReactElement => {
@@ -33,13 +33,12 @@ export const Controller = (): ReactElement => {
     }
     const addedArgs = runConfig.find(x => x.name === runningConfig)
       .vars.map(item => ['-e', `${item.variable}=${item.value}`]).flat();
-    ddClient.docker.cli.exec('run', addedArgs.concat(START_ARGS)).then(() => mutate());
+    ddClient.docker.cli.exec('run', addedArgs.concat(START_ARGS)) .then(() => mutate());
   };
 
   const stop = async () => {
     ddClient.docker.cli.exec('run', STOP_ARGS).then(() => mutate());
   };
-
 
   return (
     <>

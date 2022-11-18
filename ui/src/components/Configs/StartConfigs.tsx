@@ -7,9 +7,6 @@ import { UpsertConfig } from './UpsertConfig';
 import { Optional, RunConfig } from '../../types';
 
 const useStyles = makeStyles((theme: Theme) => createStyles({
-  root: {
-    margin: theme.spacing(2),
-  },
   addButton: {
     margin: theme.spacing(2),
   },
@@ -29,7 +26,7 @@ export const StartConfigs = (): ReactElement => {
   };
 
   return (
-    <Card className={classes.root}>
+    <Card>
       <Button
         className={classes.addButton}
         endIcon={<AddIcon />}
