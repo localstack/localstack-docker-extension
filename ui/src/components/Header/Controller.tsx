@@ -33,7 +33,7 @@ export const Controller = (): ReactElement => {
     }
     const addedArgs = runConfig.find(x => x.name === runningConfig)
       .vars.map(item => ['-e', `${item.variable}=${item.value}`]).flat();
-    ddClient.docker.cli.exec('run', addedArgs.concat(START_ARGS)) .then(() => mutate());
+    ddClient.docker.cli.exec('run', addedArgs.concat(START_ARGS)).then(() => mutate());
   };
 
   const stop = async () => {
