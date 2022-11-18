@@ -42,7 +42,7 @@ export const UpsertConfig = ({ config, open, onClose }: Props): ReactElement => 
   const [newVar, setNewVar] = useState<string>('');
   const [newValue, setNewValue] = useState<string>('');
   const [configName, setConfigName] = useState<string>(config?.name || '');
-  const [newConfig, setNewConfig] = useState<RunConfig>(config || { name: '', vars: [] } as RunConfig);
+  const [newConfig, setNewConfig] = useState<RunConfig>(config || { name: '',id: uuid(), vars: [] } as RunConfig);
   const classes = useStyles();
 
   const handleAddButtonPress = () => {
