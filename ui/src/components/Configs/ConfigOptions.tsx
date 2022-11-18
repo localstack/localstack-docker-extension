@@ -28,11 +28,11 @@ export const ConfigOptions = ({ config }: Props): ReactElement => {
   };
 
   const handleRemoveButtonPress = (id: string) => {
-    setRunConfig(runConfig.map(config1 => 
-      config1.id !== config.id ?
-        config1 :
-        { id: config1.id, name: config1.name, vars: config1.vars?.filter(item => item?.id !== id) || [] } as RunConfig,
-    ));
+    setRunConfig(runConfig.map(config1 => config1.id !== config.id ?
+      config1 : {
+        id: config1.id, name: config1.name,
+        vars: config1.vars?.filter(item => item?.id !== id) || [],
+      } as RunConfig));
   };
 
   return (

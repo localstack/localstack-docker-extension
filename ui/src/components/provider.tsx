@@ -1,6 +1,7 @@
-import { createDockerDesktopClient } from "@docker/extension-api-client";
-import React, { ReactNode } from "react";
-import { GlobalDDContext } from "../services/context/GlobalDDContext";
+// eslint-disable-next-line import/no-unresolved
+import { createDockerDesktopClient } from '@docker/extension-api-client';
+import React, { ReactNode, useMemo } from 'react';
+import { GlobalDDContext } from '../services/context/GlobalDDContext';
 
 interface Props {
   children: ReactNode;
@@ -8,8 +9,10 @@ interface Props {
 const client = createDockerDesktopClient();
 
 export const GlobalDDProvider = ({ children }: Props) => {
+  const GlobalDDContextValue = useMemo(() => ({ client }), [client]);
+
   return (
-    <GlobalDDContext.Provider value={{client}}>
+    <GlobalDDContext.Provider value={GlobalDDContextValue}>
       {children}
     </GlobalDDContext.Provider>
   );

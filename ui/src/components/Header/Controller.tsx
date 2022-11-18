@@ -9,13 +9,13 @@ import { useDDClient, useRunConfig, useLocalStack } from '../../services/hooks';
 
 export const Controller = (): ReactElement => {
   const ddClient = useDDClient();
-  const { runConfig, setRunConfig } = useRunConfig();
+  const { runConfig, isLoading, setRunConfig } = useRunConfig();
   const { data, mutate } = useLocalStack();
   const [runningConfig, setRunningConfig] = useState<string>('Default');
   const isRunning = data && data.State === 'running';
 
   useEffect(() => {
-    if (!runConfig.find(item => item.name === 'Default')) {
+    if (!isLoading && !runConfig.find(item => item.name === 'Default')) {
       setRunConfig([...runConfig,
         {
           name: 'Default', id: '0', vars:

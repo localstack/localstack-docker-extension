@@ -1,46 +1,88 @@
-// eslint-disable-next-line no-undef
 module.exports = {
-  "root": true,
-  'env': {
-    'browser': true,
-    'es2021': true,
+  root: true,
+  env: {
+    browser: true,
+    es2021: true,
   },
-  'extends': [
+  parserOptions: {
+    ecmaFeatures: {
+      jsx: true,
+    },
+    ecmaVersion: 12,
+    sourceType: 'module',
+    requireConfigFile: false,
+  },
+  parser: '@babel/eslint-parser',
+  extends: [
+    'plugin:react/recommended',
+    'airbnb',
+    'prettier',
+    'plugin:import/recommended',
+    'plugin:import/typescript',
     'eslint:recommended',
     'plugin:react/recommended',
     'plugin:@typescript-eslint/recommended',
   ],
-  'overrides': [
-  ],
-  'parser': '@typescript-eslint/parser',
-  'parserOptions': {
-    'ecmaVersion': 'latest',
-    'sourceType': 'module',
-  },
-  'plugins': [
-    'react',
-    '@typescript-eslint',
-  ],
-  'rules': {
-    '@typescript-eslint/no-unused-vars': ['error', { argsIgnorePattern: '^_' }],
-    'indent': ['error', 2],
-    'eol-last': ['error', 'always'],
-    'no-param-reassign': 'off',
-    'no-console': 'off',
-    'curly': 'error',
-    'no-unused-vars': 'warn',
-    'key-spacing': ['error', { 'afterColon': true }],
-    'class-methods-use-this': 'off',
-    'consistent-return': 'off',
-    'semi': 'error',
-    'comma-dangle': ['error', 'always-multiline'],
-    'max-len': [
-      'error',
-      {
-        code: 120,
-        tabWidth: 2,
-        ignoreComments: true,
+  overrides: [
+    {
+      parser: '@typescript-eslint/parser',
+      plugins: [
+        'react',
+        '@typescript-eslint',
+      ],
+
+      files: ['*.ts', '*.tsx'],
+      rules: {
+        quotes: ['error', 'single'],
+        '@typescript-eslint/no-unused-vars': ['error', { argsIgnorePattern: '^_' }],
+        'react/require-default-props': 'off',
+        'react/function-component-definition': 'off',
+        'react/jsx-props-no-spreading': 'off',
+        'indent': ['error', 2],
+        'react/jsx-filename-extension': [1, { extensions: ['.tsx', '.jsx'] }],
+        'eol-last': ['error', 'always'],
+        'no-param-reassign': 'off',
+        'no-console': 'off',
+        'import/no-extraneous-dependencies': 'off',
+        'import/prefer-default-export': 'off',
+        'import/no-named-as-default': 'off',
+        'no-use-before-define': 'off',
+        'no-shadow': 'off',
+        'curly': 'error',
+        'no-unused-vars': 'warn',
+        'key-spacing': ['error', { 'afterColon': true }],
+        'class-methods-use-this': 'off',
+        'consistent-return': 'off',
+        'semi': 'error',
+        'comma-dangle': ['error', 'always-multiline'],
+        'max-len': [
+          'error',
+          {
+            code: 120,
+            tabWidth: 2,
+            ignoreComments: true,
+          },
+        ],
+        'import/extensions': [
+          'error',
+          'ignorePackages',
+          {
+            js: 'never',
+            jsx: 'never',
+            ts: 'never',
+            tsx: 'never',
+          },
+        ],
       },
-    ],
-  },
+      extends: [
+        'plugin:react/recommended',
+        'airbnb',
+        'prettier',
+        'plugin:import/recommended',
+        'plugin:import/typescript',
+        'plugin:@typescript-eslint/eslint-recommended',
+        'plugin:@typescript-eslint/recommended',
+      ],
+    },
+  ],
 };
