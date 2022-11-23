@@ -3,6 +3,7 @@ import { Box, Button, Card, IconButton, Theme } from '@mui/material';
 import React, { ReactElement, useState } from 'react';
 import { createStyles, makeStyles } from '@mui/styles';
 import { DataGrid, GridColDef, GridRenderCellParams } from '@mui/x-data-grid';
+import { v4 as uuid } from 'uuid';
 import { useRunConfig } from '../../services/hooks';
 import { UpsertConfig } from './UpsertConfig';
 import { Optional, RunConfig } from '../../types';
@@ -70,7 +71,7 @@ export const StartConfigs = (): ReactElement => {
       <Box sx={{ height: 400, width: '100%' }}>
         <DataGrid
           rows={runConfig} columns={columns}
-          getRowId={(row) => (row).id as string || '3'}
+          getRowId={(row) => (row).id as string || uuid()}
           disableSelectionOnClick
         />
       </Box>
