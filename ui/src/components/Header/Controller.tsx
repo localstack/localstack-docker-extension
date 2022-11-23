@@ -2,10 +2,16 @@ import React, { ReactElement, useEffect, useState } from 'react';
 import { Chip, Button, ButtonGroup, Select, MenuItem, FormControl } from '@mui/material';
 import { PlayArrow, Stop } from '@mui/icons-material';
 import { v4 as uuid } from 'uuid';
+import { createStyles, makeStyles } from '@mui/styles';
 import { DEFAULT_CONFIGURATION_ID, START_ARGS, STOP_ARGS } from '../../constants';
 import { DockerImage } from '../../types';
 import { useDDClient, useRunConfig, useLocalStack } from '../../services/hooks';
 
+const useStyles = makeStyles(() => createStyles({
+  selectForm: {
+    color: '#ffffff',
+  },
+}));
 
 export const Controller = (): ReactElement => {
   const ddClient = useDDClient();
@@ -13,6 +19,8 @@ export const Controller = (): ReactElement => {
   const { data, mutate } = useLocalStack();
   const [runningConfig, setRunningConfig] = useState<string>('Default');
   const isRunning = data && data.State === 'running';
+
+  const classes = useStyles();
 
   useEffect(() => {
     if (!isLoading && !runConfig.find(item => item.name === 'Default')) {
@@ -55,8 +63,9 @@ export const Controller = (): ReactElement => {
           endIcon={<PlayArrow />}>
           Start
         </Button>
-        <FormControl sx={{ m: 1, minWidth: 120 }} size="small">
+        <FormControl sx={{ m: 1, minWidth: 120, border: 'none' }} size="small">
           <Select
+            className={classes.selectForm}
             value={runningConfig}
             onChange={({ target }) => setRunningConfig(target.value)}
           >
