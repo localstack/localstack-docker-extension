@@ -1,5 +1,15 @@
 import React, { useState, useEffect, ReactNode } from 'react';
-import { Tabs, Tab, TabsProps } from '@mui/material';
+import { Tabs, Tab, TabsProps, Theme } from '@mui/material';
+import { createStyles, makeStyles } from '@mui/styles';
+
+
+const useStyles = makeStyles((theme: Theme) => createStyles({
+  sticky: {
+    position: 'sticky',
+    top: 64,
+    backgroundColor: theme.palette.background.default,
+  },
+}));
 
 export const TabPanel: React.FC<{ index: number; tab: number }> = ({
   children,
@@ -34,6 +44,8 @@ export const ControlledTabPanels: React.FC<ControlledTabPanelsProps & TabsProps>
     setTab(newValue);
   };
 
+  const classes = useStyles();
+
   useEffect(() => {
     if (selected !== undefined) {
       setTab(selected);
@@ -43,6 +55,7 @@ export const ControlledTabPanels: React.FC<ControlledTabPanelsProps & TabsProps>
   return (
     <>
       <Tabs
+        className={classes.sticky}
         variant="fullWidth"
         {...rest}
         value={tab}

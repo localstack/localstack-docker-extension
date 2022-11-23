@@ -1,5 +1,5 @@
 import { Add as AddIcon, Edit } from '@mui/icons-material';
-import { Box, Button, Card, IconButton, Theme } from '@mui/material';
+import { Box, Button, IconButton, Theme } from '@mui/material';
 import React, { ReactElement, useState } from 'react';
 import { createStyles, makeStyles } from '@mui/styles';
 import { DataGrid, GridColDef, GridRenderCellParams } from '@mui/x-data-grid';
@@ -59,7 +59,7 @@ export const StartConfigs = (): ReactElement => {
     },
   ];
   return (
-    <Card>
+    <Box m={2}>
       <Button
         className={classes.addButton}
         endIcon={<AddIcon />}
@@ -68,7 +68,7 @@ export const StartConfigs = (): ReactElement => {
       >
         New
       </Button>
-      <Box sx={{ height: 400, width: '100%' }}>
+      <Box sx={{ height: 400, width: '100%', marginTop: 3 }}>
         <DataGrid
           rows={runConfig} columns={columns}
           getRowId={(row) => (row).id as string || uuid()}
@@ -76,6 +76,6 @@ export const StartConfigs = (): ReactElement => {
         />
       </Box>
       {openModal && <UpsertConfig config={targetConfig} open={openModal} onClose={() => setOpenModal(false)} />}
-    </Card >
+    </Box >
   );
 };

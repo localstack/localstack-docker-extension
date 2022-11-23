@@ -1,4 +1,4 @@
-import { Card, CardContent, Typography } from '@mui/material';
+import { Box,  Typography } from '@mui/material';
 import React, { ReactElement, useEffect, useState } from 'react';
 import { useDDClient, useLocalStack } from '../../services/hooks';
 
@@ -33,17 +33,15 @@ export const Logs = (): ReactElement => {
   }, [data]);
 
   return (
-    <Card>
-      <CardContent>
-        {logs.map(log => (
-          <>
-            <Typography>
-              {`${log}`}
-            </Typography>
-            <br />
-          </>
-        ))}
-      </CardContent>
-    </Card>
+    <Box m={2}>
+      {logs.map(log => (
+        <>
+          <Typography>
+            {`${log}`}
+          </Typography>
+          <br />
+        </>
+      ))}
+    </Box>
   );
 };
