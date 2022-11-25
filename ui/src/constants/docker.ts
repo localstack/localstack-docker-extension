@@ -27,3 +27,9 @@ export const STOP_ARGS = [
   ...COMMON_ARGS,
   'stop',
 ];
+
+export const UPDATE_ARGS = [
+  ...COMMON_ARGS,
+  'update',
+  'docker-images',
+];
