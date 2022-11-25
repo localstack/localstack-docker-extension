@@ -6,7 +6,7 @@ import { createStyles, makeStyles } from '@mui/styles';
 import { DEFAULT_CONFIGURATION_ID, START_ARGS, STOP_ARGS } from '../../constants';
 import { DockerImage } from '../../types';
 import { useDDClient, useRunConfig, useLocalStack } from '../../services/hooks';
-import { UpdateDialog } from '../UpdateDialog';
+import { LongMenu } from './Menu';
 
 const useStyles = makeStyles(() => createStyles({
   selectForm: {
@@ -19,7 +19,6 @@ export const Controller = (): ReactElement => {
   const { runConfig, isLoading, setRunConfig } = useRunConfig();
   const { data, mutate } = useLocalStack();
   const [runningConfig, setRunningConfig] = useState<string>('Default');
-  const [openModal, setOpenModal] = useState<boolean>(false);
   const isRunning = data && data.State === 'running';
 
   const classes = useStyles();
@@ -52,7 +51,6 @@ export const Controller = (): ReactElement => {
 
   return (
     <>
-      {openModal && <UpdateDialog open={openModal} onClose={() => setOpenModal(false)} />}
       <Chip
         style={{ borderRadius: 20 }}
         label={isRunning ? 'Running' : 'Stopped'}
@@ -85,12 +83,8 @@ export const Controller = (): ReactElement => {
           endIcon={<Stop />}>
           Stop
         </Button>
-        <Button
-          onClick={() => setOpenModal(!openModal)}
-        >
-          update
-        </Button>
       </ButtonGroup>
+      <LongMenu />
     </>
   );
 };
