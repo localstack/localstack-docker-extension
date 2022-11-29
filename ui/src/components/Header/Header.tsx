@@ -8,7 +8,7 @@ export const Header = (): ReactElement => {
   const ddClient = useDDClient();
 
   return (
-    <AppBar position="static">
+    <AppBar position="static" elevation={0}>
       <Toolbar>
         <Box display='flex' flexGrow={1}>
           <Typography variant='h3' sx={{ my: 2 }}>

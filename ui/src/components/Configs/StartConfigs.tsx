@@ -1,10 +1,13 @@
 import { Add as AddIcon, Edit } from '@mui/icons-material';
-import { Box, Button, Card, IconButton, TextField, Theme } from '@mui/material';
+import { Box, Button, Card, IconButton, Theme } from '@mui/material';
 import React, { ReactElement, useState } from 'react';
 import { createStyles, makeStyles } from '@mui/styles';
+import { DataGrid, GridColDef, GridRenderCellParams } from '@mui/x-data-grid';
+import { v4 as uuid } from 'uuid';
 import { useRunConfig } from '../../services/hooks';
 import { UpsertConfig } from './UpsertConfig';
 import { Optional, RunConfig } from '../../types';
+import { DEFAULT_CONFIGURATION_ID } from '../../constants';
 
 const useStyles = makeStyles((theme: Theme) => createStyles({
   addButton: {
@@ -25,6 +28,36 @@ export const StartConfigs = (): ReactElement => {
     setOpenModal(true);
   };
 
+  const columns: GridColDef<RunConfig>[] = [
+    {
+      field: 'Edit',
+      headerName: 'Edit',
+      width: 50,
+      renderCell: (params: GridRenderCellParams) =>
+        // eslint-disable-next-line react/jsx-no-useless-fragment
+        <>
+          {params.row.id !== DEFAULT_CONFIGURATION_ID &&
+            <IconButton onClick={() => openModalSetup(params.row)} >
+              <Edit />
+            </IconButton>
+          } 
+        </>,
+    },
+    { field: 'name', headerName: 'Name', width: 300 },
+    {
+      field: 'id',
+      headerName: 'ID',
+      width: 300,
+    },
+    {
+      field: 'Configurations',
+      headerName: 'Configurations',
+      sortable: false,
+      width: 900,
+      renderCell: (params: GridRenderCellParams) =>
+        (params.row as RunConfig).vars.map(setting => `${setting.variable}=${setting.value}`).join(', '),
+    },
+  ];
   return (
     <Card>
       <Button
@@ -35,21 +68,14 @@ export const StartConfigs = (): ReactElement => {
       >
         New
       </Button>
+      <Box sx={{ height: 400, width: '100%' }}>
+        <DataGrid
+          rows={runConfig} columns={columns}
+          getRowId={(row) => (row).id as string || uuid()}
+          disableSelectionOnClick
+        />
+      </Box>
       {openModal && <UpsertConfig config={targetConfig} open={openModal} onClose={() => setOpenModal(false)} />}
-      {
-        runConfig.map(item => (
-          <Box key={item.id}>
-            <Box p={2} display="flex" width='full' >
-              <TextField fullWidth variant="outlined" disabled value={item.name} />
-              {item.id !== '0' &&
-                <IconButton onClick={() => openModalSetup(item)} >
-                  <Edit />
-                </IconButton>
-              }
-            </Box>
-          </Box>
-        ))
-      }
     </Card >
   );
 };
