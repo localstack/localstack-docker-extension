@@ -42,7 +42,7 @@ export const UpsertConfig = ({ config, open, onClose }: Props): ReactElement => 
   const [newVar, setNewVar] = useState<string>('');
   const [newValue, setNewValue] = useState<string>('');
   const [configName, setConfigName] = useState<string>(config?.name || '');
-  const [newConfig, setNewConfig] = useState<RunConfig>(config || { name: '',id: uuid(), vars: [] } as RunConfig);
+  const [newConfig, setNewConfig] = useState<RunConfig>(config || { name: '', id: uuid(), vars: [] } as RunConfig);
   const classes = useStyles();
 
   const handleAddButtonPress = () => {
@@ -79,8 +79,8 @@ export const UpsertConfig = ({ config, open, onClose }: Props): ReactElement => 
     <Dialog open={open} onClose={onClose}>
       <DialogContent>
         <Box display="flex" width='full' flexDirection="column">
-          <Settings fontSize='large'/>
-          <Box className={classes.emptyBox}/>
+          <Settings fontSize='large' />
+          <Box className={classes.emptyBox} />
           <TextField
             fullWidth
             variant="outlined"
@@ -89,7 +89,7 @@ export const UpsertConfig = ({ config, open, onClose }: Props): ReactElement => 
             onChange={(e) => setConfigName(e.target.value)}
           />
         </Box>
-        <Box className={classes.emptyBox}/>
+        <Box className={classes.emptyBox} />
         <List
           subheader={
             <Typography>Environment Variables </Typography>
