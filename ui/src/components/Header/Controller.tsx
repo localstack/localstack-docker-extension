@@ -15,7 +15,7 @@ const useStyles = makeStyles(() => createStyles({
 
 export const Controller = (): ReactElement => {
   const ddClient = useDDClient();
-  const { runConfig, isLoading, setRunConfig } = useRunConfig();
+  const { runConfig, isLoading, setConfig } = useRunConfig();
   const { data, mutate } = useLocalStack();
   const [runningConfig, setRunningConfig] = useState<string>('Default');
   const isRunning = data && data.State === 'running';
@@ -23,16 +23,15 @@ export const Controller = (): ReactElement => {
   const classes = useStyles();
 
   useEffect(() => {
-    if (!isLoading && !runConfig.find(item => item.name === 'Default')) {
-      setRunConfig([...runConfig,
-        {
-          name: 'Default', id: DEFAULT_CONFIGURATION_ID, vars:
+    console.log('insisde useEffect');
+    if (!isLoading && (!runConfig || !runConfig.find(item => item.name === 'Default'))) {
+      setConfig({
+        name: 'Default', id: DEFAULT_CONFIGURATION_ID, vars:
           [{ variable: 'EXTRA_CORS_ALLOWED_ORIGINS', value: 'http://localhost:3000', id: uuid() }],
-        },
-      ]);
+      },
+      );
     }
   });
-
 
   const start = async () => {
     const images = await ddClient.docker.listImages() as [DockerImage];
@@ -70,7 +69,7 @@ export const Controller = (): ReactElement => {
             onChange={({ target }) => setRunningConfig(target.value)}
           >
             {
-              runConfig.map(config => (
+              runConfig?.map(config => (
                 <MenuItem key={config.id} value={config.name}>{config.name}</MenuItem>
               ))
             }
