@@ -34,13 +34,11 @@ export const useRunConfig = (): useRunConfigReturn => {
 
   const deleteConfig = async (configId: string) => {
     await ddClient.extension.vm.service.post('/delete', { Data: configId });
-    mutate(); 
+    mutate();
   };
 
   return {
-    runConfig: (!data || data?.Message === '' || data?.Message as string === 'Failed' || data.Message === 'null') ?
-      [] :
-      JSON.parse(data?.Message),
+    runConfig: (!data || data?.Message === '' || error) ? [] : JSON.parse(data?.Message),
     isLoading: isValidating || (!error && !data),
     setConfig,
     updateConfig,

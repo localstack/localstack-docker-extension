@@ -4,6 +4,8 @@ import (
 	"encoding/json"
 	"errors"
 	"flag"
+	"fmt"
+	"io"
 	"log"
 	"net"
 	"net/http"
@@ -12,6 +14,8 @@ import (
 	"github.com/labstack/echo"
 	"github.com/sirupsen/logrus"
 )
+
+var ERRORS = [...]string{"Errors while converting byte[] to struct", "Errors while writing data", "Failed retrieving data"}
 
 func main() {
 	var socketPath string
@@ -65,7 +69,7 @@ type Payload struct {
 func getSettings(ctx echo.Context) error {
 	content, err := readData()
 	if err != nil {
-		return ctx.JSON(http.StatusConflict, HTTPMessageBody{Message: "Failed"})
+		return ctx.JSON(http.StatusConflict, HTTPMessageBody{Message: ERRORS[2]})
 	}
 	return ctx.JSON(http.StatusOK, HTTPMessageBody{Message: string(content[:])})
 }
@@ -78,11 +82,14 @@ func updateSetting(ctx echo.Context) error {
 
 	ctx.Bind(&testPayload)
 	json.Unmarshal([]byte(testPayload.Data), &reqContent)
-	savedData, _ := readData()
+	savedData, file, _ := readDataKeepOpen()
+	defer file.Close()
+	fmt.Println("loaded data:" + string(savedData))
+
 	err := json.Unmarshal(savedData, &parsedContent)
 
 	if err != nil {
-		return ctx.NoContent(http.StatusInternalServerError)
+		return ctx.JSON(http.StatusInternalServerError, HTTPMessageBody{Message: ERRORS[0]})
 	}
 
 	for index, item := range parsedContent {
@@ -97,11 +104,11 @@ func updateSetting(ctx echo.Context) error {
 		parsedContent[indexToChange] = reqContent
 	}
 
-	err = writeData(parsedContent)
+	err = writeData(parsedContent, file)
 	if err == nil {
 		return ctx.NoContent(http.StatusOK)
 	}
-	return ctx.NoContent(http.StatusInternalServerError)
+	return ctx.JSON(http.StatusInternalServerError, HTTPMessageBody{Message: ERRORS[1]})
 }
 
 func deleteSetting(ctx echo.Context) error {
@@ -112,11 +119,12 @@ func deleteSetting(ctx echo.Context) error {
 
 	ctx.Bind(&testPayload)
 	idToDelete = testPayload.Data
-	savedData, _ := readData()
+	savedData, file, _ := readDataKeepOpen()
+	defer file.Close()
 	err := json.Unmarshal(savedData, &parsedContent)
 
 	if err != nil {
-		return ctx.NoContent(http.StatusInternalServerError)
+		return ctx.JSON(http.StatusInternalServerError, HTTPMessageBody{Message: ERRORS[0]})
 	}
 
 	for index, item := range parsedContent {
@@ -132,11 +140,11 @@ func deleteSetting(ctx echo.Context) error {
 		parsedContent = parsedContent[:len(parsedContent)-1]
 	}
 
-	err = writeData(parsedContent)
+	err = writeData(parsedContent, file)
 	if err == nil {
 		return ctx.NoContent(http.StatusOK)
 	}
-	return ctx.NoContent(http.StatusInternalServerError)
+	return ctx.JSON(http.StatusInternalServerError, HTTPMessageBody{Message: ERRORS[1]})
 }
 
 func setSetting(ctx echo.Context) error {
@@ -147,19 +155,20 @@ func setSetting(ctx echo.Context) error {
 
 	ctx.Bind(&testPayload)
 	json.Unmarshal([]byte(testPayload.Data), &reqContent)
-	savedData, _ := readData()
+	savedData, file, _ := readDataKeepOpen()
+	defer file.Close()
+
 	err := json.Unmarshal(savedData, &parsedContent)
 
 	if err != nil {
-		return ctx.NoContent(http.StatusInternalServerError)
+		return ctx.JSON(http.StatusInternalServerError, HTTPMessageBody{Message: ERRORS[0]})
 	}
 
 	updatedArray := append(parsedContent, reqContent)
-	err = writeData(updatedArray)
+	err = writeData(updatedArray, file)
 
 	if err != nil {
-		logrus.New().Infof("Errors while writing data")
-		return ctx.NoContent(http.StatusInternalServerError)
+		return ctx.JSON(http.StatusInternalServerError, HTTPMessageBody{Message: ERRORS[1]})
 	}
 
 	return ctx.NoContent(http.StatusOK)
@@ -187,10 +196,44 @@ func readData() ([]byte, error) {
 	return content, err
 }
 
-func writeData(data []Configuration) error {
-	jsonData, err := json.Marshal(data)
+func readDataKeepOpen() ([]byte, *os.File, error) {
+	_, err := os.Stat("data.json")
+	var content []byte
+
+	if errors.Is(err, os.ErrNotExist) {
+
+		file, err := os.OpenFile("data.json", os.O_CREATE, 0755)
+
+		if err != nil {
+			logrus.New().Infof("Errors while creating file")
+			logrus.New().Infof(err.Error())
+		}
+		_, err = file.Write([]byte("[]"))
+		return content, file, err
+	}
+
+	file, err := os.OpenFile("data.json", os.O_RDWR, 0755)
+	var buff = make([]byte, 1024)
 	if err == nil {
-		err = os.WriteFile("data.json", jsonData, 0644)
+		for {
+			n, err := file.Read(buff)
+			if err == io.EOF {
+				break
+			}
+			content = append(content, buff[:n]...)
+		}
+	}
+	fmt.Println("File content:" + string(content))
+	return content, file, err
+}
+
+func writeData(data []Configuration, file *os.File) error {
+	jsonData, err := json.Marshal(data)
+	fmt.Print("Len to write: ")
+	fmt.Println(len(jsonData))
+	if err == nil {
+		file.Truncate(0)
+		_, err = file.WriteAt(jsonData, 0)
 	}
 	return err
 }
