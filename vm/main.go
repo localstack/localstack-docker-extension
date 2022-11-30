@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"errors"
 	"flag"
-	"fmt"
 	"io"
 	"log"
 	"net"
@@ -16,6 +15,8 @@ import (
 )
 
 var ERRORS = [...]string{"Errors while converting byte[] to struct", "Errors while writing data", "Failed retrieving data"}
+
+const FILE_NAME = "data.json"
 
 func main() {
 	var socketPath string
@@ -75,16 +76,15 @@ func getSettings(ctx echo.Context) error {
 }
 
 func updateSetting(ctx echo.Context) error {
-	var testPayload Payload
+	var payload Payload
 	var reqContent Configuration
 	var parsedContent []Configuration
 	var indexToChange int = -1
 
-	ctx.Bind(&testPayload)
-	json.Unmarshal([]byte(testPayload.Data), &reqContent)
+	ctx.Bind(&payload)
+	json.Unmarshal([]byte(payload.Data), &reqContent)
 	savedData, file, _ := readDataKeepOpen()
 	defer file.Close()
-	fmt.Println("loaded data:" + string(savedData))
 
 	err := json.Unmarshal(savedData, &parsedContent)
 
@@ -112,13 +112,13 @@ func updateSetting(ctx echo.Context) error {
 }
 
 func deleteSetting(ctx echo.Context) error {
-	var testPayload Payload
+	var payload Payload
 	var idToDelete string
 	var parsedContent []Configuration
 	var indexToDelete int = -1
 
-	ctx.Bind(&testPayload)
-	idToDelete = testPayload.Data
+	ctx.Bind(&payload)
+	idToDelete = payload.Data
 	savedData, file, _ := readDataKeepOpen()
 	defer file.Close()
 	err := json.Unmarshal(savedData, &parsedContent)
@@ -141,20 +141,22 @@ func deleteSetting(ctx echo.Context) error {
 	}
 
 	err = writeData(parsedContent, file)
-	if err == nil {
-		return ctx.NoContent(http.StatusOK)
+	if err != nil {
+		return ctx.JSON(http.StatusInternalServerError, HTTPMessageBody{Message: ERRORS[1]})
 	}
-	return ctx.JSON(http.StatusInternalServerError, HTTPMessageBody{Message: ERRORS[1]})
+
+	return ctx.NoContent(http.StatusOK)
+
 }
 
 func setSetting(ctx echo.Context) error {
 
-	var testPayload Payload
+	var payload Payload
 	var reqContent Configuration
 	var parsedContent []Configuration
 
-	ctx.Bind(&testPayload)
-	json.Unmarshal([]byte(testPayload.Data), &reqContent)
+	ctx.Bind(&payload)
+	json.Unmarshal([]byte(payload.Data), &reqContent)
 	savedData, file, _ := readDataKeepOpen()
 	defer file.Close()
 
@@ -176,43 +178,28 @@ func setSetting(ctx echo.Context) error {
 }
 
 func readData() ([]byte, error) {
-	_, err := os.Stat("data.json")
+	_, err := os.Stat(FILE_NAME)
 	var content []byte
 
 	if errors.Is(err, os.ErrNotExist) {
-		logrus.New().Infof("File not exist, creating")
-		file, err := os.Create("data.json")
-
-		if err != nil {
-			logrus.New().Infof("Errors while creating file")
-			logrus.New().Infof(err.Error())
-		}
-		_, err = file.Write([]byte("[]"))
+		content, file, err := createFile()
 		file.Close()
 		return content, err
 	}
 
-	content, err = os.ReadFile("data.json")
+	content, err = os.ReadFile(FILE_NAME)
 	return content, err
 }
 
 func readDataKeepOpen() ([]byte, *os.File, error) {
-	_, err := os.Stat("data.json")
+	_, err := os.Stat(FILE_NAME)
 	var content []byte
 
 	if errors.Is(err, os.ErrNotExist) {
-
-		file, err := os.OpenFile("data.json", os.O_CREATE, 0755)
-
-		if err != nil {
-			logrus.New().Infof("Errors while creating file")
-			logrus.New().Infof(err.Error())
-		}
-		_, err = file.Write([]byte("[]"))
-		return content, file, err
+		return createFile()
 	}
 
-	file, err := os.OpenFile("data.json", os.O_RDWR, 0755)
+	file, err := os.OpenFile(FILE_NAME, os.O_RDWR, 0755)
 	var buff = make([]byte, 1024)
 	if err == nil {
 		for {
@@ -223,17 +210,28 @@ func readDataKeepOpen() ([]byte, *os.File, error) {
 			content = append(content, buff[:n]...)
 		}
 	}
-	fmt.Println("File content:" + string(content))
 	return content, file, err
 }
 
 func writeData(data []Configuration, file *os.File) error {
 	jsonData, err := json.Marshal(data)
-	fmt.Print("Len to write: ")
-	fmt.Println(len(jsonData))
 	if err == nil {
 		file.Truncate(0)
 		_, err = file.WriteAt(jsonData, 0)
 	}
 	return err
+}
+
+func createFile() ([]byte, *os.File, error) {
+
+	logrus.New().Infof("File not exists, creating")
+	file, err := os.OpenFile(FILE_NAME, os.O_CREATE, 0755)
+
+	if err != nil {
+		logrus.New().Infof("Errors while creating file")
+		logrus.New().Infof(err.Error())
+	}
+	_, err = file.Write([]byte("[]"))
+	var toReturn []byte
+	return toReturn, file, err
 }
