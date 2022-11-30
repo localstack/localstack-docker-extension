@@ -111,7 +111,7 @@ func deleteSetting(ctx echo.Context) error {
 	var indexToDelete int = -1
 
 	ctx.Bind(&testPayload)
-	json.Unmarshal([]byte(testPayload.Data), &idToDelete)
+	idToDelete = testPayload.Data
 	savedData, _ := readData()
 	err := json.Unmarshal(savedData, &parsedContent)
 
@@ -125,12 +125,11 @@ func deleteSetting(ctx echo.Context) error {
 		}
 	}
 
-	if indexToDelete != -1 { //no config with that id found
+	if indexToDelete != -1 {
 		if indexToDelete != len(parsedContent)-1 {
 			parsedContent[indexToDelete] = parsedContent[len(parsedContent)-1]
 		}
 		parsedContent = parsedContent[:len(parsedContent)-1]
-
 	}
 
 	err = writeData(parsedContent)
@@ -159,6 +158,7 @@ func setSetting(ctx echo.Context) error {
 	err = writeData(updatedArray)
 
 	if err != nil {
+		logrus.New().Infof("Errors while writing data")
 		return ctx.NoContent(http.StatusInternalServerError)
 	}
 
@@ -173,11 +173,13 @@ func readData() ([]byte, error) {
 	if errors.Is(err, os.ErrNotExist) {
 		logrus.New().Infof("File not exist, creating")
 		file, err := os.Create("data.json")
-		file.Close()
+
 		if err != nil {
 			logrus.New().Infof("Errors while creating file")
 			logrus.New().Infof(err.Error())
 		}
+		_, err = file.Write([]byte("[]"))
+		file.Close()
 		return content, err
 	}
 
@@ -188,7 +190,7 @@ func readData() ([]byte, error) {
 func writeData(data []Configuration) error {
 	jsonData, err := json.Marshal(data)
 	if err == nil {
-		err = os.WriteFile("data.json", []byte(jsonData), 0644)
+		err = os.WriteFile("data.json", jsonData, 0644)
 	}
 	return err
 }

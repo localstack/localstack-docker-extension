@@ -23,7 +23,6 @@ export const Controller = (): ReactElement => {
   const classes = useStyles();
 
   useEffect(() => {
-    console.log('insisde useEffect');
     if (!isLoading && (!runConfig || !runConfig.find(item => item.name === 'Default'))) {
       setConfig({
         name: 'Default', id: DEFAULT_CONFIGURATION_ID, vars:
@@ -31,7 +30,7 @@ export const Controller = (): ReactElement => {
       },
       );
     }
-  });
+  },[isLoading]);
 
   const start = async () => {
     const images = await ddClient.docker.listImages() as [DockerImage];

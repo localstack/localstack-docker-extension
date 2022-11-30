@@ -34,7 +34,7 @@ export const useRunConfig = (): useRunConfigReturn => {
 
   const deleteConfig = async (configId: string) => {
     await ddClient.extension.vm.service.post('/delete', { Data: configId });
-    mutate();
+    mutate(); 
   };
 
   return {
