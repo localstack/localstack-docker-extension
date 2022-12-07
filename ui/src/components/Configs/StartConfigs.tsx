@@ -40,7 +40,7 @@ export const StartConfigs = (): ReactElement => {
             <IconButton onClick={() => openModalSetup(params.row)} >
               <Edit />
             </IconButton>
-          } 
+          }
         </>,
     },
     { field: 'name', headerName: 'Name', width: 300 },
@@ -68,8 +68,9 @@ export const StartConfigs = (): ReactElement => {
       >
         New
       </Button>
-      <Box sx={{ height: 400, width: '100%', marginTop: 3 }}>
+      <Box sx={{ marginTop: 3 }}>
         <DataGrid
+          autoHeight
           rows={runConfig} columns={columns}
           getRowId={(row) => (row).id as string || uuid()}
           disableSelectionOnClick

@@ -6,6 +6,7 @@ import { createStyles, makeStyles } from '@mui/styles';
 const useStyles = makeStyles((theme: Theme) => createStyles({
   sticky: {
     position: 'sticky',
+    zIndex: 2,
     top: 64,
     backgroundColor: theme.palette.background.default,
   },

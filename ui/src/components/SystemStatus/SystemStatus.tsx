@@ -96,8 +96,6 @@ export const SystemStatus = (): ReactElement => {
         :
         <>No data available</>
       }
-
-
     </Box>
   );
 };

@@ -7,6 +7,7 @@ const useStyles = makeStyles(() => createStyles({
   sticky: {
     position: 'sticky',
     top: 0,
+    zIndex: 2,
   },
 }));
 
