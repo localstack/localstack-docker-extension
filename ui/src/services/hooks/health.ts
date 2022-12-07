@@ -13,7 +13,7 @@ interface UseResourcesGraph {
 
 export const getDockerStatus = async (): Promise<Health> => {
   try {
-    const { data } = await axios.create({ baseURL: 'http://localhost:4566' }).get('health');
+    const { data } = await axios.create({ baseURL: 'http://localhost:4566' }).get('_localstack/health');
     return data;
   } catch (_error) {
     return undefined;
