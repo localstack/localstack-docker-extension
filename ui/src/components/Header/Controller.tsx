@@ -15,7 +15,7 @@ const useStyles = makeStyles(() => createStyles({
 
 export const Controller = (): ReactElement => {
   const ddClient = useDDClient();
-  const { runConfig, isLoading, setConfig } = useRunConfig();
+  const { runConfig, isLoading, createConfig } = useRunConfig();
   const { data, mutate } = useLocalStack();
   const [runningConfig, setRunningConfig] = useState<string>('Default');
   const isRunning = data && data.State === 'running';
@@ -24,7 +24,7 @@ export const Controller = (): ReactElement => {
 
   useEffect(() => {
     if (!isLoading && (!runConfig || !runConfig.find(item => item.name === 'Default'))) {
-      setConfig({
+      createConfig({
         name: 'Default', id: DEFAULT_CONFIGURATION_ID, vars:
           [{ variable: 'EXTRA_CORS_ALLOWED_ORIGINS', value: 'http://localhost:3000', id: uuid() }],
       },

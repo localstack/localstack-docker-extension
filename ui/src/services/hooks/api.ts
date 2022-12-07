@@ -6,7 +6,7 @@ import { useDDClient } from './utils';
 interface useRunConfigReturn {
   runConfig: RunConfig[],
   isLoading: boolean,
-  setConfig: (data: RunConfig) => unknown;
+  createConfig: (data: RunConfig) => unknown;
   updateConfig: (data: RunConfig) => unknown;
   deleteConfig: (data: string) => unknown;
 }
@@ -28,8 +28,8 @@ export const useRunConfig = (): useRunConfigReturn => {
     mutate();
   };
 
-  const setConfig = async (newData: RunConfig) => {
-    await ddClient.extension.vm.service.post('/set', { Data: JSON.stringify(newData) });
+  const createConfig = async (newData: RunConfig) => {
+    await ddClient.extension.vm.service.post('/create', { Data: JSON.stringify(newData) });
     mutate();
   };
 
@@ -41,7 +41,7 @@ export const useRunConfig = (): useRunConfigReturn => {
   return {
     runConfig: (!data || data?.Message === '' || error) ? [] : JSON.parse(data?.Message),
     isLoading: isValidating || (!error && !data),
-    setConfig,
+    createConfig,
     updateConfig,
     deleteConfig,
   };

@@ -38,7 +38,7 @@ func main() {
 	router.Listener = ln
 	os.Chdir("/saved_config")
 	router.GET("/get", getSettings)
-	router.POST("/set", setSetting)
+	router.POST("/create", createSetting)
 	router.POST("/update", updateSetting)
 	router.POST("/delete", deleteSetting)
 
@@ -149,7 +149,7 @@ func deleteSetting(ctx echo.Context) error {
 
 }
 
-func setSetting(ctx echo.Context) error {
+func createSetting(ctx echo.Context) error {
 
 	var payload Payload
 	var reqContent Configuration
