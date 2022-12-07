@@ -59,7 +59,8 @@ export const UpdateDialog = ({ open, onClose }: Props): ReactElement => {
               <br />
             </>
           ))}
-          {isUpdating && <Skeleton animation="wave" />}
+          {logs.length === 0 && <Typography>Updating docker images</Typography>}
+          {isUpdating && logs.length >= 1 && <Skeleton animation="wave" />}
         </Box>
       </DialogContent>
     </Dialog >
