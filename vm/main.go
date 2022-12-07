@@ -37,10 +37,10 @@ func main() {
 	}
 	router.Listener = ln
 	os.Chdir("/saved_config")
-	router.GET("/get", getSettings)
-	router.POST("/create", createSetting)
-	router.POST("/update", updateSetting)
-	router.POST("/delete", deleteSetting)
+	router.GET("/config", getSettings)
+	router.POST("/config", createSetting)
+	router.PUT("/config", updateSetting)
+	router.DELETE("/config/:id", deleteSetting)
 
 	log.Fatal(router.Start(startURL))
 }
@@ -112,13 +112,12 @@ func updateSetting(ctx echo.Context) error {
 }
 
 func deleteSetting(ctx echo.Context) error {
-	var payload Payload
+
 	var idToDelete string
 	var parsedContent []Configuration
 	var indexToDelete int = -1
 
-	ctx.Bind(&payload)
-	idToDelete = payload.Data
+	idToDelete = ctx.Param("id")
 	savedData, file, _ := readDataKeepOpen()
 	defer file.Close()
 	err := json.Unmarshal(savedData, &parsedContent)

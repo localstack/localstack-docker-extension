@@ -20,21 +20,21 @@ export const useRunConfig = (): useRunConfigReturn => {
   const ddClient = useDDClient();
   const { data, mutate, isValidating, error } = useSWR(
     cacheKey,
-    () => (ddClient.extension.vm.service.get('/get') as Promise<HTTPMessageBody>),
+    () => (ddClient.extension.vm.service.get('/config') as Promise<HTTPMessageBody>),
   );
 
   const updateConfig = async (newData: RunConfig) => {
-    await ddClient.extension.vm.service.post('/update', { Data: JSON.stringify(newData) });
+    await ddClient.extension.vm.service.put('/config', { Data: JSON.stringify(newData) });
     mutate();
   };
 
   const createConfig = async (newData: RunConfig) => {
-    await ddClient.extension.vm.service.post('/create', { Data: JSON.stringify(newData) });
+    await ddClient.extension.vm.service.post('/config', { Data: JSON.stringify(newData) });
     mutate();
   };
 
   const deleteConfig = async (configId: string) => {
-    await ddClient.extension.vm.service.post('/delete', { Data: configId });
+    await ddClient.extension.vm.service.delete(`/config/${configId}`);
     mutate();
   };
 
