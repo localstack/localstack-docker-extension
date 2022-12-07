@@ -22,6 +22,7 @@ export const useRunConfig = (): useRunConfigReturn => {
     cacheKey,
     () => (ddClient.extension.vm.service.get('/get') as Promise<HTTPMessageBody>),
   );
+
   const updateConfig = async (newData: RunConfig) => {
     await ddClient.extension.vm.service.post('/update', { Data: JSON.stringify(newData) });
     mutate();

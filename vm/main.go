@@ -14,7 +14,7 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-var ERRORS = [...]string{"Errors while converting byte[] to struct", "Errors while writing data", "Failed retrieving data"}
+var ERRORS = [...]string{"Bad format", "Errors while saving data", "Failed retrieving data", "Configuration already present"}
 
 const FILE_NAME = "data.json"
 
