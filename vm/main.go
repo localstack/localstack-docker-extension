@@ -37,10 +37,10 @@ func main() {
 	}
 	router.Listener = ln
 	os.Chdir("/saved_config")
-	router.GET("/config", getSettings)
-	router.POST("/config", createSetting)
-	router.PUT("/config", updateSetting)
-	router.DELETE("/config/:id", deleteSetting)
+	router.GET("/configs", getSettings)
+	router.POST("/configs", createSetting)
+	router.PUT("/configs", updateSetting)
+	router.DELETE("/configs/:id", deleteSetting)
 
 	log.Fatal(router.Start(startURL))
 }
