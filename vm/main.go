@@ -159,7 +159,6 @@ func setSetting(ctx echo.Context) error {
 	json.Unmarshal([]byte(payload.Data), &reqContent)
 	savedData, file, _ := readDataKeepOpen()
 	defer file.Close()
-
 	err := json.Unmarshal(savedData, &parsedContent)
 
 	if err != nil {
@@ -225,7 +224,7 @@ func writeData(data []Configuration, file *os.File) error {
 func createFile() ([]byte, *os.File, error) {
 
 	logrus.New().Infof("File not exists, creating")
-	file, err := os.OpenFile(FILE_NAME, os.O_CREATE, 0755)
+	file, err := os.OpenFile(FILE_NAME, os.O_CREATE|os.O_RDWR, 0755)
 
 	if err != nil {
 		logrus.New().Infof("Errors while creating file")
