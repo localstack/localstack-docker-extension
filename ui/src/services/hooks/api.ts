@@ -6,7 +6,9 @@ import { useDDClient } from './utils';
 interface useRunConfigReturn {
   runConfig: RunConfig[],
   isLoading: boolean,
-  setRunConfig: (data: RunConfig[]) => unknown;
+  createConfig: (data: RunConfig) => unknown;
+  updateConfig: (data: RunConfig) => unknown;
+  deleteConfig: (data: string) => unknown;
 }
 
 interface HTTPMessageBody {
@@ -18,17 +20,30 @@ export const useRunConfig = (): useRunConfigReturn => {
   const ddClient = useDDClient();
   const { data, mutate, isValidating, error } = useSWR(
     cacheKey,
-    () => (ddClient.extension.vm.service.get('/getConfig') as Promise<HTTPMessageBody>),
+    () => (ddClient.extension.vm.service.get('/configs') as Promise<HTTPMessageBody>),
   );
-  const mutateRunConfig = async (newData: RunConfig[]) => {
-    await ddClient.extension.vm.service.post('/setConfig', { Data: JSON.stringify(newData) });
+
+  const updateConfig = async (newData: RunConfig) => {
+    await ddClient.extension.vm.service.put('/configs', { Data: JSON.stringify(newData) });
+    mutate();
+  };
+
+  const createConfig = async (newData: RunConfig) => {
+    await ddClient.extension.vm.service.post('/configs', { Data: JSON.stringify(newData) });
+    mutate();
+  };
+
+  const deleteConfig = async (configId: string) => {
+    await ddClient.extension.vm.service.delete(`/configs/${configId}`);
     mutate();
   };
 
   return {
-    runConfig: (!data || data?.Message === '' || data?.Message as string === 'Failed') ? [] : JSON.parse(data?.Message),
+    runConfig: (!data || data?.Message === '' || error) ? [] : JSON.parse(data?.Message),
     isLoading: isValidating || (!error && !data),
-    setRunConfig: mutateRunConfig,
+    createConfig,
+    updateConfig,
+    deleteConfig,
   };
 };
 

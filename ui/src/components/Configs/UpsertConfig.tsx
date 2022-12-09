@@ -38,7 +38,7 @@ const useStyles = makeStyles((theme: Theme) => createStyles({
 
 export const UpsertConfig = ({ config, open, onClose }: Props): ReactElement => {
 
-  const { runConfig, setRunConfig } = useRunConfig();
+  const { updateConfig, deleteConfig } = useRunConfig();
   const [newVar, setNewVar] = useState<string>('');
   const [newValue, setNewValue] = useState<string>('');
   const [configName, setConfigName] = useState<string>(config?.name || '');
@@ -55,10 +55,7 @@ export const UpsertConfig = ({ config, open, onClose }: Props): ReactElement => 
   };
 
   const handleSaveButtonPress = () => {
-    setRunConfig([...runConfig.filter(config1 => config1.id !== newConfig.id),
-      {
-        name: configName, id: newConfig.id, vars: newConfig.vars,
-      }]);
+    updateConfig({ name: configName, id: newConfig.id, vars: newConfig.vars });
     onClose();
   };
 
@@ -70,7 +67,7 @@ export const UpsertConfig = ({ config, open, onClose }: Props): ReactElement => 
 
   const handleDeleteButtonPress = () => {
     if (newConfig.id) {
-      setRunConfig(runConfig.filter(config1 => config1.id !== newConfig.id));
+      deleteConfig(newConfig.id);
     }
     onClose();
   };
