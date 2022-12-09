@@ -11,7 +11,7 @@ import { DEFAULT_CONFIGURATION_ID } from '../../constants';
 
 const useStyles = makeStyles((theme: Theme) => createStyles({
   addButton: {
-    margin: theme.spacing(2),
+    marginBottom: theme.spacing(2),
   },
 }));
 
