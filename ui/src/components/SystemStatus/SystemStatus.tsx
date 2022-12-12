@@ -2,7 +2,7 @@ import React, { Fragment, ReactElement, useEffect } from 'react';
 import {
   Box,
   Button,
-  Card, CardActions, CardContent, List, ListItem, ListItemText, Theme, Typography,
+  List, ListItem, ListItemText, Theme, Typography,
 } from '@mui/material';
 import { createStyles, makeStyles } from '@mui/styles';
 import { Refresh } from '@mui/icons-material';
@@ -31,6 +31,10 @@ const useStyles = makeStyles((theme: Theme) => createStyles({
       gridTemplateColumns: 'repeat(1, 1fr)',
     },
   },
+  servicesBlock: {
+    marginTop: theme.spacing(2),
+    marginBottom: theme.spacing(2),
+  },
 }));
 
 export const SystemStatus = (): ReactElement => {
@@ -53,16 +57,16 @@ export const SystemStatus = (): ReactElement => {
 
 
   return (
-    <Card style={{ padding: 10 }}>
-      <CardContent>
-        <Button
-          onClick={mutate}
-          variant='outlined'
-          style={{ marginBottom: 30 }}
-          endIcon={<Refresh />}
-        >
-            Refresh
-        </Button>
+    <Box m={2}>
+      <Button
+        onClick={mutate}
+        variant='outlined'
+        style={{ marginBottom: 30 }}
+        endIcon={<Refresh />}
+      >
+        Refresh
+      </Button>
+      <div className={classes.servicesBlock}>
         {
           ORDER.map((status) => (
             <Fragment key={status}>
@@ -86,15 +90,12 @@ export const SystemStatus = (): ReactElement => {
             </Fragment>
           ))
         }
-      </CardContent>
-      <CardActions>
-        {health ?
-          <>version : {health?.version}</>
-          :
-          <>No data available</>
-        }
-
-      </CardActions>
-    </Card>
+      </div>
+      {health ?
+        <>version : {health?.version}</>
+        :
+        <>No data available</>
+      }
+    </Box>
   );
 };

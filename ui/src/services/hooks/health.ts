@@ -13,7 +13,7 @@ interface UseResourcesGraph {
 
 export const getDockerStatus = async (): Promise<Health> => {
   try {
-    const { data } = await axios.create({ baseURL: 'http://localhost:4566' }).get('health');
+    const { data } = await axios.create({ baseURL: 'http://localhost:4566' }).get('_localstack/health');
     return data;
   } catch (_error) {
     return undefined;
@@ -23,7 +23,7 @@ export const getDockerStatus = async (): Promise<Health> => {
 export const useLocalStackHealth = (): UseResourcesGraph => {
   const { data, error, isValidating, mutate } = useSWR<Health>(
     SwrCacheKey.HEALTH,
-    () => getDockerStatus(), { revalidateOnMount: true },
+    () => getDockerStatus(), { revalidateOnMount: true, refreshInterval: 2000 },
   );
 
   return {

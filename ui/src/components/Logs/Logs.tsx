@@ -1,4 +1,4 @@
-import { Card, CardContent, Typography } from '@mui/material';
+import { Box, Typography } from '@mui/material';
 import React, { ReactElement, useEffect, useState } from 'react';
 import { useDDClient, useLocalStack } from '../../services/hooks';
 
@@ -33,8 +33,15 @@ export const Logs = (): ReactElement => {
   }, [data]);
 
   return (
-    <Card>
-      <CardContent>
+    <>
+      {!data &&
+        <Box my={10}>
+          <Typography variant='h2' style={{ textAlign: 'center' }}>
+            No instance is running - Start LocalStack to see it&apos;s logs
+          </Typography>
+        </Box>
+      }
+      <Box m={2}>
         {logs.map(log => (
           <>
             <Typography>
@@ -43,7 +50,7 @@ export const Logs = (): ReactElement => {
             <br />
           </>
         ))}
-      </CardContent>
-    </Card>
+      </Box>
+    </>
   );
 };

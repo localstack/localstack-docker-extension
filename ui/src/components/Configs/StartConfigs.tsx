@@ -1,5 +1,5 @@
 import { Add as AddIcon, Edit } from '@mui/icons-material';
-import { Box, Button, Card, IconButton, Theme } from '@mui/material';
+import { Box, Button, IconButton, Theme } from '@mui/material';
 import React, { ReactElement, useState } from 'react';
 import { createStyles, makeStyles } from '@mui/styles';
 import { DataGrid, GridColDef, GridRenderCellParams } from '@mui/x-data-grid';
@@ -11,7 +11,7 @@ import { DEFAULT_CONFIGURATION_ID } from '../../constants';
 
 const useStyles = makeStyles((theme: Theme) => createStyles({
   addButton: {
-    margin: theme.spacing(2),
+    marginBottom: theme.spacing(2),
   },
 }));
 
@@ -40,7 +40,7 @@ export const StartConfigs = (): ReactElement => {
             <IconButton onClick={() => openModalSetup(params.row)} >
               <Edit />
             </IconButton>
-          } 
+          }
         </>,
     },
     { field: 'name', headerName: 'Name', width: 300 },
@@ -59,7 +59,7 @@ export const StartConfigs = (): ReactElement => {
     },
   ];
   return (
-    <Card>
+    <Box m={2}>
       <Button
         className={classes.addButton}
         endIcon={<AddIcon />}
@@ -68,14 +68,15 @@ export const StartConfigs = (): ReactElement => {
       >
         New
       </Button>
-      <Box sx={{ height: 400, width: '100%' }}>
+      <Box sx={{ marginTop: 3 }}>
         <DataGrid
+          autoHeight
           rows={runConfig} columns={columns}
           getRowId={(row) => (row).id as string || uuid()}
           disableSelectionOnClick
         />
       </Box>
       {openModal && <UpsertConfig config={targetConfig} open={openModal} onClose={() => setOpenModal(false)} />}
-    </Card >
+    </Box >
   );
 };

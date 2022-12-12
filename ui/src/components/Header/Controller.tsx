@@ -6,6 +6,7 @@ import { createStyles, makeStyles } from '@mui/styles';
 import { DEFAULT_CONFIGURATION_ID, START_ARGS, STOP_ARGS } from '../../constants';
 import { DockerImage } from '../../types';
 import { useDDClient, useRunConfig, useLocalStack } from '../../services/hooks';
+import { LongMenu } from './Menu';
 
 const useStyles = makeStyles(() => createStyles({
   selectForm: {
@@ -37,7 +38,7 @@ export const Controller = (): ReactElement => {
     if (!images.some(image => image.RepoTags?.at(0) === 'localstack/localstack:latest')) {
       ddClient.desktopUI.toast.warning('localstack/localstack:latest not found; now pulling..');
     }
-    const addedArgs = runConfig.find(x => x.name === runningConfig)
+    const addedArgs = runConfig.find(config => config.name === runningConfig)
       .vars.map(item => ['-e', `${item.variable}=${item.value}`]).flat();
     ddClient.docker.cli.exec('run', addedArgs.concat(START_ARGS)).then(() => mutate());
   };
@@ -81,6 +82,7 @@ export const Controller = (): ReactElement => {
           Stop
         </Button>
       </ButtonGroup>
+      <LongMenu />
     </>
   );
 };
