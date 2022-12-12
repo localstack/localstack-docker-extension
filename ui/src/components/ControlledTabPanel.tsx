@@ -4,7 +4,7 @@ import { createStyles, makeStyles } from '@mui/styles';
 
 
 const useStyles = makeStyles((theme: Theme) => createStyles({
-  sticky: {
+  tabs: {
     position: 'sticky',
     zIndex: 2,
     top: 64,
@@ -56,7 +56,7 @@ export const ControlledTabPanels: React.FC<ControlledTabPanelsProps & TabsProps>
   return (
     <>
       <Tabs
-        className={classes.sticky}
+        className={classes.tabs}
         variant="fullWidth"
         {...rest}
         value={tab}

@@ -36,8 +36,8 @@ export const Logs = (): ReactElement => {
     <>
       {!data &&
         <Box my={10}>
-          <Typography variant='h2' style={{textAlign: 'center'}}>
-            No instance is running...Start a LocalStack instance to see it&apos;s logs
+          <Typography variant='h2' style={{ textAlign: 'center' }}>
+            No instance is running - Start LocalStack to see it&apos;s logs
           </Typography>
         </Box>
       }

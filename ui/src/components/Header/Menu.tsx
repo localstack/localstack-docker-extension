@@ -3,7 +3,7 @@ import { IconButton, Menu, MenuItem } from '@mui/material';
 import React, { useState } from 'react';
 import { UpdateDialog } from '../UpdateDialog';
 
-const ITEM_HEIGHT =80;
+const ITEM_HEIGHT = 80;
 
 export const LongMenu = () => {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
@@ -26,7 +26,7 @@ export const LongMenu = () => {
 
   return (
     <div>
-      {openModal && <UpdateDialog open={openModal} onClose={() => setOpenModal(false)} />}
+      <UpdateDialog open={openModal} onClose={() => setOpenModal(false)} />
       <IconButton
         aria-label="more"
         id="long-button"
@@ -35,7 +35,7 @@ export const LongMenu = () => {
         aria-haspopup="true"
         onClick={handleClick}
       >
-        <MoreVert htmlColor='#FFFFFF'/>
+        <MoreVert htmlColor='#FFFFFF' />
       </IconButton>
       <Menu
         id="long-menu"

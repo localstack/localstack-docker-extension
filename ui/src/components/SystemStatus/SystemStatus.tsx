@@ -31,7 +31,7 @@ const useStyles = makeStyles((theme: Theme) => createStyles({
       gridTemplateColumns: 'repeat(1, 1fr)',
     },
   },
-  resBlock: {
+  servicesBlock: {
     marginTop: theme.spacing(2),
     marginBottom: theme.spacing(2),
   },
@@ -66,7 +66,7 @@ export const SystemStatus = (): ReactElement => {
       >
         Refresh
       </Button>
-      <div className={classes.resBlock}>
+      <div className={classes.servicesBlock}>
         {
           ORDER.map((status) => (
             <Fragment key={status}>
