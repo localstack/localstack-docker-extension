@@ -34,7 +34,8 @@ export const StartConfigs = (): ReactElement => {
     {
       field: 'Actions',
       headerName: 'Actions',
-      width: 100,
+      flex: 1,
+      minWidth: 100,
       renderCell: (params: GridRenderCellParams) =>
         // eslint-disable-next-line react/jsx-no-useless-fragment
         <>
@@ -52,17 +53,21 @@ export const StartConfigs = (): ReactElement => {
           </ConfirmableButton>
         </>,
     },
-    { field: 'name', headerName: 'Name', width: 300 },
+    {
+      field: 'name',
+      headerName: 'Name',
+      flex: 2,
+    },
     {
       field: 'id',
       headerName: 'ID',
-      width: 300,
+      flex: 2,
     },
     {
       field: 'Configurations',
       headerName: 'Configurations',
       sortable: false,
-      width: 900,
+      flex: 5,
       renderCell: (params: GridRenderCellParams) =>
         (params.row as RunConfig).vars.map(setting => `${setting.variable}=${setting.value}`).join(', '),
     },
