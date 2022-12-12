@@ -26,7 +26,7 @@ export const LongMenu = () => {
 
   return (
     <div>
-      <UpdateDialog open={openModal} onClose={() => setOpenModal(false)} />
+      {openModal && <UpdateDialog open={openModal} onClose={() => setOpenModal(false)} />}
       <IconButton
         aria-label="more"
         id="long-button"
