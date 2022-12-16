@@ -63,6 +63,8 @@ To contribute, check out our [issue tracker](https://github.com/localstack/local
   - Bug fixes:
     - Made configuration persistent
     - Logs are correctly displayed
+
+
 ## License
 
 This software is released under the Apache License, Version 2.0 (see [`LICENSE`](LICENSE)).
