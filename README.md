@@ -53,6 +53,16 @@ To contribute, check out our [issue tracker](https://github.com/localstack/local
     $ docker extension dev ui-source localstack/localstack-docker-desktop http://localhost:3000
     ```
 
+## Changelog
+- v0.2.0:
+  - You can now update your LocalStack images from the UI
+  - We have made some changes in the UI:
+    - Updates in the control section
+    - Moved to a table to display saved configurations
+    - Improved UI for inserting a new configuration
+  - Bug fixes:
+    - Made configuration persistent
+    - Logs are correctly displayed
 ## License
 
 This software is released under the Apache License, Version 2.0 (see [`LICENSE`](LICENSE)).
