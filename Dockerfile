@@ -49,7 +49,21 @@ LABEL org.opencontainers.image.title="LocalStack" \
   {\"title\":\"GitHub Repository\", \"url\":\"https://github.com/localstack/localstack-docker-extension\"}, \
   {\"title\":\"Feedback and Issues\", \"url\":\"https://github.com/localstack/localstack-docker-extension/issues\"}, \
   ]" \
-  com.docker.extension.changelog=""
+  com.docker.extension.changelog="We have introduced a new feature:<br/> \
+  <ul>  \
+  <li> You can now update your LocalStack images from the UI </li> \
+  </ul> \
+  We have made some changes in the UI: \
+  <ul>  \
+  <li> Updates in the control section </li> \
+  <li> Moved to a table to display saved configurations </li> \
+  <li> Improved UI for inserting a new configuration </li> \
+  </ul> \
+  Bug fixes:<br/> \
+  <ul>  \
+  <li> Made configuration persistent </li> \
+  <li> Logs are correctly displayed </li> \
+  </ul>"
 
 COPY --from=builder /backend/bin/service /
 COPY docker-compose.yaml .
