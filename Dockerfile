@@ -36,7 +36,8 @@ LABEL org.opencontainers.image.title="LocalStack" \
   com.docker.extension.detailed-description="The LocalStack Extension for Docker Desktop enables developers working with LocalStack to run their AWS applications or Lambdas entirely \
   on their local machine without connecting to a remote cloud provider! LocalStack empowers developers to use over 75+ AWS services locally while helping them simplify their testing \
   and development workflow. LocalStack supports a comprehensive list of APIs, which you can view on our <a href=\"https://docs.localstack.cloud/user-guide/aws/feature-coverage/\"> \
-  Feature coverage page</a>. <br>\
+  Feature coverage page</a>. <br><br> \
+  Make sure to have also installed awscli-local. You can install it via pip: <b>pip install awscli-local<b> \
   <h2>This extension supports the following main features:</h2>\
   <ul>\
   <li>Control LocalStack: Start, stop, and restart LocalStack from the Docker Desktop. You can also see the current status of your LocalStack instance and navigate to LocalStack Web Application. </li>\
@@ -45,9 +46,9 @@ LABEL org.opencontainers.image.title="LocalStack" \
   </ul>" \
   com.docker.extension.publisher-url="https://localstack.cloud/" \
   com.docker.extension.additional-urls="[ \
-        {\"title\":\"GitHub Repository\", \"url\":\"https://github.com/localstack/localstack-docker-extension\"}, \
-        {\"title\":\"Feedback and Issues\", \"url\":\"https://github.com/localstack/localstack-docker-extension/issues\"}, \
-    ]" \
+  {\"title\":\"GitHub Repository\", \"url\":\"https://github.com/localstack/localstack-docker-extension\"}, \
+  {\"title\":\"Feedback and Issues\", \"url\":\"https://github.com/localstack/localstack-docker-extension/issues\"}, \
+  ]" \
   com.docker.extension.changelog=""
 
 COPY --from=builder /backend/bin/service /
