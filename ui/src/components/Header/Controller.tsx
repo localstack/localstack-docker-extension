@@ -49,12 +49,6 @@ export const Controller = (): ReactElement => {
 
   return (
     <>
-      <Chip
-        style={{ borderRadius: 20 }}
-        label={isRunning ? 'Running' : 'Stopped'}
-        color={isRunning ? 'success' : 'error'}
-
-      />
       <ButtonGroup variant="outlined">
         {isRunning ?
           <Button
@@ -65,12 +59,6 @@ export const Controller = (): ReactElement => {
           </Button>
           :
           <>
-            <Button
-              variant="contained"
-              onClick={start}
-              endIcon={<PlayArrow />}>
-              Start
-            </Button>
             <FormControl sx={{ m: 1, minWidth: 120, border: 'none' }} size="small">
               <Select
                 className={classes.selectForm}
@@ -84,9 +72,21 @@ export const Controller = (): ReactElement => {
                 }
               </Select>
             </FormControl>
+            <Button
+              variant="contained"
+              onClick={start}
+              endIcon={<PlayArrow />}>
+              Start
+            </Button>
           </>
         }
       </ButtonGroup>
+      <Chip
+        style={{ borderRadius: 20 }}
+        label={isRunning ? 'Running' : 'Stopped'}
+        color={isRunning ? 'success' : 'error'}
+
+      />
       <LongMenu />
     </>
   );

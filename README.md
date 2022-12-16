@@ -4,7 +4,7 @@ The LocalStack Extension for Docker Desktop enables developers working with Loca
 
 LocalStack empowers developers to use over 75+ AWS services locally while helping them simplify their testing and development workflow. LocalStack supports a comprehensive list of APIs, which you can view on our [Feature coverage](https://docs.localstack.cloud/aws/feature-coverage/) page.
 
-![Snap of LocalStack running on Docker Desktop as a Docker Extension](.github/images/1-systenStatus.png)
+![Snap of LocalStack running on Docker Desktop as a Docker Extension](.github/images/1-systemStatus.png)
 
 ## Installation
 
