@@ -31,7 +31,7 @@ export const Controller = (): ReactElement => {
       },
       );
     }
-  },[isLoading]);
+  }, [isLoading]);
 
   const start = async () => {
     const images = await ddClient.docker.listImages() as [DockerImage];
@@ -49,39 +49,44 @@ export const Controller = (): ReactElement => {
 
   return (
     <>
+      <ButtonGroup variant="outlined">
+        {isRunning ?
+          <Button
+            variant="contained"
+            onClick={stop}
+            endIcon={<Stop />}>
+            Stop
+          </Button>
+          :
+          <>
+            <FormControl sx={{ m: 1, minWidth: 120, border: 'none' }} size="small">
+              <Select
+                className={classes.selectForm}
+                value={runningConfig}
+                onChange={({ target }) => setRunningConfig(target.value)}
+              >
+                {
+                  runConfig?.map(config => (
+                    <MenuItem key={config.id} value={config.name}>{config.name}</MenuItem>
+                  ))
+                }
+              </Select>
+            </FormControl>
+            <Button
+              variant="contained"
+              onClick={start}
+              endIcon={<PlayArrow />}>
+              Start
+            </Button>
+          </>
+        }
+      </ButtonGroup>
       <Chip
         style={{ borderRadius: 20 }}
         label={isRunning ? 'Running' : 'Stopped'}
         color={isRunning ? 'success' : 'error'}
 
       />
-      <ButtonGroup variant="outlined">
-        <Button
-          variant="contained"
-          onClick={start}
-          endIcon={<PlayArrow />}>
-          Start
-        </Button>
-        <FormControl sx={{ m: 1, minWidth: 120, border: 'none' }} size="small">
-          <Select
-            className={classes.selectForm}
-            value={runningConfig}
-            onChange={({ target }) => setRunningConfig(target.value)}
-          >
-            {
-              runConfig?.map(config => (
-                <MenuItem key={config.id} value={config.name}>{config.name}</MenuItem>
-              ))
-            }
-          </Select>
-        </FormControl>
-        <Button
-          variant="contained"
-          onClick={stop}
-          endIcon={<Stop />}>
-          Stop
-        </Button>
-      </ButtonGroup>
       <LongMenu />
     </>
   );

@@ -38,7 +38,7 @@ const useStyles = makeStyles((theme: Theme) => createStyles({
 
 export const UpsertConfig = ({ config, open, onClose }: Props): ReactElement => {
 
-  const { updateConfig, deleteConfig } = useRunConfig();
+  const { updateConfig } = useRunConfig();
   const [newVar, setNewVar] = useState<string>('');
   const [newValue, setNewValue] = useState<string>('');
   const [configName, setConfigName] = useState<string>(config?.name || '');
@@ -63,13 +63,6 @@ export const UpsertConfig = ({ config, open, onClose }: Props): ReactElement => 
     setNewConfig({
       name: newConfig.name, id: newConfig.id || uuid(), vars: newConfig.vars?.filter(item => item?.id !== id) || [],
     });
-  };
-
-  const handleDeleteButtonPress = () => {
-    if (newConfig.id) {
-      deleteConfig(newConfig.id);
-    }
-    onClose();
   };
 
   return (
@@ -130,13 +123,6 @@ export const UpsertConfig = ({ config, open, onClose }: Props): ReactElement => 
         </List>
       </DialogContent>
       <DialogActions>
-        <Button
-          variant='contained'
-          color='error'
-          onClick={handleDeleteButtonPress}
-        >
-          Delete
-        </Button>
         <Button
           variant='contained'
           onClick={handleSaveButtonPress}

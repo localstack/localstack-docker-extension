@@ -4,7 +4,7 @@ The LocalStack Extension for Docker Desktop enables developers working with Loca
 
 LocalStack empowers developers to use over 75+ AWS services locally while helping them simplify their testing and development workflow. LocalStack supports a comprehensive list of APIs, which you can view on our [Feature coverage](https://docs.localstack.cloud/aws/feature-coverage/) page.
 
-![Snap of LocalStack running on Docker Desktop as a Docker Extension](.github/images/localstack-docker-extension.png)
+![Snap of LocalStack running on Docker Desktop as a Docker Extension](.github/images/1-systemStatus.png)
 
 ## Installation
 
@@ -21,8 +21,6 @@ make install-extension
 ```
 
 It will build the Docker image and install the extension on your Docker Desktop application.
-
-**Note**: We recommend you to add add `/tmp` to your shared files on Docker Desktop under **Settings** > **Resources** > **File sharing**. It is a temporary solution since it's where the LocalStack volume directory mounts.
 
 ## Features
 
@@ -54,6 +52,18 @@ To contribute, check out our [issue tracker](https://github.com/localstack/local
     $ npm start 
     $ docker extension dev ui-source localstack/localstack-docker-desktop http://localhost:3000
     ```
+
+## Changelog
+- v0.2.0:
+  - You can now update your LocalStack images from the UI
+  - We have made some changes in the UI:
+    - Updates in the control section
+    - Moved to a table to display saved configurations
+    - Improved UI for inserting a new configuration
+  - Bug fixes:
+    - Made configuration persistent
+    - Logs are correctly displayed
+
 
 ## License
 

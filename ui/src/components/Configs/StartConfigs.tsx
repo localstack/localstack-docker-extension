@@ -1,4 +1,4 @@
-import { Add as AddIcon, Edit } from '@mui/icons-material';
+import { Add as AddIcon, Delete, Edit } from '@mui/icons-material';
 import { Box, Button, IconButton, Theme } from '@mui/material';
 import React, { ReactElement, useState } from 'react';
 import { createStyles, makeStyles } from '@mui/styles';
@@ -8,6 +8,7 @@ import { useRunConfig } from '../../services/hooks';
 import { UpsertConfig } from './UpsertConfig';
 import { Optional, RunConfig } from '../../types';
 import { DEFAULT_CONFIGURATION_ID } from '../../constants';
+import { ConfirmableButton } from './ConfirmableButton';
 
 const useStyles = makeStyles((theme: Theme) => createStyles({
   addButton: {
@@ -17,6 +18,7 @@ const useStyles = makeStyles((theme: Theme) => createStyles({
 
 export const StartConfigs = (): ReactElement => {
 
+  const { deleteConfig } = useRunConfig();
   const { runConfig } = useRunConfig();
   const [openModal, setOpenModal] = useState<boolean>(false);
   const [targetConfig, setTargetConfig] = useState<RunConfig | null>(null);
@@ -30,30 +32,42 @@ export const StartConfigs = (): ReactElement => {
 
   const columns: GridColDef<RunConfig>[] = [
     {
-      field: 'Edit',
-      headerName: 'Edit',
-      width: 50,
+      field: 'Actions',
+      headerName: 'Actions',
+      flex: 1,
+      minWidth: 100,
       renderCell: (params: GridRenderCellParams) =>
         // eslint-disable-next-line react/jsx-no-useless-fragment
         <>
-          {params.row.id !== DEFAULT_CONFIGURATION_ID &&
-            <IconButton onClick={() => openModalSetup(params.row)} >
-              <Edit />
-            </IconButton>
-          }
+          <IconButton disabled={params.row.id === DEFAULT_CONFIGURATION_ID} onClick={() => openModalSetup(params.row)} >
+            <Edit fontSize='small' />
+          </IconButton>
+          <ConfirmableButton
+            component="IconButton"
+            disabled={params.row.id === DEFAULT_CONFIGURATION_ID}
+            title={`Remove ${params.row.name} configuration?`}
+            onClick={() => deleteConfig(params.row.id)}
+            text="Selected configuration will be permanently deleted"
+          >
+            <Delete fontSize='small' />
+          </ConfirmableButton>
         </>,
     },
-    { field: 'name', headerName: 'Name', width: 300 },
+    {
+      field: 'name',
+      headerName: 'Name',
+      flex: 2,
+    },
     {
       field: 'id',
       headerName: 'ID',
-      width: 300,
+      flex: 2,
     },
     {
       field: 'Configurations',
       headerName: 'Configurations',
       sortable: false,
-      width: 900,
+      flex: 5,
       renderCell: (params: GridRenderCellParams) =>
         (params.row as RunConfig).vars.map(setting => `${setting.variable}=${setting.value}`).join(', '),
     },
