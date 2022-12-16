@@ -31,7 +31,7 @@ LABEL org.opencontainers.image.title="LocalStack" \
   com.docker.extension.screenshots="[ \
   {\"alt\": \"System status\", \"url\": \"https://raw.githubusercontent.com/localstack/localstack-docker-extension/main/.github/images/1-systemStatus.png\"}, \
   {\"alt\": \"Edit configurations\", \"url\": \"https://raw.githubusercontent.com/localstack/localstack-docker-extension/main/.github/images/2-configuration.png\"}, \
-  {\"alt\": \"Watch logs of the LocalStack running container \", \"url\": \"https://raw.githubusercontent.com/localstack/localstack-docker-extension/main/.github/images/3-logs.png\"}, \
+  {\"alt\": \"Watch logs of the LocalStack running container \", \"url\": \"https://raw.githubusercontent.com/localstack/localstack-docker-extension/main/.github/images/3-logs.png\"} \
   ]" \
   com.docker.extension.detailed-description="The LocalStack Extension for Docker Desktop enables developers working with LocalStack to run their AWS applications or Lambdas entirely \
   on their local machine without connecting to a remote cloud provider! LocalStack empowers developers to use over 75+ AWS services locally while helping them simplify their testing \
@@ -47,7 +47,7 @@ LABEL org.opencontainers.image.title="LocalStack" \
   com.docker.extension.publisher-url="https://localstack.cloud/" \
   com.docker.extension.additional-urls="[ \
   {\"title\":\"GitHub Repository\", \"url\":\"https://github.com/localstack/localstack-docker-extension\"}, \
-  {\"title\":\"Feedback and Issues\", \"url\":\"https://github.com/localstack/localstack-docker-extension/issues\"}, \
+  {\"title\":\"Feedback and Issues\", \"url\":\"https://github.com/localstack/localstack-docker-extension/issues\"}\
   ]" \
   com.docker.extension.changelog="We have introduced a new feature:<br/> \
   <ul>  \
