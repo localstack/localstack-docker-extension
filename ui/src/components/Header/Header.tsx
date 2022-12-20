@@ -11,12 +11,12 @@ export const Header = (): ReactElement => {
     <AppBar position="relative" elevation={0}>
       <Toolbar>
         <Box display="flex" flexGrow={1} alignItems="center" flexWrap="wrap">
-          <Typography variant="h3" sx={{ my: 2, mr: 3 }}>
+          <Typography variant="h3" color={(theme) => theme.palette.text.primary} sx={{ my: 2, mr: 3 }}>
             LocalStack
           </Typography>
           <Box>
             <Button
-              variant="text"
+              variant="outlined"
               onClick={() =>
                 ddClient.host.openExternal('https://app.localstack.cloud')
               }
