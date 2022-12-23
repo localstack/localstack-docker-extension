@@ -35,6 +35,8 @@ export const Controller = (): ReactElement => {
     const images = await ddClient.docker.listImages() as [DockerImage];
     if (!images.some(image => image.RepoTags?.at(0) === 'localstack/localstack:latest')) {
       ddClient.desktopUI.toast.warning('localstack/localstack:latest not found; now pulling..');
+    } else {
+      ddClient.desktopUI.toast.success('Starting LocalStack');
     }
     const addedArgs = runConfig.find(config => config.name === runningConfig)
       .vars.map(item => {
@@ -43,7 +45,13 @@ export const Controller = (): ReactElement => {
         }
         return ['-e', `${item.variable}=${item.value}`];
       }).flat();
-    ddClient.docker.cli.exec('run', addedArgs.concat(START_ARGS)).then(() => mutate());
+    ddClient.docker.cli.exec('run', addedArgs.concat(START_ARGS), {
+      stream: {
+        onClose() {
+          ddClient.desktopUI.toast.warning('Process finished');
+        },
+      },
+    });
   };
 
   const stop = async () => {
