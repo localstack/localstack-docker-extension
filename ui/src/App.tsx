@@ -1,4 +1,3 @@
-import { Divider } from '@mui/material';
 import React, { useState } from 'react';
 import { createStyles, makeStyles } from '@mui/styles';
 import { ControlledTabPanels, SystemStatus, Header, Logs, StartConfigs } from './components';
@@ -20,7 +19,6 @@ export function App() {
       <div className={classes.sticky}>
         <Header />
       </div>
-      <Divider />
       <ControlledTabPanels
         onTabChange={(_, to) => setSelected(to)}
         selected={selected}
