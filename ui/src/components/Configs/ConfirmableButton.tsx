@@ -23,6 +23,8 @@ export type BaseProps = {
   title: string;
   text?: string | JSX.Element;
   okText?: string;
+  okColor?: ButtonProps['color'];
+  cancelColor?: ButtonProps['color'];
   cancelText?: string;
   children?: ReactNode;
 }
@@ -39,6 +41,8 @@ export const ConfirmableButton = ({
   text,
   component = 'Button',
   okText,
+  okColor,
+  cancelColor,
   cancelText,
   children,
   ...rest
@@ -66,6 +70,7 @@ export const ConfirmableButton = ({
         )}
         <DialogActions>
           <Button
+            color= {cancelColor || 'primary'}
             variant="outlined"
             onClick={() => setShowConfirmDialog(false)}
           >
@@ -73,7 +78,7 @@ export const ConfirmableButton = ({
           </Button>
           <Button
             autoFocus
-            color="error"
+            color= {okColor || 'error'}
             variant="contained"
             onClick={(event: MouseEvent<HTMLButtonElement>) => {
               if (rest.onClick) rest.onClick(event as any); // eslint-disable-line
