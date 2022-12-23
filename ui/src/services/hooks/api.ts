@@ -62,7 +62,7 @@ export const useLocalStack = (): useLocalStackReturn => {
       .find(container =>
         container.Image === 'localstack/localstack' &&
         container.Command !== 'bin/localstack update docker-images',
-      ), { refreshInterval: 2000 },
+      ), { refreshInterval: 2000,  compare: (a, b) => a?.Id === b?.Id },
   );
 
   return {
