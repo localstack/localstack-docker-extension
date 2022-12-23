@@ -45,7 +45,8 @@ export const StartConfigs = (): ReactElement => {
           <ConfirmableButton
             component="IconButton"
             disabled={params.row.id === DEFAULT_CONFIGURATION_ID}
-            title={`Remove ${params.row.name} configuration?`}
+            title={`Delete ${params.row.name} configuration?`}
+            okText="Delete"
             onClick={() => deleteConfig(params.row.id)}
             text="Selected configuration will be permanently deleted"
           >

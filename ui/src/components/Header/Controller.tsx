@@ -1,5 +1,5 @@
 import React, { ReactElement, useEffect, useState } from 'react';
-import { Chip, Button, ButtonGroup, Select, MenuItem, FormControl } from '@mui/material';
+import { Chip, Button, ButtonGroup, Select, MenuItem, FormControl, Box } from '@mui/material';
 import { PlayArrow, Stop } from '@mui/icons-material';
 import { v4 as uuid } from 'uuid';
 import { createStyles, makeStyles } from '@mui/styles';
@@ -48,17 +48,17 @@ export const Controller = (): ReactElement => {
   };
 
   return (
-    <>
+    <Box display="flex" gap={1} alignItems="center">
       <ButtonGroup variant="outlined">
         {isRunning ?
           <Button
             variant="contained"
             onClick={stop}
-            endIcon={<Stop />}>
+            startIcon={<Stop />}>
             Stop
           </Button>
           :
-          <>
+          <Box display="flex" alignItems="center">
             <FormControl sx={{ m: 1, minWidth: 120, border: 'none' }} size="small">
               <Select
                 className={classes.selectForm}
@@ -72,22 +72,23 @@ export const Controller = (): ReactElement => {
                 }
               </Select>
             </FormControl>
-            <Button
-              variant="contained"
-              onClick={start}
-              endIcon={<PlayArrow />}>
-              Start
-            </Button>
-          </>
+            <Box>
+              <Button
+                variant="contained"
+                onClick={start}
+                startIcon={<PlayArrow />}>
+                Start
+              </Button>
+            </Box>
+          </Box>
         }
       </ButtonGroup>
       <Chip
-        style={{ borderRadius: 20 }}
         label={isRunning ? 'Running' : 'Stopped'}
-        color={isRunning ? 'success' : 'error'}
-
+        color={isRunning ? 'success' : 'warning'}
+sx={{ p: 2, borderRadius: 10 }}
       />
       <LongMenu />
-    </>
+    </Box>
   );
 };

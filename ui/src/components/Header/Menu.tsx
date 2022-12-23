@@ -35,7 +35,7 @@ export const LongMenu = () => {
         aria-haspopup="true"
         onClick={handleClick}
       >
-        <MoreVert htmlColor='#FFFFFF' />
+        <MoreVert />
       </IconButton>
       <Menu
         id="long-menu"

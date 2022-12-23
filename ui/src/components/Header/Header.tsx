@@ -10,20 +10,23 @@ export const Header = (): ReactElement => {
   return (
     <AppBar position="relative" elevation={0}>
       <Toolbar>
-        <Box display='flex' flexGrow={1}>
-          <Typography variant='h3' sx={{ my: 2, mr: 3 }}>
+        <Box display="flex" flexGrow={1} alignItems="center" flexWrap="wrap">
+          <Typography variant="h3" color={(theme) => theme.palette.text.primary} sx={{ my: 2, mr: 3 }}>
             LocalStack
           </Typography>
-          <Button
-            color="inherit"
-            onClick={() => ddClient.host.openExternal('https://app.localstack.cloud')}
-            endIcon={<OpenInNew />}
-          >
-            Web App
-          </Button>
+          <Box>
+            <Button
+              variant="outlined"
+              onClick={() =>
+                ddClient.host.openExternal('https://app.localstack.cloud')
+              }
+              endIcon={<OpenInNew />}
+            >
+              Web App
+            </Button>
+          </Box>
         </Box>
         <Controller />
-
       </Toolbar>
     </AppBar>
   );

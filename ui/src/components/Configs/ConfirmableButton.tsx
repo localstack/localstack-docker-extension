@@ -66,14 +66,14 @@ export const ConfirmableButton = ({
         )}
         <DialogActions>
           <Button
-            color="secondary"
+            variant="outlined"
             onClick={() => setShowConfirmDialog(false)}
           >
             {cancelText || 'Cancel'}
           </Button>
           <Button
             autoFocus
-            color="primary"
+            color="error"
             variant="contained"
             onClick={(event: MouseEvent<HTMLButtonElement>) => {
               if (rest.onClick) rest.onClick(event as any); // eslint-disable-line
