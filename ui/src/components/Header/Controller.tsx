@@ -1,7 +1,6 @@
 import React, { ReactElement, useEffect, useState } from 'react';
 import { Chip, Button, ButtonGroup, Select, MenuItem, FormControl, Box } from '@mui/material';
 import { PlayArrow, Stop } from '@mui/icons-material';
-import { v4 as uuid } from 'uuid';
 import { createStyles, makeStyles } from '@mui/styles';
 import { DEFAULT_CONFIGURATION_ID, START_ARGS, STOP_ARGS } from '../../constants';
 import { DockerImage } from '../../types';
@@ -26,8 +25,7 @@ export const Controller = (): ReactElement => {
   useEffect(() => {
     if (!isLoading && (!runConfig || !runConfig.find(item => item.name === 'Default'))) {
       createConfig({
-        name: 'Default', id: DEFAULT_CONFIGURATION_ID, vars:
-          [{ variable: 'EXTRA_CORS_ALLOWED_ORIGINS', value: 'http://localhost:3000', id: uuid() }],
+        name: 'Default', id: DEFAULT_CONFIGURATION_ID, vars: [],
       },
       );
     }
@@ -39,7 +37,12 @@ export const Controller = (): ReactElement => {
       ddClient.desktopUI.toast.warning('localstack/localstack:latest not found; now pulling..');
     }
     const addedArgs = runConfig.find(config => config.name === runningConfig)
-      .vars.map(item => ['-e', `${item.variable}=${item.value}`]).flat();
+      .vars.map(item => {
+        if (item.variable === 'EXTRA_CORS_ALLOWED_ORIGINS') {
+          return ['-e', `${item.variable}=${item.value},http://localhost:3000`];
+        }
+        return ['-e', `${item.variable}=${item.value}`];
+      }).flat();
     ddClient.docker.cli.exec('run', addedArgs.concat(START_ARGS)).then(() => mutate());
   };
 
