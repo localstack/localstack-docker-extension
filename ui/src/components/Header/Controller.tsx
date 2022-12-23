@@ -45,13 +45,7 @@ export const Controller = (): ReactElement => {
         }
         return ['-e', `${item.variable}=${item.value}`];
       }).flat();
-    ddClient.docker.cli.exec('run', addedArgs.concat(START_ARGS), {
-      stream: {
-        onClose() {
-          ddClient.desktopUI.toast.warning('Process finished');
-        },
-      },
-    });
+    ddClient.docker.cli.exec('run', addedArgs.concat(START_ARGS)).then(() => mutate());
   };
 
   const stop = async () => {
