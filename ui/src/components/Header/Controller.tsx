@@ -86,7 +86,7 @@ export const Controller = (): ReactElement => {
       <Chip
         label={isRunning ? 'Running' : 'Stopped'}
         color={isRunning ? 'success' : 'warning'}
-
+sx={{ p: 2, borderRadius: 10 }}
       />
       <LongMenu />
     </Box>
