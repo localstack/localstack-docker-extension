@@ -22,7 +22,7 @@ export const Header = (): ReactElement => {
               }
               endIcon={<OpenInNew />}
             >
-              Web App
+              LocalStack Web Application
             </Button>
           </Box>
         </Box>
