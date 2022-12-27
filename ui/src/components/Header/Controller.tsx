@@ -45,7 +45,8 @@ export const Controller = (): ReactElement => {
         }
         return ['-e', `${item.variable}=${item.value}`];
       }).flat();
-    ddClient.docker.cli.exec('run', addedArgs.concat(START_ARGS)).then(() => mutate());
+    const mountArg = `LOCALSTACK_VOLUME_DIR=${ddClient.host.platform === 'darwin' ? '/Volume' : '/home'}`;
+    ddClient.docker.cli.exec('run', ['-e', mountArg, ...START_ARGS, ...addedArgs]).then(() => mutate());
   };
 
   const stop = async () => {
