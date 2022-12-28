@@ -1,7 +1,7 @@
 import { OpenInNew } from '@mui/icons-material';
 import { Box, Typography, Button, AppBar, Toolbar } from '@mui/material';
 import React, { ReactElement } from 'react';
-import { useDDClient } from '../../services/hooks';
+import { useDDClient } from '../../../services/hooks';
 import { Controller } from './Controller';
 
 export const Header = (): ReactElement => {

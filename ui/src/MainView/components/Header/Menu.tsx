@@ -1,10 +1,10 @@
 import { MoreVert } from '@mui/icons-material';
 import { IconButton, Menu } from '@mui/material';
 import React, { useEffect, useState } from 'react';
-import { useDDClient } from '../../services/hooks';
-import { DockerImage } from '../../types';
+import { useDDClient } from '../../../services/hooks';
+import { DockerImage } from '../../../types';
 import { ConfirmableButton } from '../Configs/ConfirmableButton';
-import { UpdateDialog } from '../UpdateDialog';
+import { UpdateDialog } from '../Dialog/UpdateDialog';
 
 const ITEM_HEIGHT = 80;
 

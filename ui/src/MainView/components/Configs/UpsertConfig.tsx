@@ -15,8 +15,8 @@ import { Add, Remove, Settings } from '@mui/icons-material';
 import React, { ReactElement, useState } from 'react';
 import { v4 as uuid } from 'uuid';
 import { createStyles, makeStyles } from '@mui/styles';
-import { useRunConfig } from '../../services/hooks';
-import { RunConfig } from '../../types';
+import { useRunConfig } from '../../../services/hooks';
+import { RunConfig } from '../../../types';
 
 const DEFAULT_COLUMN_WIDTH = 2000;
 

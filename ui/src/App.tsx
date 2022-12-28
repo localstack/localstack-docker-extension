@@ -1,42 +1,31 @@
-import React, { useState } from 'react';
-import { createStyles, makeStyles } from '@mui/styles';
-import { ControlledTabPanels, SystemStatus, Header, Logs, StartConfigs } from './components';
+import React, { useEffect, useState } from 'react';
+import { useDDClient, useMountPoint } from './services/hooks';
+import { OnBoarding } from './MainView/components/Configs/OnBoarding';
+import { MainView } from './MainView/MainView';
 
-const useStyles = makeStyles(() => createStyles({
-  sticky: {
-    position: 'sticky',
-    top: 0,
-    zIndex: 2,
-  },
-}));
 
 export function App() {
-  const [selected, setSelected] = useState<number>(0);
-  const classes = useStyles();
+  const ddClient = useDDClient();
+  const { data, isLoading } = useMountPoint();
+  const [users, setUsers] = useState<string[]>([]);
+
+  useEffect(() => {
+    const checkHomeDir = async () => {
+      const path = ddClient.host.platform === 'darwin' ? 'Users' : 'home';
+      const res = await ddClient.docker.cli.exec('run',
+        ['--entrypoint=', '-v', `/${path}:/users`, 'localstack/localstack', 'ls', '/users']);
+
+      const foundUsers = res.stdout.split('\n');
+      foundUsers.pop(); // remove last '' element
+      if (foundUsers.join(',') !== users.join(',')) {
+        setUsers(foundUsers);
+      }
+    };
+
+    checkHomeDir();
+  }, [users]);
 
   return (
-    <>
-      <div className={classes.sticky}>
-        <Header />
-      </div>
-      <ControlledTabPanels
-        onTabChange={(_, to) => setSelected(to)}
-        selected={selected}
-        options={[
-          {
-            label: 'System Status',
-            panel: <SystemStatus />,
-          },
-          {
-            label: 'Configurations',
-            panel: <StartConfigs />,
-          },
-          {
-            label: 'Logs',
-            panel: <Logs />,
-          },
-        ]}
-      />
-    </>
+    (data && data !== '') ? <MainView /> : <OnBoarding users={users} loading={isLoading || users.length === 0} />
   );
 }

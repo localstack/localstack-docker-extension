@@ -2,9 +2,9 @@ import React, { ReactElement, useEffect, useState } from 'react';
 import { Chip, Button, ButtonGroup, Select, MenuItem, FormControl, Box } from '@mui/material';
 import { PlayArrow, Stop } from '@mui/icons-material';
 import { createStyles, makeStyles } from '@mui/styles';
-import { DEFAULT_CONFIGURATION_ID, START_ARGS, STOP_ARGS } from '../../constants';
-import { DockerImage } from '../../types';
-import { useDDClient, useRunConfig, useLocalStack } from '../../services/hooks';
+import { DEFAULT_CONFIGURATION_ID, START_ARGS, STOP_ARGS } from '../../../constants';
+import { DockerImage } from '../../../types';
+import { useDDClient, useRunConfig, useLocalStack, useMountPoint } from '../../../services/hooks';
 import { LongMenu } from './Menu';
 
 const useStyles = makeStyles(() => createStyles({
@@ -19,6 +19,7 @@ export const Controller = (): ReactElement => {
   const { data, mutate } = useLocalStack();
   const [runningConfig, setRunningConfig] = useState<string>('Default');
   const isRunning = data && data.State === 'running';
+  const { data: mountPoint } = useMountPoint();
 
   const classes = useStyles();
 
@@ -38,19 +39,31 @@ export const Controller = (): ReactElement => {
     } else {
       ddClient.desktopUI.toast.success('Starting LocalStack');
     }
+    const corsArg = '-e EXTRA_CORS_ALLOWED_ORIGINS=http://localhost:3000';
     const addedArgs = runConfig.find(config => config.name === runningConfig)
       .vars.map(item => {
         if (item.variable === 'EXTRA_CORS_ALLOWED_ORIGINS') {
+          corsArg.slice(0, 0);
           return ['-e', `${item.variable}=${item.value},http://localhost:3000`];
         }
         return ['-e', `${item.variable}=${item.value}`];
       }).flat();
-    const mountArg = `LOCALSTACK_VOLUME_DIR=${ddClient.host.platform === 'darwin' ? '/Volume' : '/home'}`;
-    ddClient.docker.cli.exec('run', ['-e', mountArg, ...START_ARGS, ...addedArgs]).then(() => mutate());
+    const mountArg =
+      `-e LOCALSTACK_VOLUME_DIR=/${ddClient.host.platform === 'darwin' ? 'Users' : 'home'}/${mountPoint}`;
+    console.log(`docker run ${[mountArg, corsArg, ...addedArgs, ...START_ARGS].join(' ')}`);
+    ddClient.docker.cli.exec('run', [mountArg, corsArg, ...addedArgs, ...START_ARGS]).then(() => mutate());
   };
 
   const stop = async () => {
     ddClient.docker.cli.exec('run', STOP_ARGS).then(() => mutate());
+  };
+
+  const checkHomeDir = async () => {
+    const res = await ddClient.docker.cli.exec('run',
+      ['--entrypoint=', '-v', '/home:/users', 'localstack/localstack', 'ls', '/users']);
+
+    const users = res.stdout.split('\n');
+    users.pop(); // remove last '' element
   };
 
   return (
@@ -85,10 +98,12 @@ export const Controller = (): ReactElement => {
                 startIcon={<PlayArrow />}>
                 Start
               </Button>
+
             </Box>
           </Box>
         }
       </ButtonGroup>
+      <Button onClick={() => checkHomeDir()} >Check Home dir</Button>
       <Chip
         label={isRunning ? 'Running' : 'Stopped'}
         color={isRunning ? 'success' : 'warning'}

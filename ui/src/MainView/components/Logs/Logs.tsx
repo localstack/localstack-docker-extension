@@ -1,6 +1,6 @@
 import { Box, Typography } from '@mui/material';
 import React, { ReactElement, useEffect, useState } from 'react';
-import { useDDClient, useLocalStack } from '../../services/hooks';
+import { useDDClient, useLocalStack } from '../../../services/hooks';
 
 export const Logs = (): ReactElement => {
   const [logs, setLogs] = useState<string[]>([]);
@@ -32,12 +32,14 @@ export const Logs = (): ReactElement => {
     }
   }, [data]);
 
+  console.log(data);
+
   return (
     <>
       {!data &&
         <Box my={10}>
           <Typography variant='h2' style={{ textAlign: 'center' }}>
-            No instance is running - Start LocalStack to see it&apos;s logs
+            No instance is running - Start LocalStack to see its logs
           </Typography>
         </Box>
       }
