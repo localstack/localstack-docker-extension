@@ -50,20 +50,11 @@ export const Controller = (): ReactElement => {
       }).flat();
     const mountArg =
       `-e LOCALSTACK_VOLUME_DIR=/${ddClient.host.platform === 'darwin' ? 'Users' : 'home'}/${mountPoint}`;
-    console.log(`docker run ${[mountArg, corsArg, ...addedArgs, ...START_ARGS].join(' ')}`);
     ddClient.docker.cli.exec('run', [mountArg, corsArg, ...addedArgs, ...START_ARGS]).then(() => mutate());
   };
 
   const stop = async () => {
     ddClient.docker.cli.exec('run', STOP_ARGS).then(() => mutate());
-  };
-
-  const checkHomeDir = async () => {
-    const res = await ddClient.docker.cli.exec('run',
-      ['--entrypoint=', '-v', '/home:/users', 'localstack/localstack', 'ls', '/users']);
-
-    const users = res.stdout.split('\n');
-    users.pop(); // remove last '' element
   };
 
   return (
@@ -103,7 +94,6 @@ export const Controller = (): ReactElement => {
           </Box>
         }
       </ButtonGroup>
-      <Button onClick={() => checkHomeDir()} >Check Home dir</Button>
       <Chip
         label={isRunning ? 'Running' : 'Stopped'}
         color={isRunning ? 'success' : 'warning'}

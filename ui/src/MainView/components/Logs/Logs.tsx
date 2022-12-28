@@ -32,8 +32,6 @@ export const Logs = (): ReactElement => {
     }
   }, [data]);
 
-  console.log(data);
-
   return (
     <>
       {!data &&
