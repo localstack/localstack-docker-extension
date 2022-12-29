@@ -4,10 +4,10 @@ import React, { ReactElement, useState } from 'react';
 import { createStyles, makeStyles } from '@mui/styles';
 import { DataGrid, GridColDef, GridRenderCellParams } from '@mui/x-data-grid';
 import { v4 as uuid } from 'uuid';
-import { useRunConfig } from '../../../services/hooks';
+import { useMountPoint, useRunConfig } from '../../services/hooks';
 import { UpsertConfig } from './UpsertConfig';
-import { Optional, RunConfig } from '../../../types';
-import { DEFAULT_CONFIGURATION_ID } from '../../../constants';
+import { Optional, RunConfig } from '../../types';
+import { DEFAULT_CONFIGURATION_ID } from '../../constants';
 import { ConfirmableButton } from './ConfirmableButton';
 
 const useStyles = makeStyles((theme: Theme) => createStyles({
@@ -18,8 +18,8 @@ const useStyles = makeStyles((theme: Theme) => createStyles({
 
 export const StartConfigs = (): ReactElement => {
 
-  const { deleteConfig } = useRunConfig();
-  const { runConfig } = useRunConfig();
+  const { runConfig, deleteConfig } = useRunConfig();
+  const { setMountPointUser } = useMountPoint();
   const [openModal, setOpenModal] = useState<boolean>(false);
   const [targetConfig, setTargetConfig] = useState<RunConfig | null>(null);
 
@@ -82,6 +82,9 @@ export const StartConfigs = (): ReactElement => {
         onClick={() => openModalSetup()}
       >
         New
+      </Button>
+      <Button onClick={() => setMountPointUser('')}>
+        Change mount point
       </Button>
       <Box sx={{ marginTop: 3 }}>
         <DataGrid

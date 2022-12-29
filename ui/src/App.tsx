@@ -1,31 +1,46 @@
-import React, { useEffect, useState } from 'react';
-import { useDDClient, useMountPoint } from './services/hooks';
-import { OnBoarding } from './MainView/components/Configs/OnBoarding';
-import { MainView } from './MainView/MainView';
+import React, { ReactElement, useState } from 'react';
+import { createStyles, makeStyles } from '@mui/styles';
+import { ControlledTabPanels, Header, Logs, OnBoarding, StartConfigs, SystemStatus } from './components';
+import { useMountPoint } from './services/hooks';
 
+const useStyles = makeStyles(() => createStyles({
+  sticky: {
+    position: 'sticky',
+    top: 0,
+    zIndex: 2,
+  },
+}));
 
-export function App() {
-  const ddClient = useDDClient();
-  const { data, isLoading } = useMountPoint();
-  const [users, setUsers] = useState<string[]>([]);
-
-  useEffect(() => {
-    const checkHomeDir = async () => {
-      const path = ddClient.host.platform === 'darwin' ? 'Users' : 'home';
-      const res = await ddClient.docker.cli.exec('run',
-        ['--entrypoint=', '-v', `/${path}:/users`, 'localstack/localstack', 'ls', '/users']);
-
-      const foundUsers = res.stdout.split('\n');
-      foundUsers.pop(); // remove last '' element
-      if (foundUsers.join(',') !== users.join(',')) {
-        setUsers(foundUsers);
-      }
-    };
-
-    checkHomeDir();
-  }, [users]);
+export const App = (): ReactElement => {
+  const [selected, setSelected] = useState<number>(0);
+  const { data: mountPoint } = useMountPoint();
+  const classes = useStyles();
+  const shouldDialogOpen = !mountPoint || mountPoint === '';
 
   return (
-    (data && data !== '') ? <MainView /> : <OnBoarding users={users} loading={isLoading || users.length === 0} />
+    <>
+      { shouldDialogOpen && <OnBoarding/> }
+      <div className={classes.sticky}>
+        <Header />
+      </div>
+      <ControlledTabPanels
+        onTabChange={(_, to) => setSelected(to)}
+        selected={selected}
+        options={[
+          {
+            label: 'System Status',
+            panel: <SystemStatus />,
+          },
+          {
+            label: 'Configurations',
+            panel: <StartConfigs />,
+          },
+          {
+            label: 'Logs',
+            panel: <Logs />,
+          },
+        ]}
+      />
+    </>
   );
-}
+};

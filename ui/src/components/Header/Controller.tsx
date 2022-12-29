@@ -2,9 +2,9 @@ import React, { ReactElement, useEffect, useState } from 'react';
 import { Chip, Button, ButtonGroup, Select, MenuItem, FormControl, Box } from '@mui/material';
 import { PlayArrow, Stop } from '@mui/icons-material';
 import { createStyles, makeStyles } from '@mui/styles';
-import { DEFAULT_CONFIGURATION_ID, START_ARGS, STOP_ARGS } from '../../../constants';
-import { DockerImage } from '../../../types';
-import { useDDClient, useRunConfig, useLocalStack, useMountPoint } from '../../../services/hooks';
+import { DEFAULT_CONFIGURATION_ID, START_ARGS, STOP_ARGS } from '../../constants';
+import { DockerImage } from '../../types';
+import { useDDClient, useRunConfig, useLocalStack, useMountPoint } from '../../services/hooks';
 import { LongMenu } from './Menu';
 
 const useStyles = makeStyles(() => createStyles({
