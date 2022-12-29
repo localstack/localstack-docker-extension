@@ -1,5 +1,5 @@
 import { Add as AddIcon, Delete, Edit } from '@mui/icons-material';
-import { Box, Button, IconButton, Theme } from '@mui/material';
+import { Box, Button, ButtonGroup, IconButton, Theme } from '@mui/material';
 import React, { ReactElement, useState } from 'react';
 import { createStyles, makeStyles } from '@mui/styles';
 import { DataGrid, GridColDef, GridRenderCellParams } from '@mui/x-data-grid';
@@ -75,17 +75,18 @@ export const StartConfigs = (): ReactElement => {
   ];
   return (
     <Box m={2}>
-      <Button
-        className={classes.addButton}
-        endIcon={<AddIcon />}
-        variant='contained'
-        onClick={() => openModalSetup()}
-      >
-        New
-      </Button>
-      <Button onClick={() => setMountPointUser('')}>
-        Change mount point
-      </Button>
+      <ButtonGroup className={classes.addButton}>
+        <Button
+          endIcon={<AddIcon />}
+          variant='contained'
+          onClick={() => openModalSetup()}
+        >
+          New
+        </Button>
+        <Button onClick={() => setMountPointUser('')}>
+          Change mount point
+        </Button>
+      </ButtonGroup>
       <Box sx={{ marginTop: 3 }}>
         <DataGrid
           autoHeight

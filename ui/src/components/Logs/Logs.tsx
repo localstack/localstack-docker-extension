@@ -1,4 +1,4 @@
-import { Box, Typography } from '@mui/material';
+import { Box, Card, Typography } from '@mui/material';
 import React, { ReactElement, useEffect, useState } from 'react';
 import { useDDClient, useLocalStack } from '../../services/hooks';
 
@@ -41,7 +41,7 @@ export const Logs = (): ReactElement => {
           </Typography>
         </Box>
       }
-      <Box m={2}>
+      <Card style={{ padding: 20, pointerEvents: 'none' }} >
         {logs.map(log => (
           <>
             <Typography>
@@ -50,7 +50,7 @@ export const Logs = (): ReactElement => {
             <br />
           </>
         ))}
-      </Box>
+      </Card>
     </>
   );
 };
