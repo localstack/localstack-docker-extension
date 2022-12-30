@@ -12,7 +12,6 @@ import {
   Typography,
 } from '@mui/material';
 import React, { ReactElement, useEffect, useState } from 'react';
-import { LOCALSTACK_IMAGES } from '../../constants';
 import { useDDClient, useMountPoint } from '../../services/hooks';
 import { DockerImage } from '../../types';
 
@@ -44,7 +43,7 @@ export const OnBoarding = (): ReactElement => {
   const checkLocalImage = async () => {
     setHasLocalImage({ checking: true, isPresent: hasLocalImage.isPresent });
     const images = await ddClient.docker.listImages() as [DockerImage];
-    const isPresent = images.filter(image => LOCALSTACK_IMAGES.includes(image.RepoTags?.at(0).split(':').at(0)));
+    const isPresent = images.filter(image => image.RepoTags?.at(0).split(':').at(0) === 'localstack/localstack');
     setHasLocalImage({ checking: false, isPresent: isPresent.length > 0 });
     return isPresent;
   };
