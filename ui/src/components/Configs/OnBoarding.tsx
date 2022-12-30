@@ -29,8 +29,13 @@ export const OnBoarding = (): ReactElement => {
     setUserState({ loading: true, selectedUser: userState.selectedUser, users: userState.users });
     const path = ddClient.host.platform === 'darwin' ? 'Users' : 'home';
     const res = await ddClient.docker.cli.exec('run',
-      ['--entrypoint=', '-v', `/${path}:/users`, 'localstack/localstack', 'ls', '/users']);
+      ['--entrypoint=', '-v', `/${path}:/users`, 'localstack/localstack', 'ls','/users']);
 
+    if(res.stderr !== '' || res.stdout === ''){
+      ddClient.desktopUI.toast.error(`Error while locating users: ${ res.stderr}\n using /tmp`);
+      setUserState({ loading: false, selectedUser: 'tmp', users: ['tmp'] });
+      setMountPointUser('tmp');
+    }
     const foundUsers = res.stdout.split('\n');
     foundUsers.pop(); // remove last '' element
     setUserState({ loading: false, selectedUser: foundUsers[0], users: foundUsers });
@@ -70,10 +75,14 @@ export const OnBoarding = (): ReactElement => {
     };
 
     execChecks();
-  }, [userState.users, triggerUseEffect]);
+  }, [triggerUseEffect]);
+
+  const onClose = () => {
+    setMountPointUser(userState.selectedUser);
+  };
 
   return (
-    <Dialog open>
+    <Dialog open onClose={onClose}>
       <DialogContent>
         <Box >
           <Typography variant='h3' gutterBottom>
@@ -104,7 +113,7 @@ export const OnBoarding = (): ReactElement => {
             {(hasLocalImage.checking || userState.loading || isPullingImage) && <Skeleton animation="wave" />
             }
             {
-              userState.users.length > 0 &&
+              userState.users.length > 0 && 
               <FormControl sx={{ minWidth: 120 }} size="small" variant='outlined'>
                 <Select
                   value={userState.selectedUser || userState.users[0]}
@@ -122,7 +131,7 @@ export const OnBoarding = (): ReactElement => {
       </DialogContent>
       <DialogActions>
         <Button
-          onClick={() => setMountPointUser(userState.selectedUser)}
+          onClick={onClose}
           disabled={!userState.selectedUser || userState.selectedUser === ''}
         >
           Confirm

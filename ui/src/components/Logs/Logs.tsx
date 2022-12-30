@@ -32,16 +32,16 @@ export const Logs = (): ReactElement => {
     }
   }, [data]);
 
+  
   return (
-    <>
-      {!data &&
-        <Box my={10}>
-          <Typography variant='h2' style={{ textAlign: 'center' }}>
-            No instance is running - Start LocalStack to see its logs
-          </Typography>
-        </Box>
-      }
-      <Card style={{ padding: 20, pointerEvents: 'none' }} >
+    !data ?
+      <Box my={10}>
+        <Typography variant='h2' style={{ textAlign: 'center' }}>
+          No instance is running - Start LocalStack to see its logs
+        </Typography>
+      </Box>
+      :
+      <Card style={{ padding: 20, pointerEvents: 'none' }}>
         {logs.map(log => (
           <>
             <Typography>
@@ -51,6 +51,6 @@ export const Logs = (): ReactElement => {
           </>
         ))}
       </Card>
-    </>
+      
   );
 };

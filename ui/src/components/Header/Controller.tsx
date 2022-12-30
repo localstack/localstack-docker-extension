@@ -49,9 +49,9 @@ export const Controller = (): ReactElement => {
         return ['-e', `${item.variable}=${item.value}`];
       }).flat();
 
-    const mountArg =
-      '-e LOCALSTACK_VOLUME_DIR=/' +
-      `${ddClient.host.platform === 'darwin' ? 'Users' : 'home'}/${mountPoint}/.localstack-volume`;
+
+    const standardDir = `${ddClient.host.platform === 'darwin' ? 'Users' : 'home'}/${mountPoint}`;
+    const mountArg = `-e LOCALSTACK_VOLUME_DIR=/${mountPoint === 'tmp' ? mountPoint : standardDir}/.localstack-volume}`;
       
     ddClient.docker.cli.exec('run', [mountArg, corsArg, ...addedArgs, ...START_ARGS]).then(() => mutate());
   };
