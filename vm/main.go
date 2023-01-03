@@ -251,7 +251,15 @@ func createFile(filename string) ([]byte, *os.File, error) {
 		logrus.New().Infof("Errors while creating file")
 		logrus.New().Infof(err.Error())
 	}
-	_, err = file.Write([]byte("[]"))
+	st, err := file.Stat()
+	if err != nil {
+		logrus.New().Infof(err.Error())
+	} else {
+		if st.Size() == 0 {
+			_, err = file.Write([]byte("[]"))
+		}
+	}
+
 	var toReturn []byte
 	return toReturn, file, err
 }
