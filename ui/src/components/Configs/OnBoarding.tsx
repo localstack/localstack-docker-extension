@@ -31,7 +31,7 @@ export const OnBoarding = (): ReactElement => {
       ['--entrypoint=', '-v', `/${path}:/users`, 'localstack/localstack', 'ls','/users']);
 
     if(res.stderr !== '' || res.stdout === ''){
-      ddClient.desktopUI.toast.error(`Error while locating users: ${ res.stderr}\n using /tmp`);
+      ddClient.desktopUI.toast.error(`Error while locating users: ${ res.stderr}\n using /tmp as mount point`);
       setUserState({ loading: false, selectedUser: 'tmp', users: ['tmp'] });
       setMountPointUser('tmp');
     }
