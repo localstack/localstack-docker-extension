@@ -202,7 +202,7 @@ func readData(fileName string) ([]byte, error) {
 	var content []byte
 
 	if errors.Is(err, os.ErrNotExist) {
-		content, file, err := createFile(CONFIG_FILE)
+		content, file, err := createFile(fileName)
 		file.Close()
 		return content, err
 	}
