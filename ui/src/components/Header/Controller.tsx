@@ -52,8 +52,21 @@ export const Controller = (): ReactElement => {
 
     const standardDir = `${ddClient.host.platform === 'darwin' ? 'Users' : 'home'}/${mountPoint}`;
     const mountArg = `-e LOCALSTACK_VOLUME_DIR=/${mountPoint === 'tmp' ? mountPoint : standardDir}/.localstack-volume`;
-      
-    ddClient.docker.cli.exec('run', [mountArg, corsArg, ...addedArgs, ...START_ARGS]).then(() => mutate());
+
+    ddClient.docker.cli.exec('run', [mountArg, corsArg, ...addedArgs, ...START_ARGS], {
+      stream: {
+        onOutput(data): void {
+          console.log(data.stderr ? data.stderr : data.stdout);
+        },
+        onError(error: unknown): void {
+          console.log(error);
+        },
+        onClose(exitCode) {
+          console.log(`onClose with exit code ${exitCode}`);
+        },
+        splitOutputLines: true,
+      },
+    });
   };
 
   const stop = async () => {
