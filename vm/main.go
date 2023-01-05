@@ -255,7 +255,7 @@ func createFile(filename string) ([]byte, *os.File, error) {
 	if err != nil {
 		logrus.New().Infof(err.Error())
 	} else {
-		if st.Size() == 0 {
+		if st.Size() == 0 && filename == CONFIG_FILE {
 			_, err = file.Write([]byte("[]"))
 		}
 	}
