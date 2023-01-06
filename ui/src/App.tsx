@@ -19,7 +19,7 @@ export const App = (): ReactElement => {
 
   return (
     <>
-      { shouldDialogOpen && <OnBoarding/> }
+      {shouldDialogOpen && <OnBoarding />}
       <div className={classes.sticky}>
         <Header />
       </div>

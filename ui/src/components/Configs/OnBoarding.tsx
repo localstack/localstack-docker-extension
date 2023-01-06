@@ -2,18 +2,19 @@
 import {
   Box,
   Button,
+  CircularProgress,
   Dialog,
   DialogActions,
   DialogContent,
   FormControl,
   MenuItem,
   Select,
-  Skeleton,
   Typography,
 } from '@mui/material';
 import React, { ReactElement, useEffect, useState } from 'react';
 import { useDDClient, useMountPoint } from '../../services/hooks';
 import { DockerImage } from '../../types';
+import { DownloadProgress } from '../DownloadProgress/DownloadProgress';
 
 
 export const OnBoarding = (): ReactElement => {
@@ -28,10 +29,10 @@ export const OnBoarding = (): ReactElement => {
     setUserState({ loading: true, selectedUser: userState.selectedUser, users: userState.users });
     const path = ddClient.host.platform === 'darwin' ? 'Users' : 'home';
     const res = await ddClient.docker.cli.exec('run',
-      ['--entrypoint=', '-v', `/${path}:/users`, 'localstack/localstack', 'ls','/users']);
+      ['--rm', '--entrypoint=', '-v', `/${path}:/users`, 'localstack/localstack', 'ls', '/users']);
 
-    if(res.stderr !== '' || res.stdout === ''){
-      ddClient.desktopUI.toast.error(`Error while locating users: ${ res.stderr}\n using /tmp as mount point`);
+    if (res.stderr !== '' || res.stdout === '') {
+      ddClient.desktopUI.toast.error(`Error while locating users: ${res.stderr}\n using /tmp as mount point`);
       setUserState({ loading: false, selectedUser: 'tmp', users: ['tmp'] });
       setMountPointUser('tmp');
     }
@@ -45,7 +46,7 @@ export const OnBoarding = (): ReactElement => {
     const images = await ddClient.docker.listImages() as [DockerImage];
     const isPresent = images.filter(image => image.RepoTags?.at(0).split(':').at(0) === 'localstack/localstack');
     setHasLocalImage({ checking: false, isPresent: isPresent.length > 0 });
-    return isPresent;
+    return isPresent.length > 0;
   };
 
   useEffect(() => {
@@ -56,20 +57,7 @@ export const OnBoarding = (): ReactElement => {
           checkHomeDir();
         } else {
           setIsPullingImage(true);
-          ddClient.docker.cli.exec('pull', ['localstack/localstack'], {
-            stream: {
-              onOutput(data): void {
-                console.log(data.stderr ? data.stderr : data.stdout);
-              },
-              onClose() {
-                setIsPullingImage(false);
-                setTriggerUseEffect(!triggerUseEffect);
-              },
-              splitOutputLines: true,
-            },
-          });
         }
-
       }
     };
 
@@ -84,16 +72,7 @@ export const OnBoarding = (): ReactElement => {
     <Dialog open onClose={onClose}>
       <DialogContent>
         <Box >
-          <Typography variant='h3' gutterBottom>
-            Select where LocalStack will be mounted
-          </Typography>
-          <Typography variant='subtitle2'>
-            {'For MacOS users it will be under /Users/<Selected>/.localstack-volume'}
-          </Typography>
-          <Typography variant='subtitle2' gutterBottom>
-            {'For Linux/Windows users it will be under /home/<Selected>/.localstack-volume'}
-          </Typography>
-          <Box marginTop={5}>
+          <Box marginBottom={5} display="flex" gap={5} alignItems="center">
             {hasLocalImage.checking &&
               <Typography>
                 Checking for local LocalStack image
@@ -105,14 +84,21 @@ export const OnBoarding = (): ReactElement => {
               </Typography>
             }
             {isPullingImage &&
-              <Typography>
-                Pulling localstack/localstack:latest... Please do not exit this view
-              </Typography>
-            }
-            {(hasLocalImage.checking || userState.loading || isPullingImage) && <Skeleton animation="wave" />
+              <>
+                <Typography>
+                  Pulling localstack/localstack:latest... Please do not exit this view
+                </Typography>
+                <DownloadProgress callback={() => {
+                  setIsPullingImage(false);
+                  setTriggerUseEffect(!triggerUseEffect);
+                }} />
+              </>
             }
             {
-              userState.users.length > 0 && 
+              (hasLocalImage.checking || userState.loading) && <CircularProgress />
+            }
+            {
+              userState.users.length > 0 &&
               <FormControl sx={{ minWidth: 120 }} size="small" variant='outlined'>
                 <Select
                   value={userState.selectedUser || userState.users[0]}
@@ -126,6 +112,16 @@ export const OnBoarding = (): ReactElement => {
               </FormControl>
             }
           </Box>
+          <Typography variant='h3' gutterBottom>
+            Select where LocalStack will be mounted
+          </Typography>
+          <Typography variant='subtitle2'>
+            {`For MacOS users it will be under /Users/${userState.selectedUser || 'loading...'}/.localstack-volume`}
+          </Typography>
+          <Typography variant='subtitle2' gutterBottom>
+            {`For Linux/Windows users it will be under \
+             /home/${userState.selectedUser || 'loading...'}/.localstack-volume`}
+          </Typography>
         </Box>
       </DialogContent>
       <DialogActions>
