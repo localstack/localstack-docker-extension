@@ -1,6 +1,6 @@
 import React, { ReactElement, useEffect, useState } from 'react';
 import { useDDClient } from '../../services/hooks';
-import { CircularProgressWithLabel } from './CircualProgressWithLabel';
+import { CircularProgressWithLabel } from './CircularProgressWithLabel';
 
 
 const statusValues = new Map([
