@@ -1,7 +1,7 @@
 // eslint-disable-next-line import/no-unresolved
 import { createDockerDesktopClient } from '@docker/extension-api-client';
 import React, { ReactNode, useMemo } from 'react';
-import { GlobalDDContext } from '../services/context/GlobalDDContext';
+import { GlobalDDContext } from './GlobalDDContext';
 
 interface Props {
   children: ReactNode;

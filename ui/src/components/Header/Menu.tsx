@@ -1,13 +1,18 @@
 import { MoreVert } from '@mui/icons-material';
-import { IconButton, Menu, MenuItem } from '@mui/material';
-import React, { useState } from 'react';
-import { UpdateDialog } from '../UpdateDialog';
+import { IconButton, Menu } from '@mui/material';
+import React, { useEffect, useState } from 'react';
+import { useDDClient } from '../../services/hooks';
+import { DockerImage } from '../../types';
+import { ConfirmableButton } from '../Configs/ConfirmableButton';
+import { UpdateDialog } from '../Dialog/UpdateDialog';
 
 const ITEM_HEIGHT = 80;
 
 export const LongMenu = () => {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [openModal, setOpenModal] = useState<boolean>(false);
+  const [images, setImages] = useState<string>('Loading...');
+  const ddClient = useDDClient();
 
   const open = Boolean(anchorEl);
 
@@ -24,21 +29,28 @@ export const LongMenu = () => {
     setOpenModal(true);
   };
 
+  useEffect(() => {
+    setImages('a');
+    (Promise.resolve(ddClient.docker.listImages()) as Promise<[DockerImage]>).then(images =>
+      setImages(images.filter(image => image.RepoTags?.at(0).startsWith('localstack/'))
+        .map(image => image.RepoTags?.at(0).split('localstack/').at(-1)).join(', ')));
+  }, []);
+
   return (
     <div>
       {openModal && <UpdateDialog open={openModal} onClose={() => setOpenModal(false)} />}
       <IconButton
-        aria-label="more"
-        id="long-button"
+        aria-label='more'
+        id='long-button'
         aria-controls={open ? 'long-menu' : undefined}
         aria-expanded={open ? 'true' : undefined}
-        aria-haspopup="true"
+        aria-haspopup='true'
         onClick={handleClick}
       >
         <MoreVert />
       </IconButton>
       <Menu
-        id="long-menu"
+        id='long-menu'
         MenuListProps={{
           'aria-labelledby': 'long-button',
         }}
@@ -52,9 +64,17 @@ export const LongMenu = () => {
           },
         }}
       >
-        <MenuItem key="Update" onClick={handleUpdateClick}>
-          Update
-        </MenuItem>
+        <ConfirmableButton
+          component='MenuItem'
+          title='Update LocalStack Images?'
+          okText='Update'
+          okColor='primary'
+          cancelColor='error'
+          onClick={() => handleUpdateClick()}
+          text={`Following images will be updated: ${images}`}
+        >
+          Update Images
+        </ConfirmableButton>
 
       </Menu>
     </div>

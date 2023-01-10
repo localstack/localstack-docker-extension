@@ -55,7 +55,10 @@ export const UpsertConfig = ({ config, open, onClose }: Props): ReactElement => 
   };
 
   const handleSaveButtonPress = () => {
-    updateConfig({ name: configName, id: newConfig.id, vars: newConfig.vars });
+    updateConfig({
+      name: configName, id: newConfig.id, vars:
+        newVar && newValue ? [...newConfig.vars, { variable: newVar, value: newValue, id: uuid() }] : newConfig.vars,
+    });
     onClose();
   };
 
@@ -123,6 +126,13 @@ export const UpsertConfig = ({ config, open, onClose }: Props): ReactElement => 
         </List>
       </DialogContent>
       <DialogActions>
+        <Button
+          variant='outlined'
+          color='error'
+          onClick={onClose}
+        >
+          Cancel
+        </Button>
         <Button
           variant='contained'
           onClick={handleSaveButtonPress}

@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
+import React, { ReactElement, useState } from 'react';
 import { createStyles, makeStyles } from '@mui/styles';
-import { ControlledTabPanels, SystemStatus, Header, Logs, StartConfigs } from './components';
+import { ControlledTabPanels, Header, Logs, OnBoarding, StartConfigs, SystemStatus } from './components';
+import { useMountPoint } from './services/hooks';
 
 const useStyles = makeStyles(() => createStyles({
   sticky: {
@@ -10,12 +11,15 @@ const useStyles = makeStyles(() => createStyles({
   },
 }));
 
-export function App() {
+export const App = (): ReactElement => {
   const [selected, setSelected] = useState<number>(0);
+  const { data: mountPoint } = useMountPoint();
   const classes = useStyles();
+  const shouldDialogOpen = !mountPoint || mountPoint === '';
 
   return (
     <>
+      {shouldDialogOpen && <OnBoarding />}
       <div className={classes.sticky}>
         <Header />
       </div>
@@ -39,4 +43,4 @@ export function App() {
       />
     </>
   );
-}
+};

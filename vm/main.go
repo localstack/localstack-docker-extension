@@ -16,7 +16,8 @@ import (
 
 var ERRORS = [...]string{"Bad format", "Errors while saving data", "Failed retrieving data", "Configuration already present"}
 
-const FILE_NAME = "data.json"
+const CONFIG_FILE = "data.json"
+const MOUNT_POINT_FILE = "mountPoint.txt"
 
 func main() {
 	var socketPath string
@@ -41,6 +42,8 @@ func main() {
 	router.POST("/configs", createSetting)
 	router.PUT("/configs", updateSetting)
 	router.DELETE("/configs/:id", deleteSetting)
+	router.GET("/mount", getMount)
+	router.POST("/mount", setMount)
 
 	log.Fatal(router.Start(startURL))
 }
@@ -67,8 +70,27 @@ type Payload struct {
 	Data string `json:"data"`
 }
 
+func getMount(ctx echo.Context) error {
+	content, err := readData(MOUNT_POINT_FILE)
+	if err != nil {
+		return ctx.JSON(http.StatusConflict, HTTPMessageBody{Message: ERRORS[2]})
+	}
+	return ctx.JSON(http.StatusOK, HTTPMessageBody{Message: string(content[:])})
+}
+
+func setMount(ctx echo.Context) error {
+	var payload Payload
+
+	ctx.Bind(&payload)
+	err := os.WriteFile(MOUNT_POINT_FILE, []byte(payload.Data), 0644)
+	if err != nil {
+		return ctx.JSON(http.StatusConflict, HTTPMessageBody{Message: ERRORS[2]})
+	}
+	return ctx.NoContent(http.StatusOK)
+}
+
 func getSettings(ctx echo.Context) error {
-	content, err := readData()
+	content, err := readData(CONFIG_FILE)
 	if err != nil {
 		return ctx.JSON(http.StatusConflict, HTTPMessageBody{Message: ERRORS[2]})
 	}
@@ -175,29 +197,29 @@ func createSetting(ctx echo.Context) error {
 
 }
 
-func readData() ([]byte, error) {
-	_, err := os.Stat(FILE_NAME)
+func readData(fileName string) ([]byte, error) {
+	_, err := os.Stat(fileName)
 	var content []byte
 
 	if errors.Is(err, os.ErrNotExist) {
-		content, file, err := createFile()
+		content, file, err := createFile(fileName)
 		file.Close()
 		return content, err
 	}
 
-	content, err = os.ReadFile(FILE_NAME)
+	content, err = os.ReadFile(fileName)
 	return content, err
 }
 
 func readDataKeepOpen() ([]byte, *os.File, error) {
-	_, err := os.Stat(FILE_NAME)
+	_, err := os.Stat(CONFIG_FILE)
 	var content []byte
 
 	if errors.Is(err, os.ErrNotExist) {
-		return createFile()
+		return createFile(CONFIG_FILE)
 	}
 
-	file, err := os.OpenFile(FILE_NAME, os.O_RDWR, 0755)
+	file, err := os.OpenFile(CONFIG_FILE, os.O_RDWR, 0755)
 	var buff = make([]byte, 1024)
 	if err == nil {
 		for {
@@ -220,16 +242,24 @@ func writeData(data []Configuration, file *os.File) error {
 	return err
 }
 
-func createFile() ([]byte, *os.File, error) {
+func createFile(filename string) ([]byte, *os.File, error) {
 
 	logrus.New().Infof("File not exists, creating")
-	file, err := os.OpenFile(FILE_NAME, os.O_CREATE|os.O_RDWR, 0755)
+	file, err := os.OpenFile(filename, os.O_CREATE|os.O_RDWR, 0755)
 
 	if err != nil {
 		logrus.New().Infof("Errors while creating file")
 		logrus.New().Infof(err.Error())
 	}
-	_, err = file.Write([]byte("[]"))
+	st, err := file.Stat()
+	if err != nil {
+		logrus.New().Infof(err.Error())
+	} else {
+		if st.Size() == 0 && filename == CONFIG_FILE {
+			_, err = file.Write([]byte("[]"))
+		}
+	}
+
 	var toReturn []byte
 	return toReturn, file, err
 }

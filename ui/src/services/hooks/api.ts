@@ -1,5 +1,5 @@
 import useSWR from 'swr';
-import { STORAGE_KEY_ENVVARS, STORAGE_KEY_LOCALSTACK } from '../../constants';
+import { STORAGE_KEY_ENVVARS, STORAGE_KEY_LOCALSTACK, STORAGE_KEY_MOUNT } from '../../constants';
 import { DockerContainer, RunConfig } from '../../types';
 import { useDDClient } from './utils';
 
@@ -47,6 +47,33 @@ export const useRunConfig = (): useRunConfigReturn => {
   };
 };
 
+interface useMountPointReturn {
+  data: string | null,
+  isLoading: boolean,
+  setMountPointUser: (data: string) => unknown;
+}
+
+export const useMountPoint = (): useMountPointReturn => {
+  const ddClient = useDDClient();
+  const cacheKey = STORAGE_KEY_MOUNT;
+
+  const { data, mutate, isValidating, error } = useSWR(
+    cacheKey,
+    async () => (ddClient.extension.vm.service.get('/mount') as Promise<HTTPMessageBody>),
+  );
+
+  const setMountPointUser = async (user: string) => {
+    await ddClient.extension.vm.service.post('/mount',{ Data: user });
+    mutate();
+  };
+
+  return {
+    data: (!error && data ) ? data.Message : null,
+    isLoading: isValidating || (!error && !data),
+    setMountPointUser,
+  };
+};
+
 interface useLocalStackReturn {
   data: DockerContainer | null,
   mutate: () => void;
@@ -62,7 +89,7 @@ export const useLocalStack = (): useLocalStackReturn => {
       .find(container =>
         container.Image === 'localstack/localstack' &&
         container.Command !== 'bin/localstack update docker-images',
-      ),
+      ), { refreshInterval: 2000,  compare: (a, b) => a?.Id === b?.Id },
   );
 
   return {
