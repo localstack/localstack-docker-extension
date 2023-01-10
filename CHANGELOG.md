@@ -2,6 +2,20 @@
 
 All notable changes to this project will be documented in this file. The format is based on [Keep a Changelog](http://keepachangelog.com/) and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [0.3.0] - 2023-01-10
+
+### Added
+
+- Interval of 2 seconds after which extension will refresh to check if an instance is running.
+- Added section to choose the LocalStack volume directory.
+- Added a button to change the LocalStack volume directory.
+- Added Card around logs to enhance their view.
+
+### Changed
+
+- Enhanced the **Update Images** button.
+- Removed the `EXTRA_CORS_ALLOWED_ORIGIN` from default configuration.
+
 ## [0.2.0] - 2022-12-16
 
 ### Added
