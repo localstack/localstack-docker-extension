@@ -87,11 +87,12 @@ export const useLocalStack = (): useLocalStackReturn => {
     cacheKey,
     async () => (await ddClient.docker.listContainers() as [DockerContainer])
       .find(container =>
-        container.Image === 'localstack/localstack' &&
+        (container.Image === 'localstack/localstack' ||
+          container.Image === 'localstack/localstack-pro') &&
         container.Command !== 'bin/localstack update docker-images',
       ), {
       refreshInterval: 2000, compare:
-          (a, b) => a?.Id === b?.Id && a?.Status.split('(').at(1) === b?.Status.split('(').at(1), // detect change from healthy to unhealthy state
+      (a, b) => a?.Id === b?.Id && a?.Status.split('(').at(1) === b?.Status.split('(').at(1), // detect change from healthy to unhealthy state
     },
   );
 

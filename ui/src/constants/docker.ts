@@ -1,6 +1,8 @@
 const COMMON_ARGS = [
   '--rm',
   '-i',
+  '-e',
+  'DNS_ADDRESS=0',
   '--entrypoint=',
   '-v',
   '/var/run/docker.sock:/var/run/docker.sock',
