@@ -44,7 +44,7 @@ export const OnBoarding = (): ReactElement => {
   const checkLocalImage = async () => {
     setHasLocalImage({ checking: true, isPresent: hasLocalImage.isPresent });
     const images = await ddClient.docker.listImages() as [DockerImage];
-    const isPresent = images.filter(image => image.RepoTags?.at(0).split(':').at(0) === 'localstack/localstack');
+    const isPresent = images.filter(image => image.RepoTags?.at(0) === 'localstack/localstack:latest');
     setHasLocalImage({ checking: false, isPresent: isPresent.length > 0 });
     return isPresent.length > 0;
   };
