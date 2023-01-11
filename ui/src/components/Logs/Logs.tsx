@@ -12,7 +12,7 @@ export const Logs = (): ReactElement => {
       const listener = ddClient.docker.cli.exec('logs', ['-f', data.Id], {
         stream: {
           onOutput(data): void {
-            setLogs((current) => [...current, data.stdout]);
+            setLogs((current) => [...current, data.stdout ? data.stdout : data.stderr]);
           },
           onError(error: unknown): void {
             ddClient.desktopUI.toast.error('An error occurred');

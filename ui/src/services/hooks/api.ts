@@ -63,12 +63,12 @@ export const useMountPoint = (): useMountPointReturn => {
   );
 
   const setMountPointUser = async (user: string) => {
-    await ddClient.extension.vm.service.post('/mount',{ Data: user });
+    await ddClient.extension.vm.service.post('/mount', { Data: user });
     mutate();
   };
 
   return {
-    data: (!error && data ) ? data.Message : null,
+    data: (!error && data) ? data.Message : null,
     isLoading: isValidating || (!error && !data),
     setMountPointUser,
   };
@@ -89,7 +89,10 @@ export const useLocalStack = (): useLocalStackReturn => {
       .find(container =>
         container.Image === 'localstack/localstack' &&
         container.Command !== 'bin/localstack update docker-images',
-      ), { refreshInterval: 2000,  compare: (a, b) => a?.Id === b?.Id },
+      ), {
+      refreshInterval: 2000, compare:
+          (a, b) => a?.Id === b?.Id && a?.Status.split('(').at(1) === b?.Status.split('(').at(1), // detect change from healthy to unhealthy state
+    },
   );
 
   return {

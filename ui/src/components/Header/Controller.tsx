@@ -1,5 +1,5 @@
 import React, { ReactElement, useEffect, useState } from 'react';
-import { Chip, Button, ButtonGroup, Select, MenuItem, FormControl, Box } from '@mui/material';
+import { Chip, Button, ButtonGroup, Select, MenuItem, FormControl, Box, Badge, Tooltip } from '@mui/material';
 import { PlayArrow, Stop } from '@mui/icons-material';
 import { createStyles, makeStyles } from '@mui/styles';
 import { DEFAULT_CONFIGURATION_ID, START_ARGS, STOP_ARGS } from '../../constants';
@@ -22,6 +22,9 @@ export const Controller = (): ReactElement => {
   const { data: mountPoint } = useMountPoint();
 
   const classes = useStyles();
+
+  const isUnhealthy = data && data.Status.includes('unhealthy');
+  const tooltipLabel = isUnhealthy ? 'Unhealthy' : 'Healthy';
 
   useEffect(() => {
     if (!isLoading && (!runConfig || !runConfig.find(item => item.name === 'Default'))) {
@@ -52,7 +55,7 @@ export const Controller = (): ReactElement => {
 
     const standardDir = `${ddClient.host.platform === 'darwin' ? 'Users' : 'home'}/${mountPoint}`;
     const mountArg = `-e LOCALSTACK_VOLUME_DIR=/${mountPoint === 'tmp' ? mountPoint : standardDir}/.localstack-volume`;
-      
+
     ddClient.docker.cli.exec('run', [mountArg, corsArg, ...addedArgs, ...START_ARGS]).then(() => mutate());
   };
 
@@ -97,11 +100,15 @@ export const Controller = (): ReactElement => {
           </Box>
         }
       </ButtonGroup>
-      <Chip
-        label={isRunning ? 'Running' : 'Stopped'}
-        color={isRunning ? 'success' : 'warning'}
-        sx={{ p: 2, borderRadius: 10 }}
-      />
+      <Tooltip title={data ? tooltipLabel : ''} >
+        <Badge color="error" overlap="circular" badgeContent=" " variant="dot" invisible={!isUnhealthy}>
+          <Chip
+            label={isRunning ? 'Running' : 'Stopped'}
+            color={isRunning ? 'success' : 'warning'}
+            sx={{ p: 2, borderRadius: 4 }}
+          />
+        </Badge>
+      </Tooltip>
       <LongMenu />
     </Box>
   );
