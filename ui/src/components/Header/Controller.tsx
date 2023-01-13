@@ -1,10 +1,9 @@
 import React, { ReactElement, useEffect, useState } from 'react';
 import { Chip, Button, ButtonGroup, Select, MenuItem, FormControl, Box } from '@mui/material';
 import { PlayArrow, Stop } from '@mui/icons-material';
-import { CORS_ALLOW_DEFAULT, DEFAULT_CONFIGURATION_ID, LATEST_IMAGE, START_ARGS, STOP_ARGS } from '../../constants';
-import { useDDClient, useRunConfig, useLocalStack, useMountPoint } from '../../services/hooks';
+import { checkLocalImage, useDDClient, useLocalStack, useMountPoint, useRunConfig } from '../../services';
+import { DEFAULT_CONFIGURATION_ID, LATEST_IMAGE, CORS_ALLOW_DEFAULT, START_ARGS, STOP_ARGS } from '../../constants';
 import { LongMenu } from './Menu';
-import { checkLocalImage } from '../../services/generic/utils';
 
 export const Controller = (): ReactElement => {
   const ddClient = useDDClient();
@@ -23,17 +22,13 @@ export const Controller = (): ReactElement => {
     }
   }, [isLoading]);
 
-  const checkForLocalImage = async () => {
+  const start = async () => {
     const hasImage = await checkLocalImage();
     if (!hasImage) {
       ddClient.desktopUI.toast.warning(`${LATEST_IMAGE} not found; now pulling..`);
     } else {
       ddClient.desktopUI.toast.success('Starting LocalStack');
     }
-  };
-
-  const start = async () => {
-    await checkForLocalImage();
 
     const standardDir = `${ddClient.host.platform === 'darwin' ? 'Users' : 'home'}/${mountPoint}`;
     const mountArg = `-e LOCALSTACK_VOLUME_DIR=/${mountPoint === 'tmp' ? mountPoint : standardDir}/.localstack-volume`;

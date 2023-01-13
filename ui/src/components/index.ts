@@ -1,4 +1,3 @@
-export * from './Views/Configs';
+export * from './Views';
 export * from './TabPanel/ControlledTabPanel';
 export * from './Header';
-export * from './Views';

@@ -11,8 +11,7 @@ import {
   Typography,
 } from '@mui/material';
 import React, { ReactElement, useEffect, useState } from 'react';
-import { checkLocalImage } from '../../../services/generic/utils';
-import { useDDClient, useMountPoint } from '../../../services/hooks';
+import { checkLocalImage, useDDClient, useMountPoint } from '../../../services';
 import { DownloadProgress } from '../../Feedback';
 
 export const MountPointForm = (): ReactElement => {

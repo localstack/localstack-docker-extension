@@ -4,11 +4,11 @@ import React, { ReactElement, useState } from 'react';
 import { createStyles, makeStyles } from '@mui/styles';
 import { DataGrid, GridColDef, GridRenderCellParams } from '@mui/x-data-grid';
 import { v4 as uuid } from 'uuid';
-import { useMountPoint, useRunConfig } from '../../../services/hooks';
-import { UpsertConfig } from './UpsertConfig';
-import { Optional, RunConfig } from '../../../types';
+import { useMountPoint, useRunConfig } from '../../../services';
 import { DEFAULT_CONFIGURATION_ID } from '../../../constants';
-import { ConfirmableButton } from '../../Feedback/ConfirmableButton';
+import { RunConfig, Optional } from '../../../types';
+import { ConfirmableButton } from '../../Feedback';
+import { UpsertConfig } from './UpsertConfig';
 
 const useStyles = makeStyles((theme: Theme) => createStyles({
   addButton: {

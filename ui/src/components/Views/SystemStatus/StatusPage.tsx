@@ -6,11 +6,9 @@ import {
 } from '@mui/material';
 import { createStyles, makeStyles } from '@mui/styles';
 import { Refresh } from '@mui/icons-material';
-import { useLocalStackHealth } from '../../../services/hooks/health';
-import { HealthState } from '../../../types';
-import { Capitalize } from '../../../services/generic/utils';
 import { SystemStatus as SystemStatusIcon } from './SystemStatus';
-import { useLocalStack } from '../../../services/hooks';
+import { useLocalStackHealth, useLocalStack, Capitalize } from '../../../services';
+import { HealthState } from '../../../types';
 
 const ORDER = [
   HealthState.RUNNING,
