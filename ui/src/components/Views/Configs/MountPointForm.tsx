@@ -11,7 +11,9 @@ import {
   Typography,
 } from '@mui/material';
 import React, { ReactElement, useEffect, useState } from 'react';
-import { checkLocalImage, useDDClient, useMountPoint } from '../../../services';
+import { LATEST_IMAGE } from '../../../constants';
+import { useDDClient, useMountPoint } from '../../../services';
+import { DockerImage } from '../../../types';
 import { DownloadProgress } from '../../Feedback';
 
 export const MountPointForm = (): ReactElement => {
@@ -43,7 +45,10 @@ export const MountPointForm = (): ReactElement => {
       if (userState.users.length === 0) {
 
         setHasLocalImage({ checking: true, isPresent: hasLocalImage.isPresent });
-        const isPresent = await checkLocalImage();
+
+        const images = await ddClient.docker.listImages() as [DockerImage];
+        const isPresent = images.some(image => image.RepoTags?.at(0) === LATEST_IMAGE);
+
         setHasLocalImage({ checking: false, isPresent });
 
         if (isPresent) {

@@ -1,9 +1,10 @@
 import React, { ReactElement, useEffect, useState } from 'react';
 import { Chip, Button, ButtonGroup, Select, MenuItem, FormControl, Box } from '@mui/material';
 import { PlayArrow, Stop } from '@mui/icons-material';
-import { checkLocalImage, useDDClient, useLocalStack, useMountPoint, useRunConfig } from '../../services';
+import { useDDClient, useLocalStack, useMountPoint, useRunConfig } from '../../services';
 import { DEFAULT_CONFIGURATION_ID, LATEST_IMAGE, CORS_ALLOW_DEFAULT, START_ARGS, STOP_ARGS } from '../../constants';
 import { LongMenu } from './Menu';
+import { DockerImage } from '../../types';
 
 export const Controller = (): ReactElement => {
   const ddClient = useDDClient();
@@ -23,7 +24,9 @@ export const Controller = (): ReactElement => {
   }, [isLoading]);
 
   const start = async () => {
-    const hasImage = await checkLocalImage();
+    const images = await ddClient.docker.listImages() as [DockerImage];
+    const hasImage = images.some(image => image.RepoTags?.at(0) === LATEST_IMAGE);
+
     if (!hasImage) {
       ddClient.desktopUI.toast.warning(`${LATEST_IMAGE} not found; now pulling..`);
     } else {
@@ -32,7 +35,7 @@ export const Controller = (): ReactElement => {
 
     const standardDir = `${ddClient.host.platform === 'darwin' ? 'Users' : 'home'}/${mountPoint}`;
     const mountArg = `-e LOCALSTACK_VOLUME_DIR=/${mountPoint === 'tmp' ? mountPoint : standardDir}/.localstack-volume`;
-    const corsArg = ['-e',`EXTRA_CORS_ALLOWED_ORIGINS=${CORS_ALLOW_DEFAULT}`];
+    const corsArg = ['-e', `EXTRA_CORS_ALLOWED_ORIGINS=${CORS_ALLOW_DEFAULT}`];
 
     const addedArgs = runConfig.find(config => config.name === runningConfig)
       .vars.map(item => {
