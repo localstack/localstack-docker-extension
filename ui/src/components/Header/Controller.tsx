@@ -1,17 +1,10 @@
 import React, { ReactElement, useEffect, useState } from 'react';
 import { Chip, Button, ButtonGroup, Select, MenuItem, FormControl, Box } from '@mui/material';
 import { PlayArrow, Stop } from '@mui/icons-material';
-import { createStyles, makeStyles } from '@mui/styles';
-import { DEFAULT_CONFIGURATION_ID, START_ARGS, STOP_ARGS } from '../../constants';
-import { DockerImage } from '../../types';
+import { CORS_ALLOW_DEFAULT, DEFAULT_CONFIGURATION_ID, LATEST_IMAGE, START_ARGS, STOP_ARGS } from '../../constants';
 import { useDDClient, useRunConfig, useLocalStack, useMountPoint } from '../../services/hooks';
 import { LongMenu } from './Menu';
-
-const useStyles = makeStyles(() => createStyles({
-  selectForm: {
-    color: '#ffffff',
-  },
-}));
+import { checkLocalImage } from '../../services/generic/utils';
 
 export const Controller = (): ReactElement => {
   const ddClient = useDDClient();
@@ -20,8 +13,6 @@ export const Controller = (): ReactElement => {
   const [runningConfig, setRunningConfig] = useState<string>('Default');
   const isRunning = data && data.State === 'running';
   const { data: mountPoint } = useMountPoint();
-
-  const classes = useStyles();
 
   useEffect(() => {
     if (!isLoading && (!runConfig || !runConfig.find(item => item.name === 'Default'))) {
@@ -32,28 +23,32 @@ export const Controller = (): ReactElement => {
     }
   }, [isLoading]);
 
-  const start = async () => {
-    const images = await ddClient.docker.listImages() as [DockerImage];
-    if (!images.some(image => image.RepoTags?.at(0) === 'localstack/localstack:latest')) {
-      ddClient.desktopUI.toast.warning('localstack/localstack:latest not found; now pulling..');
+  const checkForLocalImage = async () => {
+    const hasImage = await checkLocalImage();
+    if (!hasImage) {
+      ddClient.desktopUI.toast.warning(`${LATEST_IMAGE} not found; now pulling..`);
     } else {
       ddClient.desktopUI.toast.success('Starting LocalStack');
     }
-    const corsArg = '-e EXTRA_CORS_ALLOWED_ORIGINS=http://localhost:3000';
+  };
+
+  const start = async () => {
+    await checkForLocalImage();
+
+    const standardDir = `${ddClient.host.platform === 'darwin' ? 'Users' : 'home'}/${mountPoint}`;
+    const mountArg = `-e LOCALSTACK_VOLUME_DIR=/${mountPoint === 'tmp' ? mountPoint : standardDir}/.localstack-volume`;
+    const corsArg = ['-e',`EXTRA_CORS_ALLOWED_ORIGINS=${CORS_ALLOW_DEFAULT}`];
+
     const addedArgs = runConfig.find(config => config.name === runningConfig)
       .vars.map(item => {
         if (item.variable === 'EXTRA_CORS_ALLOWED_ORIGINS') {
           corsArg.slice(0, 0);
-          return ['-e', `${item.variable}=${item.value},http://localhost:3000`];
+          return ['-e', `${item.variable}=${item.value},${CORS_ALLOW_DEFAULT}`];
         }
         return ['-e', `${item.variable}=${item.value}`];
       }).flat();
 
-
-    const standardDir = `${ddClient.host.platform === 'darwin' ? 'Users' : 'home'}/${mountPoint}`;
-    const mountArg = `-e LOCALSTACK_VOLUME_DIR=/${mountPoint === 'tmp' ? mountPoint : standardDir}/.localstack-volume`;
-      
-    ddClient.docker.cli.exec('run', [mountArg, corsArg, ...addedArgs, ...START_ARGS]).then(() => mutate());
+    ddClient.docker.cli.exec('run', [mountArg, ...corsArg, ...addedArgs, ...START_ARGS]).then(() => mutate());
   };
 
   const stop = async () => {
@@ -74,7 +69,6 @@ export const Controller = (): ReactElement => {
           <Box display="flex" alignItems="center">
             <FormControl sx={{ m: 1, minWidth: 120, border: 'none' }} size="small">
               <Select
-                className={classes.selectForm}
                 value={runningConfig}
                 onChange={({ target }) => setRunningConfig(target.value)}
               >
