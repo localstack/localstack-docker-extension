@@ -1,4 +1,3 @@
-
 import {
   Box,
   Button,
@@ -12,12 +11,11 @@ import {
   Typography,
 } from '@mui/material';
 import React, { ReactElement, useEffect, useState } from 'react';
-import { useDDClient, useMountPoint } from '../../services/hooks';
-import { DockerImage } from '../../types';
-import { DownloadProgress } from '../DownloadProgress/DownloadProgress';
+import { checkLocalImage } from '../../../services/generic/utils';
+import { useDDClient, useMountPoint } from '../../../services/hooks';
+import { DownloadProgress } from '../../Feedback';
 
-
-export const OnBoarding = (): ReactElement => {
+export const MountPointForm = (): ReactElement => {
   const { setMountPointUser } = useMountPoint();
   const ddClient = useDDClient();
   const [userState, setUserState] = useState({ loading: false, selectedUser: '', users: [] });
@@ -41,19 +39,15 @@ export const OnBoarding = (): ReactElement => {
     setUserState({ loading: false, selectedUser: foundUsers[0], users: foundUsers });
   };
 
-  const checkLocalImage = async () => {
-    setHasLocalImage({ checking: true, isPresent: hasLocalImage.isPresent });
-    const images = await ddClient.docker.listImages() as [DockerImage];
-    const isPresent = images.filter(image => image.RepoTags?.at(0).split(':').at(0) === 'localstack/localstack');
-    setHasLocalImage({ checking: false, isPresent: isPresent.length > 0 });
-    return isPresent.length > 0;
-  };
-
   useEffect(() => {
     const execChecks = async () => {
       if (userState.users.length === 0) {
-        const isImagePresent = await checkLocalImage();
-        if (isImagePresent) {
+
+        setHasLocalImage({ checking: true, isPresent: hasLocalImage.isPresent });
+        const isPresent = await checkLocalImage();
+        setHasLocalImage({ checking: false, isPresent });
+
+        if (isPresent) {
           checkHomeDir();
         } else {
           setIsPullingImage(true);

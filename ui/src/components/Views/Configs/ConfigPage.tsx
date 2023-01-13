@@ -4,11 +4,11 @@ import React, { ReactElement, useState } from 'react';
 import { createStyles, makeStyles } from '@mui/styles';
 import { DataGrid, GridColDef, GridRenderCellParams } from '@mui/x-data-grid';
 import { v4 as uuid } from 'uuid';
-import { useMountPoint, useRunConfig } from '../../services/hooks';
+import { useMountPoint, useRunConfig } from '../../../services/hooks';
 import { UpsertConfig } from './UpsertConfig';
-import { Optional, RunConfig } from '../../types';
-import { DEFAULT_CONFIGURATION_ID } from '../../constants';
-import { ConfirmableButton } from './ConfirmableButton';
+import { Optional, RunConfig } from '../../../types';
+import { DEFAULT_CONFIGURATION_ID } from '../../../constants';
+import { ConfirmableButton } from '../../Feedback/ConfirmableButton';
 
 const useStyles = makeStyles((theme: Theme) => createStyles({
   addButton: {
@@ -16,7 +16,7 @@ const useStyles = makeStyles((theme: Theme) => createStyles({
   },
 }));
 
-export const StartConfigs = (): ReactElement => {
+export const ConfigPage = (): ReactElement => {
 
   const { runConfig, deleteConfig } = useRunConfig();
   const { setMountPointUser } = useMountPoint();
