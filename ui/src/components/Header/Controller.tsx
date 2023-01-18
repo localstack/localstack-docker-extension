@@ -40,9 +40,7 @@ export const Controller = (): ReactElement => {
 
     if (!images.some(image => image.RepoTags?.at(0) === 'localstack/localstack:latest')) {
       ddClient.desktopUI.toast.warning('localstack/localstack:latest not found; now pulling..');
-    } else {
-      ddClient.desktopUI.toast.success('Starting LocalStack');
-    }
+    } 
 
     const corsArg = ['-e', 'EXTRA_CORS_ALLOWED_ORIGINS=http://localhost:3000'];
     let isPro = false;
@@ -67,7 +65,20 @@ export const Controller = (): ReactElement => {
 
   const start = async () => {
     const args = await normalizeArguments();
-    ddClient.docker.cli.exec('run', args).then(() => mutate());
+    ddClient.docker.cli.exec('run', args,{
+      stream: {
+        onOutput(data): void {
+          if(data.stderr){
+            ddClient.desktopUI.toast.error(data.stderr);
+          }
+        },
+        onClose(exitCode) {
+          if(exitCode === 0){
+            ddClient.desktopUI.toast.success('Starting LocalStack');
+          }
+        },
+      },
+    });
   };
 
   const stop = async () => {
