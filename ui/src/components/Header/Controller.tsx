@@ -2,7 +2,7 @@ import React, { ReactElement, useEffect, useState } from 'react';
 import { Chip, Button, ButtonGroup, Select, MenuItem, FormControl, Box, Badge, Tooltip } from '@mui/material';
 import { PlayArrow, Stop } from '@mui/icons-material';
 import { createStyles, makeStyles } from '@mui/styles';
-import { DEFAULT_CONFIGURATION_ID, START_ARGS, STOP_ARGS } from '../../constants';
+import { DEFAULT_CONFIGURATION_ID, SDK_START_ARGS } from '../../constants';
 import { DockerImage } from '../../types';
 import { useDDClient, useRunConfig, useLocalStack, useMountPoint } from '../../services/hooks';
 import { LongMenu } from './Menu';
@@ -35,32 +35,43 @@ export const Controller = (): ReactElement => {
     }
   }, [isLoading]);
 
-  const start = async () => {
+  const normalizeArguments = async () => {
     const images = await ddClient.docker.listImages() as [DockerImage];
+
     if (!images.some(image => image.RepoTags?.at(0) === 'localstack/localstack:latest')) {
       ddClient.desktopUI.toast.warning('localstack/localstack:latest not found; now pulling..');
     } else {
       ddClient.desktopUI.toast.success('Starting LocalStack');
     }
-    const corsArg = '-e EXTRA_CORS_ALLOWED_ORIGINS=http://localhost:3000';
+
+    const corsArg = ['-e', 'EXTRA_CORS_ALLOWED_ORIGINS=http://localhost:3000'];
+    let isPro = false;
     const addedArgs = runConfig.find(config => config.name === runningConfig)
       .vars.map(item => {
         if (item.variable === 'EXTRA_CORS_ALLOWED_ORIGINS') {
           corsArg.slice(0, 0);
           return ['-e', `${item.variable}=${item.value},http://localhost:3000`];
         }
+        if (item.variable === 'LOCALSTACK_API_KEY') {
+          isPro = true;
+        }
         return ['-e', `${item.variable}=${item.value}`];
       }).flat();
 
-
     const standardDir = `${ddClient.host.platform === 'darwin' ? 'Users' : 'home'}/${mountPoint}`;
-    const mountArg = `-e LOCALSTACK_VOLUME_DIR=/${mountPoint === 'tmp' ? mountPoint : standardDir}/.localstack-volume`;
+    const mountArg = ['-e', `/${mountPoint === 'tmp' ? `${mountPoint}` :
+      `${standardDir}/.cache`}/localstack/volume:/var/lib/localstack`];
 
-    ddClient.docker.cli.exec('run', [mountArg, corsArg, ...addedArgs, ...START_ARGS]).then(() => mutate());
+    return [...SDK_START_ARGS, ...mountArg, ...corsArg, ...addedArgs, `localstack/localstack${isPro ? '-pro' : ''}`];
+  };
+
+  const start = async () => {
+    const args = await normalizeArguments();
+    ddClient.docker.cli.exec('run', args).then(() => mutate());
   };
 
   const stop = async () => {
-    ddClient.docker.cli.exec('run', STOP_ARGS).then(() => mutate());
+    ddClient.docker.cli.exec('stop', ['localstack_main']).then(() => mutate());
   };
 
   return (
