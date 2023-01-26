@@ -12,6 +12,7 @@ import {
 import { LongMenu } from './Menu';
 import { DockerImage } from '../../types';
 import { DownloadProgressDialog } from '../Feedback/DownloadProgressDialog';
+import { ProgressButton } from '../Feedback';
 
 export const Controller = (): ReactElement => {
   const ddClient = useDDClient();
@@ -21,6 +22,7 @@ export const Controller = (): ReactElement => {
   const isRunning = data && data.State === 'running';
   const { data: mountPoint } = useMountPoint();
   const [downloadProps, setDownloadProps] = useState({ open: false, image: LATEST_IMAGE });
+  const [isStarting, setIsStarting] = useState<boolean>(false);
 
 
   const isUnhealthy = data && data.Status.includes('unhealthy');
@@ -77,6 +79,7 @@ export const Controller = (): ReactElement => {
       return;
     }
     const args = await normalizeArguments(isPro);
+    setIsStarting(true);
     ddClient.docker.cli.exec('run', args, {
       stream: {
         onOutput(data): void {
@@ -85,6 +88,7 @@ export const Controller = (): ReactElement => {
           }
         },
         onClose(exitCode) {
+          setIsStarting(false);
           if (exitCode === 0) {
             ddClient.desktopUI.toast.success('Starting LocalStack');
           }
@@ -133,12 +137,13 @@ export const Controller = (): ReactElement => {
               </Select>
             </FormControl>
             <Box>
-              <Button
+              <ProgressButton
                 variant="contained"
+                loading={isStarting}
                 onClick={start}
                 startIcon={<PlayArrow />}>
                 Start
-              </Button>
+              </ProgressButton>
 
             </Box>
           </Box>
