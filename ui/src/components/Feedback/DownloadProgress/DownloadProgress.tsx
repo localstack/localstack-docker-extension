@@ -14,15 +14,15 @@ const statusValues = new Map([
 ]);
 
 interface DownloadProgressProps {
-  callback: () => unknown;
+  callback?: () => unknown;
   imageName: string;
 }
 
-export const DownloadProgress = ({ callback,imageName }: DownloadProgressProps): ReactElement => {
+export const DownloadProgress = ({ callback, imageName }: DownloadProgressProps): ReactElement => {
 
   const ddClient = useDDClient();
   const [statusMap, setStatusMap] = useState<Map<string, string>>(new Map());
-
+  const [isDone, setIsDone] = useState<boolean>(false);
   const percentage = Array.from(statusMap.entries())
     .reduce((partialSum, [, value]) => partialSum + statusValues.get(value), 0) / statusMap.size;
 
@@ -36,6 +36,9 @@ export const DownloadProgress = ({ callback,imageName }: DownloadProgressProps):
 
           const [key, status] = data.stdout.split(':').map(item => item.trim());
           if (key === 'Status' || key === 'Digest' || key === 'latest' || status === 'latest') {
+            if (status.startsWith('Image is up to date')) {
+              setIsDone(true);
+            }
             return;
           }
 
@@ -46,7 +49,6 @@ export const DownloadProgress = ({ callback,imageName }: DownloadProgressProps):
           console.log(error);
         },
         onClose(): void {
-          console.log('Called callback on DownloadProgress');
           callback();
         },
         splitOutputLines: true,
@@ -54,7 +56,8 @@ export const DownloadProgress = ({ callback,imageName }: DownloadProgressProps):
     });
   }, []);
 
+  const percentageValue = Number.isNaN(percentage) ? 0 : percentage;
   return (
-    <CircularProgressWithLabel value={Number.isNaN(percentage) ? 0 : percentage} />
+    <CircularProgressWithLabel value={isDone ? 100 : percentageValue} />
   );
 };
