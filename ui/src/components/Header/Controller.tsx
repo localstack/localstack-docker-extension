@@ -1,17 +1,10 @@
 import React, { ReactElement, useEffect, useState } from 'react';
 import { Chip, Button, ButtonGroup, Select, MenuItem, FormControl, Box, Badge, Tooltip } from '@mui/material';
 import { PlayArrow, Stop } from '@mui/icons-material';
-import { createStyles, makeStyles } from '@mui/styles';
-import { DEFAULT_CONFIGURATION_ID, SDK_START_ARGS } from '../../constants';
-import { DockerImage } from '../../types';
-import { useDDClient, useRunConfig, useLocalStack, useMountPoint } from '../../services/hooks';
+import { useDDClient, useLocalStack, useMountPoint, useRunConfig } from '../../services';
+import { DEFAULT_CONFIGURATION_ID, CORS_ALLOW_DEFAULT, SDK_START_ARGS } from '../../constants';
 import { LongMenu } from './Menu';
-
-const useStyles = makeStyles(() => createStyles({
-  selectForm: {
-    color: '#ffffff',
-  },
-}));
+import { DockerImage } from '../../types';
 
 export const Controller = (): ReactElement => {
   const ddClient = useDDClient();
@@ -20,8 +13,6 @@ export const Controller = (): ReactElement => {
   const [runningConfig, setRunningConfig] = useState<string>('Default');
   const isRunning = data && data.State === 'running';
   const { data: mountPoint } = useMountPoint();
-
-  const classes = useStyles();
 
   const isUnhealthy = data && data.Status.includes('unhealthy');
   const tooltipLabel = isUnhealthy ? 'Unhealthy' : 'Healthy';
@@ -42,13 +33,13 @@ export const Controller = (): ReactElement => {
       ddClient.desktopUI.toast.warning('localstack/localstack:latest not found; now pulling..');
     } 
 
-    const corsArg = ['-e', 'EXTRA_CORS_ALLOWED_ORIGINS=http://localhost:3000'];
+    const corsArg = ['-e', `EXTRA_CORS_ALLOWED_ORIGINS=${CORS_ALLOW_DEFAULT}`];
     let isPro = false;
     const addedArgs = runConfig.find(config => config.name === runningConfig)
       .vars.map(item => {
         if (item.variable === 'EXTRA_CORS_ALLOWED_ORIGINS') {
           corsArg.slice(0, 0);
-          return ['-e', `${item.variable}=${item.value},http://localhost:3000`];
+          return ['-e', `${item.variable}=${item.value},${CORS_ALLOW_DEFAULT}`];
         }
         if (item.variable === 'LOCALSTACK_API_KEY') {
           isPro = true;
@@ -99,7 +90,6 @@ export const Controller = (): ReactElement => {
           <Box display="flex" alignItems="center">
             <FormControl sx={{ m: 1, minWidth: 120, border: 'none' }} size="small">
               <Select
-                className={classes.selectForm}
                 value={runningConfig}
                 onChange={({ target }) => setRunningConfig(target.value)}
               >

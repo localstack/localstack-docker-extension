@@ -1,4 +1,3 @@
-
 import {
   Box,
   Button,
@@ -12,12 +11,12 @@ import {
   Typography,
 } from '@mui/material';
 import React, { ReactElement, useEffect, useState } from 'react';
-import { useDDClient, useMountPoint } from '../../services/hooks';
-import { DockerImage } from '../../types';
-import { DownloadProgress } from '../DownloadProgress/DownloadProgress';
+import { LATEST_IMAGE } from '../../../constants';
+import { useDDClient, useMountPoint } from '../../../services';
+import { DockerImage } from '../../../types';
+import { DownloadProgress } from '../../Feedback';
 
-
-export const OnBoarding = (): ReactElement => {
+export const MountPointForm = (): ReactElement => {
   const { setMountPointUser } = useMountPoint();
   const ddClient = useDDClient();
   const [userState, setUserState] = useState({ loading: false, selectedUser: '', users: [] });
@@ -41,19 +40,18 @@ export const OnBoarding = (): ReactElement => {
     setUserState({ loading: false, selectedUser: foundUsers[0], users: foundUsers });
   };
 
-  const checkLocalImage = async () => {
-    setHasLocalImage({ checking: true, isPresent: hasLocalImage.isPresent });
-    const images = await ddClient.docker.listImages() as [DockerImage];
-    const isPresent = images.filter(image => image.RepoTags?.at(0) === 'localstack/localstack:latest');
-    setHasLocalImage({ checking: false, isPresent: isPresent.length > 0 });
-    return isPresent.length > 0;
-  };
-
   useEffect(() => {
     const execChecks = async () => {
       if (userState.users.length === 0) {
-        const isImagePresent = await checkLocalImage();
-        if (isImagePresent) {
+
+        setHasLocalImage({ checking: true, isPresent: hasLocalImage.isPresent });
+
+        const images = await ddClient.docker.listImages() as [DockerImage];
+        const isPresent = images.some(image => image.RepoTags?.at(0) === LATEST_IMAGE);
+
+        setHasLocalImage({ checking: false, isPresent });
+
+        if (isPresent) {
           checkHomeDir();
         } else {
           setIsPullingImage(true);

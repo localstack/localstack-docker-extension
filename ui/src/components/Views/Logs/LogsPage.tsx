@@ -1,8 +1,8 @@
 import { Box, Card, Typography } from '@mui/material';
 import React, { ReactElement, useEffect, useState } from 'react';
-import { useDDClient, useLocalStack } from '../../services/hooks';
+import { useDDClient, useLocalStack } from '../../../services';
 
-export const Logs = (): ReactElement => {
+export const LogsPage = (): ReactElement => {
   const [logs, setLogs] = useState<string[]>([]);
   const ddClient = useDDClient();
   const { data } = useLocalStack();

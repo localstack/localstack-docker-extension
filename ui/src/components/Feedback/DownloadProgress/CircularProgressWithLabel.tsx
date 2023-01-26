@@ -2,8 +2,7 @@ import * as React from 'react';
 import CircularProgress, {
   CircularProgressProps,
 } from '@mui/material/CircularProgress';
-import Typography from '@mui/material/Typography';
-import Box from '@mui/material/Box';
+import { Box, Typography } from '@mui/material';
 
 export const CircularProgressWithLabel = (
   props: CircularProgressProps & { value: number },
@@ -28,7 +27,9 @@ export const CircularProgressWithLabel = (
           variant="caption"
           component="div"
           color="text.secondary"
-        >{`${Math.round(value)}%`}</Typography>
+        >
+          {`${Math.round(value)}%`}
+        </Typography>
       </Box>
     </Box>
   );
