@@ -1,38 +1,3 @@
-const COMMON_ARGS = [
-  '--rm',
-  '-i',
-  '-e',
-  'DNS_ADDRESS=0',
-  '--entrypoint=',
-  '-v',
-  '/var/run/docker.sock:/var/run/docker.sock',
-  'localstack/localstack',
-  'bin/localstack',
-];
-
-export const START_ARGS = [
-  ...COMMON_ARGS,
-  'start',
-  '-d',
-];
-
-export const STATUS_ARGS = [
-  ...COMMON_ARGS,
-  'status',
-];
-
-export const STOP_ARGS = [
-  ...COMMON_ARGS,
-  'stop',
-];
-
-export const UPDATE_ARGS = [
-  ...COMMON_ARGS,
-  'update',
-  'docker-images',
-];
-
-
 export const SDK_START_ARGS = [
   '--rm',
   '-i',
@@ -46,9 +11,9 @@ export const SDK_START_ARGS = [
   '-e',
   'SET_TERM_HANDLER=1',
   '-p',
-  '127.0.0.1:4566:4566', // gateway
+  '127.0.0.1:4566:4566',
   '-p',
-  '127.0.0.1:4510-4559:4510-4559', // services
+  '127.0.0.1:4510-4559:4510-4559',
   '-p',
   '127.0.0.1:12121:12121',
   '-p',
