@@ -58,7 +58,7 @@ export const Controller = (): ReactElement => {
     const corsArg = ['-e', `EXTRA_CORS_ALLOWED_ORIGINS=${CORS_ALLOW_DEFAULT}`];
     const addedArgs = runConfig.find(config => config.name === runningConfig)
       .vars.map(item => {
-        if (item.variable === 'EXTRA_CORS_ALLOWED_ORIGINS') {
+        if (item.variable === 'EXTRA_CORS_ALLOWED_ORIGINS') { // prevent overriding variable
           corsArg.slice(0, 0);
           return ['-e', `${item.variable}=${item.value},${CORS_ALLOW_DEFAULT}`];
         }
@@ -66,7 +66,7 @@ export const Controller = (): ReactElement => {
       }).flat();
 
     const standardDir = `${ddClient.host.platform === 'darwin' ? 'Users' : 'home'}/${mountPoint}`;
-    const mountArg = ['-e', `/${mountPoint === 'tmp' ? `${mountPoint}` :
+    const mountArg = ['-v', `/${mountPoint === 'tmp' ? `${mountPoint}` :
       `${standardDir}/.cache`}/localstack/volume:/var/lib/localstack`];
 
     return [...SDK_START_ARGS, ...mountArg, ...corsArg, ...addedArgs, isPro ? LATEST_PRO_IMAGE : LATEST_IMAGE];
@@ -79,12 +79,14 @@ export const Controller = (): ReactElement => {
       return;
     }
     const args = await normalizeArguments(isPro);
+   
     setIsStarting(true);
     ddClient.docker.cli.exec('run', args, {
       stream: {
         onOutput(data): void {
           if (data.stderr) {
             ddClient.desktopUI.toast.error(data.stderr);
+            setIsStarting(false);
           }
         },
         onClose(exitCode) {

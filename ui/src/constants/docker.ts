@@ -20,6 +20,10 @@ export const SDK_START_ARGS = [
   '127.0.0.1:4571:4571',
   '-p',
   '127.0.0.1:433:433',
+  '-p',
+  '127.0.0.1:53:53', // TODO rethink on how to bind for DNS
+  '-p',
+  '127.0.0.1:53:53/udp',
   '-v',
   '/var/run/docker.sock:/var/run/docker.sock',
 ];
