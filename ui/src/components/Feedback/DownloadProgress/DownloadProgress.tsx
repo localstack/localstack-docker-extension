@@ -30,7 +30,6 @@ export const DownloadProgress = ({ callback,imageName }: DownloadProgressProps):
     ddClient.docker.cli.exec('pull', [imageName], {
       stream: {
         onOutput(data): void {
-          console.log(data.stderr ? data.stderr : data.stdout);
           if (data.stderr) {
             ddClient.desktopUI.toast.error(data.stderr);
           }
