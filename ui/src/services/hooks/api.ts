@@ -87,8 +87,8 @@ export const useLocalStack = (): useLocalStackReturn => {
     cacheKey,
     async () => (await ddClient.docker.listContainers() as [DockerContainer])
       .find(container =>
-        (container.Image === 'localstack/localstack' ||
-          container.Image === 'localstack/localstack-pro') &&
+        (container.Image.split(':').at(0) === 'localstack/localstack' ||
+          container.Image.split(':').at(0) === 'localstack/localstack-pro') &&
         container.Command !== 'bin/localstack update docker-images',
       ), {
       refreshInterval: 2000, compare:

@@ -84,12 +84,14 @@ export const MountPointForm = (): ReactElement => {
             {isPullingImage &&
               <>
                 <Typography>
-                  Pulling localstack/localstack:latest... Please do not exit this view
+                  Pulling localstack/localstack:latest
                 </Typography>
-                <DownloadProgress callback={() => {
-                  setIsPullingImage(false);
-                  setTriggerUseEffect(!triggerUseEffect);
-                }} />
+                <DownloadProgress
+                  imageName={LATEST_IMAGE}
+                  callback={() => {
+                    setIsPullingImage(false);
+                    setTriggerUseEffect(!triggerUseEffect);
+                  }} />
               </>
             }
             {
@@ -114,11 +116,11 @@ export const MountPointForm = (): ReactElement => {
             Select where LocalStack will be mounted
           </Typography>
           <Typography variant='subtitle2'>
-            {`For MacOS users it will be under /Users/${userState.selectedUser || 'loading...'}/.localstack-volume`}
+            {`For MacOS users it will be under /Users/${userState.selectedUser || 'loading...'}/.localstack/volume`}
           </Typography>
           <Typography variant='subtitle2' gutterBottom>
             {`For Linux/Windows users it will be under \
-             /home/${userState.selectedUser || 'loading...'}/.localstack-volume`}
+             /home/${userState.selectedUser || 'loading...'}/.localstack/volume`}
           </Typography>
         </Box>
       </DialogContent>

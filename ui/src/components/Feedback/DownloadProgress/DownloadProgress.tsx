@@ -15,9 +15,10 @@ const statusValues = new Map([
 
 interface DownloadProgressProps {
   callback: () => unknown;
+  imageName: string;
 }
 
-export const DownloadProgress = ({ callback }: DownloadProgressProps): ReactElement => {
+export const DownloadProgress = ({ callback,imageName }: DownloadProgressProps): ReactElement => {
 
   const ddClient = useDDClient();
   const [statusMap, setStatusMap] = useState<Map<string, string>>(new Map());
@@ -26,9 +27,10 @@ export const DownloadProgress = ({ callback }: DownloadProgressProps): ReactElem
     .reduce((partialSum, [, value]) => partialSum + statusValues.get(value), 0) / statusMap.size;
 
   useEffect(() => {
-    ddClient.docker.cli.exec('pull', ['localstack/localstack:latest'], {
+    ddClient.docker.cli.exec('pull', [imageName], {
       stream: {
         onOutput(data): void {
+          console.log(data.stderr ? data.stderr : data.stdout);
           if (data.stderr) {
             ddClient.desktopUI.toast.error(data.stderr);
           }
@@ -45,6 +47,7 @@ export const DownloadProgress = ({ callback }: DownloadProgressProps): ReactElem
           console.log(error);
         },
         onClose(): void {
+          console.log('Called callback on DownloadProgress');
           callback();
         },
         splitOutputLines: true,

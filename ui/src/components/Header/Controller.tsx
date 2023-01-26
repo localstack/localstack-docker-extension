@@ -2,9 +2,16 @@ import React, { ReactElement, useEffect, useState } from 'react';
 import { Chip, Button, ButtonGroup, Select, MenuItem, FormControl, Box, Badge, Tooltip } from '@mui/material';
 import { PlayArrow, Stop } from '@mui/icons-material';
 import { useDDClient, useLocalStack, useMountPoint, useRunConfig } from '../../services';
-import { DEFAULT_CONFIGURATION_ID, CORS_ALLOW_DEFAULT, SDK_START_ARGS } from '../../constants';
+import {
+  DEFAULT_CONFIGURATION_ID,
+  CORS_ALLOW_DEFAULT,
+  SDK_START_ARGS,
+  LATEST_IMAGE,
+  LATEST_PRO_IMAGE,
+} from '../../constants';
 import { LongMenu } from './Menu';
 import { DockerImage } from '../../types';
+import { DownloadProgressDialog } from '../Feedback/DownloadProgressDialog';
 
 export const Controller = (): ReactElement => {
   const ddClient = useDDClient();
@@ -13,6 +20,8 @@ export const Controller = (): ReactElement => {
   const [runningConfig, setRunningConfig] = useState<string>('Default');
   const isRunning = data && data.State === 'running';
   const { data: mountPoint } = useMountPoint();
+  const [downloadProps, setDownloadProps] = useState({ open: false, image: LATEST_IMAGE });
+
 
   const isUnhealthy = data && data.Status.includes('unhealthy');
   const tooltipLabel = isUnhealthy ? 'Unhealthy' : 'Healthy';
@@ -26,23 +35,30 @@ export const Controller = (): ReactElement => {
     }
   }, [isLoading]);
 
-  const normalizeArguments = async () => {
+  interface checkForRequiredImageReturn {
+    haveLocally: boolean;
+    isPro: boolean;
+  }
+
+  const checkForRequiredImage = async (): Promise<checkForRequiredImageReturn> => {
+    const isPro = runConfig.find(config => config.name === runningConfig)?.vars.some(item =>
+      item.variable === 'LOCALSTACK_API_KEY');
     const images = await ddClient.docker.listImages() as [DockerImage];
+    const haveLocally = images.some(image => image.RepoTags?.at(0) === (isPro ? LATEST_PRO_IMAGE : LATEST_IMAGE));
 
-    if (!images.some(image => image.RepoTags?.at(0) === 'localstack/localstack:latest')) {
-      ddClient.desktopUI.toast.warning('localstack/localstack:latest not found; now pulling..');
-    } 
+    return {
+      haveLocally,
+      isPro,
+    };
+  };
 
+  const normalizeArguments = async (isPro: boolean) => {
     const corsArg = ['-e', `EXTRA_CORS_ALLOWED_ORIGINS=${CORS_ALLOW_DEFAULT}`];
-    let isPro = false;
     const addedArgs = runConfig.find(config => config.name === runningConfig)
       .vars.map(item => {
         if (item.variable === 'EXTRA_CORS_ALLOWED_ORIGINS') {
           corsArg.slice(0, 0);
           return ['-e', `${item.variable}=${item.value},${CORS_ALLOW_DEFAULT}`];
-        }
-        if (item.variable === 'LOCALSTACK_API_KEY') {
-          isPro = true;
         }
         return ['-e', `${item.variable}=${item.value}`];
       }).flat();
@@ -51,20 +67,25 @@ export const Controller = (): ReactElement => {
     const mountArg = ['-e', `/${mountPoint === 'tmp' ? `${mountPoint}` :
       `${standardDir}/.cache`}/localstack/volume:/var/lib/localstack`];
 
-    return [...SDK_START_ARGS, ...mountArg, ...corsArg, ...addedArgs, `localstack/localstack${isPro ? '-pro' : ''}`];
+    return [...SDK_START_ARGS, ...mountArg, ...corsArg, ...addedArgs, isPro ? LATEST_PRO_IMAGE : LATEST_IMAGE];
   };
 
   const start = async () => {
-    const args = await normalizeArguments();
-    ddClient.docker.cli.exec('run', args,{
+    const { haveLocally, isPro } = await checkForRequiredImage();
+    if (!haveLocally) {
+      setDownloadProps({ open: true, image: isPro ? LATEST_PRO_IMAGE : LATEST_IMAGE });
+      return;
+    }
+    const args = await normalizeArguments(isPro);
+    ddClient.docker.cli.exec('run', args, {
       stream: {
         onOutput(data): void {
-          if(data.stderr){
+          if (data.stderr) {
             ddClient.desktopUI.toast.error(data.stderr);
           }
         },
         onClose(exitCode) {
-          if(exitCode === 0){
+          if (exitCode === 0) {
             ddClient.desktopUI.toast.success('Starting LocalStack');
           }
         },
@@ -76,8 +97,19 @@ export const Controller = (): ReactElement => {
     ddClient.docker.cli.exec('stop', ['localstack_main']).then(() => mutate());
   };
 
+  const onClose = () => {
+    console.log('called onClose on Controller');
+    setDownloadProps({ open: false, image: downloadProps.image });
+    start();
+  };
+
   return (
     <Box display="flex" gap={1} alignItems="center">
+      <DownloadProgressDialog
+        imageName={downloadProps.image}
+        open={downloadProps.open}
+        onClose={onClose}
+      />
       <ButtonGroup variant="outlined">
         {isRunning ?
           <Button
