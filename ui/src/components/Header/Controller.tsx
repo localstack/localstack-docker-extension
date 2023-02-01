@@ -45,12 +45,13 @@ export const Controller = (): ReactElement => {
           corsArg.slice(0, 0);
           return ['-e', `${item.variable}=${item.value},${CORS_ALLOW_DEFAULT}`];
         }
+      
         return ['-e', `${item.variable}=${item.value}`];
       }).flat();
 
     const standardDir = `${ddClient.host.platform === 'darwin' ? 'Users' : 'home'}/${mountPoint}`;
-    const mountArg = ['-v', `/${mountPoint === 'tmp' ? `${mountPoint}` :
-      `${standardDir}/.cache`}/localstack/volume:/var/lib/localstack`];
+    const mountArg = ['-e', `LOCALSTACK_VOLUME_DIR=/${mountPoint === 'tmp' ? `${mountPoint}` :
+      `${standardDir}/.cache`}/localstack/volume`];
 
     return [...mountArg, ...corsArg, ...addedArgs, ...START_ARGS];
   };
