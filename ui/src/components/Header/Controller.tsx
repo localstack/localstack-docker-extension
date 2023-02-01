@@ -1,5 +1,5 @@
 import React, { ReactElement, useEffect, useState } from 'react';
-import { Chip, Button, ButtonGroup, Select, MenuItem, FormControl, Box, Badge, Tooltip } from '@mui/material';
+import { Chip, ButtonGroup, Select, MenuItem, FormControl, Box, Badge, Tooltip } from '@mui/material';
 import { PlayArrow, Stop } from '@mui/icons-material';
 import { useDDClient, useLocalStack, useMountPoint, useRunConfig } from '../../services';
 import {
@@ -23,6 +23,7 @@ export const Controller = (): ReactElement => {
   const { data: mountPoint } = useMountPoint();
   const [downloadProps, setDownloadProps] = useState({ open: false, image: LATEST_IMAGE });
   const [isStarting, setIsStarting] = useState<boolean>(false);
+  const [isStopping, setIsStopping] = useState<boolean>(false);
 
 
   const isUnhealthy = data && data.Status.includes('unhealthy');
@@ -70,7 +71,7 @@ export const Controller = (): ReactElement => {
     ddClient.docker.cli.exec('run', args, {
       stream: {
         onOutput(data): void {
-          if (data.stderr) {
+          if (data.stderr && !data.stderr.includes('Successfully')) { // Api key activation is included in the error stream
             ddClient.desktopUI.toast.error(data.stderr);
             setIsStarting(false);
           }
@@ -86,7 +87,11 @@ export const Controller = (): ReactElement => {
   };
 
   const stop = async () => {
-    ddClient.docker.cli.exec('run', STOP_ARGS).then(() => mutate());
+    setIsStopping(true);
+    ddClient.docker.cli.exec('run', STOP_ARGS).then(() => {
+      setIsStopping(false);
+      mutate();
+    });
   };
 
   const onClose = () => {
@@ -103,12 +108,13 @@ export const Controller = (): ReactElement => {
       />
       <ButtonGroup variant="outlined">
         {isRunning ?
-          <Button
+          <ProgressButton
             variant="contained"
+            loading={isStopping}
             onClick={stop}
             startIcon={<Stop />}>
             Stop
-          </Button>
+          </ProgressButton>
           :
           <Box display="flex" alignItems="center">
             <FormControl sx={{ m: 1, minWidth: 120, border: 'none' }} size="small">
