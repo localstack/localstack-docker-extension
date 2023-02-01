@@ -5,9 +5,9 @@ import { useDDClient, useLocalStack, useMountPoint, useRunConfig } from '../../s
 import {
   DEFAULT_CONFIGURATION_ID,
   CORS_ALLOW_DEFAULT,
-  SDK_START_ARGS,
   LATEST_IMAGE,
-  LATEST_PRO_IMAGE,
+  START_ARGS,
+  STOP_ARGS,
 } from '../../constants';
 import { LongMenu } from './Menu';
 import { DockerImage } from '../../types';
@@ -37,24 +37,7 @@ export const Controller = (): ReactElement => {
     }
   }, [isLoading]);
 
-  interface checkForRequiredImageReturn {
-    haveLocally: boolean;
-    isPro: boolean;
-  }
-
-  const checkForRequiredImage = async (): Promise<checkForRequiredImageReturn> => {
-    const isPro = runConfig.find(config => config.name === runningConfig)?.vars.some(item =>
-      item.variable === 'LOCALSTACK_API_KEY');
-    const images = await ddClient.docker.listImages() as [DockerImage];
-    const haveLocally = images.some(image => image.RepoTags?.at(0) === (isPro ? LATEST_PRO_IMAGE : LATEST_IMAGE));
-
-    return {
-      haveLocally,
-      isPro,
-    };
-  };
-
-  const normalizeArguments = async (isPro: boolean) => {
+  const normalizeArguments = async () => {
     const corsArg = ['-e', `EXTRA_CORS_ALLOWED_ORIGINS=${CORS_ALLOW_DEFAULT}`];
     const addedArgs = runConfig.find(config => config.name === runningConfig)
       .vars.map(item => {
@@ -69,17 +52,19 @@ export const Controller = (): ReactElement => {
     const mountArg = ['-v', `/${mountPoint === 'tmp' ? `${mountPoint}` :
       `${standardDir}/.cache`}/localstack/volume:/var/lib/localstack`];
 
-    return [...SDK_START_ARGS, ...mountArg, ...corsArg, ...addedArgs, isPro ? LATEST_PRO_IMAGE : LATEST_IMAGE];
+    return [...mountArg, ...corsArg, ...addedArgs, ...START_ARGS];
   };
 
   const start = async () => {
-    const { haveLocally, isPro } = await checkForRequiredImage();
+    const images = await ddClient.docker.listImages() as [DockerImage];
+    const haveLocally = images.some(image => image.RepoTags?.at(0) === LATEST_IMAGE);
+
     if (!haveLocally) {
-      setDownloadProps({ open: true, image: isPro ? LATEST_PRO_IMAGE : LATEST_IMAGE });
+      setDownloadProps({ open: true, image: LATEST_IMAGE });
       return;
     }
-    const args = await normalizeArguments(isPro);
-   
+    const args = await normalizeArguments();
+
     setIsStarting(true);
     ddClient.docker.cli.exec('run', args, {
       stream: {
@@ -100,11 +85,10 @@ export const Controller = (): ReactElement => {
   };
 
   const stop = async () => {
-    ddClient.docker.cli.exec('stop', ['localstack_main']).then(() => mutate());
+    ddClient.docker.cli.exec('run', STOP_ARGS).then(() => mutate());
   };
 
   const onClose = () => {
-    console.log('called onClose on Controller');
     setDownloadProps({ open: false, image: downloadProps.image });
     start();
   };

@@ -6,7 +6,7 @@ export const LogsPage = (): ReactElement => {
   const [logs, setLogs] = useState<string[]>([]);
   const ddClient = useDDClient();
   const { data } = useLocalStack();
-
+  
   useEffect(() => {
     if (data) {
       const listener = ddClient.docker.cli.exec('logs', ['-f', data.Id], {

@@ -1,29 +1,37 @@
-export const SDK_START_ARGS = [
+const COMMON_ARGS = [
   '--rm',
   '-i',
-  '-d',
-  '--name',
-  'localstack_main',
-  '-e',
-  'TEST_AWS_ACCOUNT_ID=000000000000',
-  '-e',
-  'DOCKER_HOST=unix:///var/run/docker.sock',
-  '-e',
-  'SET_TERM_HANDLER=1',
-  '-p',
-  '127.0.0.1:4566:4566',
-  '-p',
-  '127.0.0.1:4510-4559:4510-4559',
-  '-p',
-  '127.0.0.1:12121:12121',
-  '-p',
-  '127.0.0.1:4571:4571',
-  '-p',
-  '127.0.0.1:433:433',
-  '-p',
-  '127.0.0.1:53:53', // TODO rethink on how to bind for DNS
-  '-p',
-  '127.0.0.1:53:53/udp',
+  '--entrypoint=',
   '-v',
   '/var/run/docker.sock:/var/run/docker.sock',
+  'localstack/localstack',
+  'bin/localstack',
+];
+
+export const START_ARGS = [
+  ...COMMON_ARGS,
+  'start',
+  '-d',
+];
+
+export const STATUS_ARGS = [
+  ...COMMON_ARGS,
+  'status',
+];
+
+export const STOP_ARGS = [
+  ...COMMON_ARGS,
+  'stop',
+];
+
+export const UPDATE_ARGS = [
+  ...COMMON_ARGS,
+  'update',
+  'docker-images',
+];
+
+export const FLAGS = [
+  '-e',
+  // eslint-disable-next-line max-len
+  'DOCKER_FLAGS=\'--label com.docker.compose.project=localstack_localstack-docker-desktop-desktop-extension --label com.docker.desktop.extension=true --label com.docker.compose.project.config_files\'',
 ];
