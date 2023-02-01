@@ -8,6 +8,7 @@ import {
   LATEST_IMAGE,
   START_ARGS,
   STOP_ARGS,
+  FLAGS,
 } from '../../constants';
 import { LongMenu } from './Menu';
 import { DockerImage } from '../../types';
@@ -39,14 +40,19 @@ export const Controller = (): ReactElement => {
   }, [isLoading]);
 
   const normalizeArguments = async () => {
+    const extendedFlag = FLAGS;
+
     const corsArg = ['-e', `EXTRA_CORS_ALLOWED_ORIGINS=${CORS_ALLOW_DEFAULT}`];
     const addedArgs = runConfig.find(config => config.name === runningConfig)
       .vars.map(item => {
         if (item.variable === 'EXTRA_CORS_ALLOWED_ORIGINS') { // prevent overriding variable
           corsArg.slice(0, 0);
           return ['-e', `${item.variable}=${item.value},${CORS_ALLOW_DEFAULT}`];
+        } 
+        if (item.variable === 'DOCKER_FLAGS') {
+          extendedFlag[1] = FLAGS.at(1).slice(0, -1).concat(` ${item.value}'`);
         }
-      
+
         return ['-e', `${item.variable}=${item.value}`];
       }).flat();
 
@@ -54,7 +60,7 @@ export const Controller = (): ReactElement => {
     const mountArg = ['-e', `LOCALSTACK_VOLUME_DIR=/${mountPoint === 'tmp' ? `${mountPoint}` :
       `${standardDir}/.cache`}/localstack/volume`];
 
-    return [...mountArg, ...corsArg, ...addedArgs, ...START_ARGS];
+    return [...extendedFlag, ...mountArg, ...corsArg, ...addedArgs, ...START_ARGS];
   };
 
   const start = async () => {
