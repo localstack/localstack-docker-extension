@@ -7,11 +7,10 @@ import {
   CORS_ALLOW_DEFAULT,
   LATEST_IMAGE,
   START_ARGS,
-  STOP_ARGS,
   FLAGS,
 } from '../../constants';
 import { LongMenu } from './Menu';
-import { DockerImage } from '../../types';
+import { DockerContainer, DockerImage } from '../../types';
 import { DownloadProgressDialog } from '../Feedback/DownloadProgressDialog';
 import { ProgressButton } from '../Feedback';
 
@@ -48,7 +47,7 @@ export const Controller = (): ReactElement => {
         if (item.variable === 'EXTRA_CORS_ALLOWED_ORIGINS') { // prevent overriding variable
           corsArg.slice(0, 0);
           return ['-e', `${item.variable}=${item.value},${CORS_ALLOW_DEFAULT}`];
-        } 
+        }
         if (item.variable === 'DOCKER_FLAGS') {
           extendedFlag[1] = FLAGS.at(1).slice(0, -1).concat(` ${item.value}'`);
         }
@@ -85,7 +84,7 @@ export const Controller = (): ReactElement => {
         onClose(exitCode) {
           setIsStarting(false);
           if (exitCode === 0) {
-            ddClient.desktopUI.toast.success('Starting LocalStack');
+            ddClient.desktopUI.toast.success('LocalStack started');
           }
         },
       },
@@ -94,10 +93,27 @@ export const Controller = (): ReactElement => {
 
   const stop = async () => {
     setIsStopping(true);
-    ddClient.docker.cli.exec('run', STOP_ARGS).then(() => {
-      setIsStopping(false);
-      mutate();
-    });
+    const containers = await ddClient.docker.listContainers({ 'all': true }) as [DockerContainer];
+
+    const stoppedContainer = containers.find(container =>
+      (container.Image === 'localstack/localstack' ||
+        container.Image === 'localstack/localstack-pro') &&
+      !Object.keys(containers[0].Labels).some(key => key === 'cloud.localstack.spawner')
+      && container.Command !== 'ls /users'); // command for mount point setting
+
+    if (stoppedContainer.State === 'created') { // not started
+
+      await ddClient.docker.cli.exec('rm', [stoppedContainer.Id]); // remove it 
+
+      const spawnerContainer = containers.find(container =>
+        Object.keys(container.Labels).some(key => key === 'cloud.localstack.spawner'));
+
+      await ddClient.docker.cli.exec('stop', [spawnerContainer.Id]); // stop the spawner
+    } else {
+      await ddClient.docker.cli.exec('stop', [stoppedContainer.Id]);
+    }
+    setIsStopping(false);
+    mutate();
   };
 
   const onClose = () => {
@@ -113,7 +129,7 @@ export const Controller = (): ReactElement => {
         onClose={onClose}
       />
       <ButtonGroup variant="outlined">
-        {isRunning ?
+        {(isRunning && !isStarting) ?
           <ProgressButton
             variant="contained"
             loading={isStopping}
@@ -151,7 +167,7 @@ export const Controller = (): ReactElement => {
       <Tooltip title={data ? tooltipLabel : ''} >
         <Badge color="error" overlap="circular" badgeContent=" " variant="dot" invisible={!isUnhealthy}>
           <Chip
-            label={isRunning ? 'Running' : 'Stopped'}
+            label={(isRunning && !isStarting) ? 'Running' : 'Stopped'}
             color={isRunning ? 'success' : 'warning'}
             sx={{ p: 2, borderRadius: 4 }}
           />

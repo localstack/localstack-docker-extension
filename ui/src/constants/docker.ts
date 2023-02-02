@@ -1,4 +1,6 @@
 const COMMON_ARGS = [
+  '--label',
+  'cloud.localstack.spawner="true"',
   '--rm',
   '-i',
   '--entrypoint=',
@@ -17,11 +19,6 @@ export const START_ARGS = [
 export const STATUS_ARGS = [
   ...COMMON_ARGS,
   'status',
-];
-
-export const STOP_ARGS = [
-  ...COMMON_ARGS,
-  'stop',
 ];
 
 export const UPDATE_ARGS = [
