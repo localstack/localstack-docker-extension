@@ -1,6 +1,6 @@
 const COMMON_ARGS = [
   '--label',
-  'cloud.localstack.spawner="true"',
+  'cloud.localstack.spawner=true',
   '--rm',
   '-i',
   '--entrypoint=',

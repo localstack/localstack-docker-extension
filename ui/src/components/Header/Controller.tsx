@@ -99,7 +99,7 @@ export const Controller = (): ReactElement => {
       (container.Image === 'localstack/localstack' ||
         container.Image === 'localstack/localstack-pro') &&
       !Object.keys(containers[0].Labels).some(key => key === 'cloud.localstack.spawner')
-      && container.Command !== 'ls /users'); // command for mount point setting
+      && container.Command === 'docker-entrypoint.sh');
 
     if (stoppedContainer.State === 'created') { // not started
 
@@ -120,6 +120,15 @@ export const Controller = (): ReactElement => {
     setDownloadProps({ open: false, image: downloadProps.image });
     start();
   };
+
+  const getChipLabel = () => {
+    if (isRunning && !isStarting) {
+      return 'Running';
+    }
+    return isStarting ? 'Starting' : 'Stopped';
+  };
+
+  const getChipColor = () => (isRunning  || isStarting)? 'success' : 'warning';
 
   return (
     <Box display="flex" gap={1} alignItems="center">
@@ -167,8 +176,8 @@ export const Controller = (): ReactElement => {
       <Tooltip title={data ? tooltipLabel : ''} >
         <Badge color="error" overlap="circular" badgeContent=" " variant="dot" invisible={!isUnhealthy}>
           <Chip
-            label={(isRunning && !isStarting) ? 'Running' : 'Stopped'}
-            color={isRunning ? 'success' : 'warning'}
+            label={getChipLabel()}
+            color={getChipColor()}
             sx={{ p: 2, borderRadius: 4 }}
           />
         </Badge>
