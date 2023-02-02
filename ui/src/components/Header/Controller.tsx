@@ -121,15 +121,6 @@ export const Controller = (): ReactElement => {
     start();
   };
 
-  const getChipLabel = () => {
-    if (isRunning && !isStarting) {
-      return 'Running';
-    }
-    return isStarting ? 'Starting' : 'Stopped';
-  };
-
-  const getChipColor = () => (isRunning  || isStarting)? 'success' : 'warning';
-
   return (
     <Box display="flex" gap={1} alignItems="center">
       <DownloadProgressDialog
@@ -176,8 +167,8 @@ export const Controller = (): ReactElement => {
       <Tooltip title={data ? tooltipLabel : ''} >
         <Badge color="error" overlap="circular" badgeContent=" " variant="dot" invisible={!isUnhealthy}>
           <Chip
-            label={getChipLabel()}
-            color={getChipColor()}
+            label={(isRunning  && !isStarting)? 'Running' : 'Stopped'}
+            color={(isRunning  && !isStarting)? 'success' : 'warning'}
             sx={{ p: 2, borderRadius: 4 }}
           />
         </Badge>
