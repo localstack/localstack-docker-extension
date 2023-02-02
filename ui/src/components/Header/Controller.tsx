@@ -76,7 +76,8 @@ export const Controller = (): ReactElement => {
     ddClient.docker.cli.exec('run', args, {
       stream: {
         onOutput(data): void {
-          if (data.stderr && !data.stderr.includes('Successfully')) { // Api key activation is included in the error stream
+          if (data.stderr && !data.stderr.includes('Successfully') && // Api key activation is included in the error stream
+            !data.stderr.includes('Execution of "prepare_host"')) { 
             ddClient.desktopUI.toast.error(data.stderr);
             setIsStarting(false);
           }
@@ -167,8 +168,8 @@ export const Controller = (): ReactElement => {
       <Tooltip title={data ? tooltipLabel : ''} >
         <Badge color="error" overlap="circular" badgeContent=" " variant="dot" invisible={!isUnhealthy}>
           <Chip
-            label={(isRunning  && !isStarting)? 'Running' : 'Stopped'}
-            color={(isRunning  && !isStarting)? 'success' : 'warning'}
+            label={(isRunning && !isStarting) ? 'Running' : 'Stopped'}
+            color={(isRunning && !isStarting) ? 'success' : 'warning'}
             sx={{ p: 2, borderRadius: 4 }}
           />
         </Badge>
