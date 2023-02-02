@@ -116,11 +116,12 @@ export const MountPointForm = (): ReactElement => {
             Select where LocalStack will be mounted
           </Typography>
           <Typography variant='subtitle2'>
-            {`For MacOS users it will be under /Users/${userState.selectedUser || 'loading...'}/.localstack/volume`}
+            {`For MacOS users it will be under /Users/${userState.selectedUser || 'loading...'} \
+            /.cache/localstack/volume`}
           </Typography>
           <Typography variant='subtitle2' gutterBottom>
             {`For Linux/Windows users it will be under \
-             /home/${userState.selectedUser || 'loading...'}/.localstack/volume`}
+             /home/${userState.selectedUser || 'loading...'}/.cache/localstack/volume`}
           </Typography>
         </Box>
       </DialogContent>
