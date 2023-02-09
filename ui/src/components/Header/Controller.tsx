@@ -1,7 +1,7 @@
 import React, { ReactElement, useEffect, useState } from 'react';
 import { Chip, ButtonGroup, Select, MenuItem, FormControl, Box, Badge, Tooltip } from '@mui/material';
 import { PlayArrow, Stop } from '@mui/icons-material';
-import { useDDClient, useLocalStack, useMountPoint, useRunConfig } from '../../services';
+import { isALocalStackContainer, useDDClient, useLocalStack, useMountPoint, useRunConfig } from '../../services';
 import {
   DEFAULT_CONFIGURATION_ID,
   CORS_ALLOW_DEFAULT,
@@ -25,7 +25,6 @@ export const Controller = (): ReactElement => {
   const [isStarting, setIsStarting] = useState<boolean>(false);
   const [isStopping, setIsStopping] = useState<boolean>(false);
 
-
   const isUnhealthy = data && data.Status.includes('unhealthy');
   const tooltipLabel = isUnhealthy ? 'Unhealthy' : 'Healthy';
 
@@ -38,10 +37,23 @@ export const Controller = (): ReactElement => {
     }
   }, [isLoading]);
 
+  const buildMountArg = () => {
+    const OSPath = ddClient.host.platform === 'darwin'
+      ? 'Users'
+      : 'home';
+
+    const mountPath = mountPoint === 'tmp'
+      ? mountPoint
+      : `${OSPath}/${mountPoint}/.cache`;
+
+    return ['-e', `LOCALSTACK_VOLUME_DIR=/${mountPath}/localstack/volume`];
+  };
+
   const normalizeArguments = async () => {
-    const extendedFlag = FLAGS;
+    const extendedFlag = FLAGS.map(x => x); // clone
 
     const corsArg = ['-e', `EXTRA_CORS_ALLOWED_ORIGINS=${CORS_ALLOW_DEFAULT}`];
+    
     const addedArgs = runConfig.find(config => config.name === runningConfig)
       .vars.map(item => {
         if (item.variable === 'EXTRA_CORS_ALLOWED_ORIGINS') { // prevent overriding variable
@@ -55,11 +67,7 @@ export const Controller = (): ReactElement => {
         return ['-e', `${item.variable}=${item.value}`];
       }).flat();
 
-    const standardDir = `${ddClient.host.platform === 'darwin' ? 'Users' : 'home'}/${mountPoint}`;
-    const mountArg = ['-e', `LOCALSTACK_VOLUME_DIR=/${mountPoint === 'tmp' ? `${mountPoint}` :
-      `${standardDir}/.cache`}/localstack/volume`];
-
-    return [...extendedFlag, ...mountArg, ...corsArg, ...addedArgs, ...START_ARGS];
+    return [...extendedFlag, ...buildMountArg(), ...corsArg, ...addedArgs, ...START_ARGS];
   };
 
   const start = async () => {
@@ -76,8 +84,10 @@ export const Controller = (): ReactElement => {
     ddClient.docker.cli.exec('run', args, {
       stream: {
         onOutput(data): void {
-          if (data.stderr && !data.stderr.includes('Successfully') && // Api key activation is included in the error stream
-            !data.stderr.includes('Execution of "prepare_host"')) { 
+          if (data.stderr
+            && !data.stderr.includes('Successfully') // Api key activation is included in the error stream
+            && !data.stderr.includes('Execution of "prepare_host"')) {
+
             ddClient.desktopUI.toast.error(data.stderr);
             setIsStarting(false);
           }
@@ -97,9 +107,8 @@ export const Controller = (): ReactElement => {
     const containers = await ddClient.docker.listContainers({ 'all': true }) as [DockerContainer];
 
     const stoppedContainer = containers.find(container =>
-      (container.Image === 'localstack/localstack' ||
-        container.Image === 'localstack/localstack-pro') &&
-      !Object.keys(containers[0].Labels).some(key => key === 'cloud.localstack.spawner')
+      isALocalStackContainer(container)
+      && !Object.keys(containers[0].Labels).some(key => key === 'cloud.localstack.spawner')
       && container.Command === 'docker-entrypoint.sh');
 
     if (stoppedContainer.State === 'created') { // not started
@@ -107,7 +116,7 @@ export const Controller = (): ReactElement => {
       await ddClient.docker.cli.exec('rm', [stoppedContainer.Id]); // remove it 
 
       const spawnerContainer = containers.find(container =>
-        Object.keys(container.Labels).some(key => key === 'cloud.localstack.spawner'));
+        Object.keys(container.Labels).includes('cloud.localstack.spawner'));
 
       await ddClient.docker.cli.exec('stop', [spawnerContainer.Id]); // stop the spawner
     } else {

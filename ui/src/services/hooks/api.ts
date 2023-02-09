@@ -1,6 +1,7 @@
 import useSWR from 'swr';
 import { STORAGE_KEY_ENVVARS, STORAGE_KEY_LOCALSTACK, STORAGE_KEY_MOUNT } from '../../constants';
 import { DockerContainer, RunConfig } from '../../types';
+import { isALocalStackContainer } from '../util';
 import { useDDClient } from './utils';
 
 interface useRunConfigReturn {
@@ -87,12 +88,14 @@ export const useLocalStack = (): useLocalStackReturn => {
     cacheKey,
     async () => (await ddClient.docker.listContainers() as [DockerContainer])
       .find(container =>
-        (container.Image.split(':').at(0) === 'localstack/localstack' ||
-          container.Image.split(':').at(0) === 'localstack/localstack-pro') &&
-        container.Command !== 'bin/localstack update docker-images',
+        isALocalStackContainer(container) && container.Command !== 'bin/localstack update docker-images',
       ), {
       refreshInterval: 2000, compare:
-      (a, b) => a?.Id === b?.Id && a?.Status.split('(').at(1) === b?.Status.split('(').at(1), // detect change from healthy to unhealthy state
+      /*
+       * The Status of a container has a string formed like "Up N seconds (healthy)" or "Up N seconds (unhealthy)"
+       * so x?.Status.split('(').at(1) returns "healthy)" or "unhealthy)" and we can detect when this change occurs
+       */
+      (a, b) => a?.Id === b?.Id && a?.Status.split('(').at(1) === b?.Status.split('(').at(1), 
     },
   );
 

@@ -13,11 +13,11 @@ export const DownloadProgressDialog = ({ imageName, open, onClose }: DownloadPro
     <DialogContent>
       <Box display='flex' gap={5} alignItems="center">
         <Typography>
-          {`Pulling ${imageName}`}
+          Pulling {imageName}
         </Typography>
         <DownloadProgress
           imageName={imageName}
-          callback={() => onClose()}
+          callback={onClose}
         />
       </Box>
     </DialogContent>

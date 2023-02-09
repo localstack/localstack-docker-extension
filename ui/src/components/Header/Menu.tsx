@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { MoreVert } from '@mui/icons-material';
 import { IconButton, Menu } from '@mui/material';
-import { useDDClient } from '../../services';
+import { removeRepoFromImage, useDDClient } from '../../services';
 import { DockerImage } from '../../types';
 import { ConfirmableButton } from '../Feedback';
 import { UpdateDialog } from '../Views';
@@ -30,9 +30,15 @@ export const LongMenu = () => {
   };
 
   useEffect(() => {
-    (Promise.resolve(ddClient.docker.listImages()) as Promise<[DockerImage]>).then(images =>
+
+    const fetchImages = async () => {
+      const images = (await ddClient.docker.listImages()) as DockerImage[];
+      
       setImages(images.filter(image => image.RepoTags?.at(0).startsWith('localstack/'))
-        .map(image => image.RepoTags?.at(0).split('localstack/').at(-1))));
+        .map(image => removeRepoFromImage(image.RepoTags?.at(0))));
+    };
+
+    fetchImages();
   }, []);
 
   return (

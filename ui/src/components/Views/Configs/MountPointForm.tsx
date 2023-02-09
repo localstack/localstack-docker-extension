@@ -17,12 +17,13 @@ import { DockerImage } from '../../../types';
 import { DownloadProgress } from '../../Feedback';
 
 export const MountPointForm = (): ReactElement => {
-  const { setMountPointUser } = useMountPoint();
-  const ddClient = useDDClient();
   const [userState, setUserState] = useState({ loading: false, selectedUser: '', users: [] });
   const [hasLocalImage, setHasLocalImage] = useState({ checking: true, isPresent: false });
   const [isPullingImage, setIsPullingImage] = useState(false);
   const [triggerUseEffect, setTriggerUseEffect] = useState(false);
+
+  const { setMountPointUser } = useMountPoint();
+  const ddClient = useDDClient();
 
   const checkHomeDir = async () => {
     setUserState({ loading: true, selectedUser: userState.selectedUser, users: userState.users });
@@ -44,7 +45,7 @@ export const MountPointForm = (): ReactElement => {
     const execChecks = async () => {
       if (userState.users.length === 0) {
 
-        setHasLocalImage({ checking: true, isPresent: hasLocalImage.isPresent });
+        setHasLocalImage({ ...hasLocalImage, checking: true });
 
         const images = await ddClient.docker.listImages() as [DockerImage];
         const isPresent = images.some(image => image.RepoTags?.at(0) === LATEST_IMAGE);
@@ -64,6 +65,11 @@ export const MountPointForm = (): ReactElement => {
 
   const onClose = () => {
     setMountPointUser(userState.selectedUser);
+  };
+
+  const endOfDownloadCallback = () => {
+    setIsPullingImage(false);
+    setTriggerUseEffect(!triggerUseEffect);
   };
 
   return (
@@ -88,10 +94,7 @@ export const MountPointForm = (): ReactElement => {
                 </Typography>
                 <DownloadProgress
                   imageName={LATEST_IMAGE}
-                  callback={() => {
-                    setIsPullingImage(false);
-                    setTriggerUseEffect(!triggerUseEffect);
-                  }} />
+                  callback={endOfDownloadCallback} />
               </>
             }
             {

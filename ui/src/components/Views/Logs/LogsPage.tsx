@@ -45,7 +45,7 @@ export const LogsPage = (): ReactElement => {
         {logs.map(log => (
           <>
             <Typography>
-              {`${log}`}
+              {log}
             </Typography>
             <br />
           </>
