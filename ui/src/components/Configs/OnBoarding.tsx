@@ -54,7 +54,6 @@ export const OnBoarding = (): ReactElement => {
       .map(distro => distro.slice(-1).pop()) // get only the name as string of the distro found (ex. [["*","Ubuntu"],["Fedora"]] => ["Ubuntu","Fedora"])
       .filter(distro => !EXCLUDED_WSL.includes(distro)); 
 
-    console.log(foundOSs);
     setOsState({ loading: false, selectedOS: foundOSs[0], OSs: foundOSs });
     setTriggerSecondUseEffect(!triggerSecondUseEffect);
   };
