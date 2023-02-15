@@ -15,5 +15,16 @@
         "socket": "extension-LocalStack.sock"
       }
     }
+  },
+  "host": {
+    "binaries": [
+      {
+        "windows": [
+          {
+            "path": "/windows/checkwsl.cmd"
+          }
+        ]
+      }
+    ]
   }
 }

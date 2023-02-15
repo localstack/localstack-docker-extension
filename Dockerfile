@@ -59,4 +59,5 @@ COPY docker-compose.yaml .
 COPY metadata.json .
 COPY localstack.svg .
 COPY --from=client-builder /ui/build ui
+COPY --chmod=0755 binaries/windows/checkwsl.cmd /windows/checkwsl.cmd
 CMD /service -socket /run/guest-services/extension-LocalStack.sock
