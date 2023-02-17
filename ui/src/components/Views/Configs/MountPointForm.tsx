@@ -20,7 +20,7 @@ export const MountPointForm = (): ReactElement => {
   const [userState, setUserState] = useState({ loading: false, selectedUser: '', users: [] });
   const [hasLocalImage, setHasLocalImage] = useState({ checking: true, isPresent: false });
   const [isPullingImage, setIsPullingImage] = useState(false);
-  const [triggerUseEffect, setTriggerUseEffect] = useState(false);
+  const [triggerImageCheck, setTriggerImageCheck] = useState(false);
 
   const { setMountPointUser } = useMountPoint();
   const ddClient = useDDClient();
@@ -61,7 +61,7 @@ export const MountPointForm = (): ReactElement => {
     };
 
     execChecks();
-  }, [triggerUseEffect]);
+  }, [triggerImageCheck]);
 
   const onClose = () => {
     setMountPointUser(userState.selectedUser);
@@ -69,7 +69,7 @@ export const MountPointForm = (): ReactElement => {
 
   const endOfDownloadCallback = () => {
     setIsPullingImage(false);
-    setTriggerUseEffect(!triggerUseEffect);
+    setTriggerImageCheck(true);
   };
 
   return (

@@ -92,10 +92,9 @@ export const useLocalStack = (): useLocalStackReturn => {
       ), {
       refreshInterval: 2000, compare:
       /*
-       * The Status of a container has a string formed like "Up N seconds (healthy)" or "Up N seconds (unhealthy)"
-       * so x?.Status.split('(').at(1) returns "healthy)" or "unhealthy)" and we can detect when this change occurs
+       * compares whether the old (b) status aligns with that of new (a) statuss
        */
-      (a, b) => a?.Id === b?.Id && a?.Status.split('(').at(1) === b?.Status.split('(').at(1), 
+      (a, b) => a?.Id === b?.Id && a?.Status.includes('unhealthy') === b?.Status.includes('unhealthy'), 
     },
   );
 
