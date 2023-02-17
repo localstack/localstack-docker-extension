@@ -19,9 +19,22 @@
   "host": {
     "binaries": [
       {
+        "darwin": [
+          {
+            "path": "/darwin/checkUser.sh"
+          }
+        ],
+        "linux": [
+          {
+            "path": "/linux/checkUser.sh"
+          }
+        ],
         "windows": [
           {
-            "path": "/windows/checkwsl.cmd"
+            "path": "/windows/checkWSLOS.cmd"
+          },
+          {
+            "path": "/windows/checkUser.cmd"
           }
         ]
       }

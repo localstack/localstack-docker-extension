@@ -7,7 +7,7 @@ import {
 import { createStyles, makeStyles } from '@mui/styles';
 import { Refresh } from '@mui/icons-material';
 import { SystemStatus as SystemStatusIcon } from './SystemStatus';
-import { useLocalStackHealth, useLocalStack, Capitalize } from '../../../services';
+import { useLocalStackHealth, useLocalStack, capitalize } from '../../../services';
 import { HealthState } from '../../../types';
 
 const ORDER = [
@@ -71,7 +71,7 @@ export const StatusPage = (): ReactElement => {
               {statusesMap[status] && (
                 <Box>
                   <Typography variant="caption">
-                    {Capitalize(status)}
+                    {capitalize(status)}
                   </Typography>
                   <List className={classes.list} dense>
                     {Object.entries(statusesMap[status] ?? {}).map(([k, v]) => (

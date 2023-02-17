@@ -19,7 +19,7 @@ const useStyles = makeStyles((theme: Theme) => createStyles({
 export const ConfigPage = (): ReactElement => {
 
   const { runConfig, deleteConfig } = useRunConfig();
-  const { setMountPointUser } = useMountPoint();
+  const { setMountPointData } = useMountPoint();
   const [openModal, setOpenModal] = useState<boolean>(false);
   const [targetConfig, setTargetConfig] = useState<RunConfig | null>(null);
 
@@ -83,7 +83,7 @@ export const ConfigPage = (): ReactElement => {
         >
           New
         </Button>
-        <Button onClick={() => setMountPointUser('')}>
+        <Button onClick={() => setMountPointData('')}>
           Change mount point
         </Button>
       </ButtonGroup>

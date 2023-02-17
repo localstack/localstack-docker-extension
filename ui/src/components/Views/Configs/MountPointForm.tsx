@@ -12,45 +12,26 @@ import {
 } from '@mui/material';
 import React, { ReactElement, useEffect, useState } from 'react';
 import { LATEST_IMAGE } from '../../../constants';
-import { removeNullBytes, useDDClient, useMountPoint } from '../../../services';
-import { DockerImage } from '../../../types';
+import { getOSsFromBinary, getUsersFromBinaryWindows, useDDClient, useMountPoint } from '../../../services';
 import { DownloadProgress } from '../../Feedback';
-
-const EXCLUDED_WSL = ['docker-desktop','docker-desktop-data'];
 
 export const MountPointForm = (): ReactElement => {
   
   const [userState, setUserState] = useState({ loading: false, selectedUser: '', users: [] });
   const [osState, setOsState] = useState({ loading: false, selectedOS: '', OSs: [] });
-  const [hasLocalImage, setHasLocalImage] = useState({ checking: true, isPresent: false });
   const [isPullingImage, setIsPullingImage] = useState(false);
   const [triggerFirstUseEffect, setTriggerFirstUseEffect] = useState(false);
   const [triggerSecondUseEffect, setTriggerSecondUseEffect] = useState(false);
 
-  const { setMountPointUser } = useMountPoint();
+  const { setMountPointData } = useMountPoint();
   const ddClient = useDDClient();
-
-  const buildLSArguments = (mountPath: string): string[] =>
-    ['--rm', '--entrypoint=', '-v', `${mountPath}:/users`, 'localstack/localstack', 'ls', '/users'];
-
-  const getPathValue = () => {
-    if(ddClient.host.platform === 'win32'){
-      return `\\\\wsl$\\${osState.selectedOS}\\home`;
-    }
-    return ddClient.host.platform === 'darwin' ? '/Users' : '/home';
-  };
       
   const checkWindowsDistro = async () => {
     setOsState({ ...osState, loading: true});
 
-    const res = await ddClient.extension.host?.cli.exec('checkwsl.cmd',[]);
+    const res = await ddClient.extension.host?.cli.exec('checkWSLOS.cmd',[]);
 
-    const foundOSs = res.stdout.split('\n').slice(3,-1) // get only the wsl items
-      .map(str => removeNullBytes(str).split(' ').filter((subStr: string) => subStr.length > 0) // remove space and null bytes
-        .slice(0,-2)) // remove status and final /r
-      .sort((a,b) => b.length -a.length) // put the selected OS as first of the list (it has * in front)
-      .map(distro => distro.slice(-1).pop()) // get only the name as string of the distro found (ex. [["*","Ubuntu"],["Fedora"]] => ["Ubuntu","Fedora"])
-      .filter(distro => !EXCLUDED_WSL.includes(distro)); 
+    const foundOSs = getOSsFromBinary(res.stdout);
 
     setOsState({ loading: false, selectedOS: foundOSs[0], OSs: foundOSs });
     setTriggerSecondUseEffect(!triggerSecondUseEffect);
@@ -59,15 +40,21 @@ export const MountPointForm = (): ReactElement => {
   const checkUser = async () => {
     setUserState({ ...userState, loading: true });
     
-    const res = await ddClient.docker.cli.exec('run', buildLSArguments(getPathValue()));
+    let binary = 'checkUser.sh';
+    if (ddClient.host.platform === 'win32') {
+      binary = 'checkUser.cmd';
+    }
+
+    const res = await ddClient.extension.host?.cli.exec(binary, [osState.selectedOS]);
+
+    const foundUsers = getUsersFromBinaryWindows(res.stdout);
 
     if (res.stderr !== '' || res.stdout === '') {
       ddClient.desktopUI.toast.error(`Error while locating users: ${res.stderr} using /tmp as mount point`);
       setUserState({ loading: false, selectedUser: 'tmp', users: ['tmp'] });
-      setMountPointUser('tmp');
+      setMountPointData('tmp');
     }
-    const foundUsers = res.stdout.split('\n');
-    foundUsers.pop();
+    
     setUserState({ loading: false, selectedUser: foundUsers[0], users: foundUsers });
   };
 
@@ -81,20 +68,9 @@ export const MountPointForm = (): ReactElement => {
 
   useEffect(() => {
     const execChecks = async () => {
-      if (userState.users.length === 0) {
-
-        setHasLocalImage({ ...hasLocalImage, checking: true });
-
-        const images = await ddClient.docker.listImages() as [DockerImage];
-        const isPresent = images.some(image => image.RepoTags?.at(0) === LATEST_IMAGE);
-
-        setHasLocalImage({ checking: false, isPresent });
-
-        if (isPresent) {
-          locateMountPoint();
-        } else {
-          setIsPullingImage(true);
-        }
+      if (userState.users.length === 0 
+        || (ddClient.host.platform === 'win32' && osState.OSs.length === 0)) {
+        locateMountPoint();
       }
     };
 
@@ -108,7 +84,7 @@ export const MountPointForm = (): ReactElement => {
   },[triggerSecondUseEffect]);
 
   const onClose = () => {
-    setMountPointUser(`${userState.selectedUser},${osState.selectedOS}`);
+    setMountPointData(`${userState.selectedUser},${osState.selectedOS}`);
   };
 
   const endOfDownloadCallback = () => {
@@ -139,11 +115,6 @@ export const MountPointForm = (): ReactElement => {
               </FormControl>
           }
           <Box marginBottom={5} display="flex" gap={5} alignItems="center">
-            {hasLocalImage.checking &&
-              <Typography>
-                Checking for local LocalStack image
-              </Typography>
-            }
             {userState.loading &&
               <Typography>
                 Checking for users
@@ -165,7 +136,7 @@ export const MountPointForm = (): ReactElement => {
               </>
             }
             {
-              (hasLocalImage.checking || userState.loading || osState.loading) && <CircularProgress />
+              (userState.loading || osState.loading) && <CircularProgress />
             }
             {
               userState.users.length > 0 &&

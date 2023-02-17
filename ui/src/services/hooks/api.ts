@@ -52,7 +52,7 @@ interface useMountPointReturn {
   user: string | null,
   os: string | null,
   isLoading: boolean,
-  setMountPointUser: (data: string) => unknown;
+  setMountPointData: (data: string) => unknown;
 }
 
 export const useMountPoint = (): useMountPointReturn => {
@@ -64,7 +64,7 @@ export const useMountPoint = (): useMountPointReturn => {
     async () => (ddClient.extension.vm.service.get('/mount') as Promise<HTTPMessageBody>),
   );
 
-  const setMountPointUser = async (user: string) => {
+  const setMountPointData = async (user: string) => {
     await ddClient.extension.vm.service.post('/mount', { Data: user });
     mutate();
   };
@@ -75,7 +75,7 @@ export const useMountPoint = (): useMountPointReturn => {
     user: fileContent ? fileContent.split(',').at(0) : null,
     os: fileContent && fileContent.split(',').length> 1 ? fileContent.split(',').at(1) : null,
     isLoading: isValidating || (!error && !data),
-    setMountPointUser,
+    setMountPointData,
   };
 };
 
