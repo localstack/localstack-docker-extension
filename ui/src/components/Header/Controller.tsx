@@ -20,7 +20,7 @@ export const Controller = (): ReactElement => {
   const { data, mutate } = useLocalStack();
   const [runningConfig, setRunningConfig] = useState<string>('Default');
   const isRunning = data && data.State === 'running';
-  const { data: mountPoint } = useMountPoint();
+  const { user, os } = useMountPoint();
   const [downloadProps, setDownloadProps] = useState({ open: false, image: LATEST_IMAGE });
   const [isStarting, setIsStarting] = useState<boolean>(false);
   const [isStopping, setIsStopping] = useState<boolean>(false);
@@ -38,13 +38,20 @@ export const Controller = (): ReactElement => {
   }, [isLoading]);
 
   const buildMountArg = () => {
+    if(ddClient.host.platform === 'win32'){
+      if(os && user){
+        return ['-e', `LOCALSTACK_VOLUME_DIR=\\\\wsl$\\${os}\\home\\${user}\\.cache\\localstack\\volume`];
+      }
+      return ['e', 'LOCALSTACK_VOLUME_DIR=/tmp/localstack/volume'];
+    }
+
     const OSPath = ddClient.host.platform === 'darwin'
       ? 'Users'
       : 'home';
 
-    const mountPath = mountPoint === 'tmp'
-      ? mountPoint
-      : `${OSPath}/${mountPoint}/.cache`;
+    const mountPath = user === 'tmp'
+      ? user
+      : `${OSPath}/${user}/.cache`;
 
     return ['-e', `LOCALSTACK_VOLUME_DIR=/${mountPath}/localstack/volume`];
   };

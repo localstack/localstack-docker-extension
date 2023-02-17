@@ -49,7 +49,8 @@ export const useRunConfig = (): useRunConfigReturn => {
 };
 
 interface useMountPointReturn {
-  data: string | null,
+  user: string | null,
+  os: string | null,
   isLoading: boolean,
   setMountPointUser: (data: string) => unknown;
 }
@@ -68,8 +69,11 @@ export const useMountPoint = (): useMountPointReturn => {
     mutate();
   };
 
+  const fileContent = (!error && data) ? data.Message : null;
+
   return {
-    data: (!error && data) ? data.Message : null,
+    user: fileContent ? fileContent.split(',').at(0) : null,
+    os: fileContent && fileContent.split(',').length> 1 ? fileContent.split(',').at(1) : null,
     isLoading: isValidating || (!error && !data),
     setMountPointUser,
   };

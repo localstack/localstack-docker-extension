@@ -18,7 +18,7 @@ import { DownloadProgress } from '../../Feedback';
 
 const EXCLUDED_WSL = ['docker-desktop','docker-desktop-data'];
 
-export const OnBoarding = (): ReactElement => {
+export const MountPointForm = (): ReactElement => {
   
   const [userState, setUserState] = useState({ loading: false, selectedUser: '', users: [] });
   const [osState, setOsState] = useState({ loading: false, selectedOS: '', OSs: [] });
@@ -108,7 +108,7 @@ export const OnBoarding = (): ReactElement => {
   },[triggerSecondUseEffect]);
 
   const onClose = () => {
-    setMountPointUser(userState.selectedUser);
+    setMountPointUser(`${userState.selectedUser},${osState.selectedOS}`);
   };
 
   const endOfDownloadCallback = () => {
