@@ -1,4 +1,3 @@
-
 import {
   Box,
   Button,
@@ -12,11 +11,10 @@ import {
   Typography,
 } from '@mui/material';
 import React, { ReactElement, useEffect, useState } from 'react';
-import { LATEST_IMAGE } from '../../constants';
-import { removeNullBytes } from '../../services/generic/utils';
-import { useDDClient, useMountPoint } from '../../services/hooks';
-import { DockerImage } from '../../types';
-import { DownloadProgress } from '../DownloadProgress/DownloadProgress';
+import { LATEST_IMAGE } from '../../../constants';
+import { removeNullBytes, useDDClient, useMountPoint } from '../../../services';
+import { DockerImage } from '../../../types';
+import { DownloadProgress } from '../../Feedback';
 
 const EXCLUDED_WSL = ['docker-desktop','docker-desktop-data'];
 
@@ -159,9 +157,11 @@ export const OnBoarding = (): ReactElement => {
             {isPullingImage &&
               <>
                 <Typography>
-                  Pulling localstack/localstack:latest... Please do not exit this view
+                  Pulling localstack/localstack:latest
                 </Typography>
-                <DownloadProgress callback={endOfDownloadCallback} />
+                <DownloadProgress
+                  imageName={LATEST_IMAGE}
+                  callback={endOfDownloadCallback} />
               </>
             }
             {
@@ -186,11 +186,12 @@ export const OnBoarding = (): ReactElement => {
             Select where LocalStack will be mounted
           </Typography>
           <Typography variant='subtitle2'>
-            {`For MacOS users it will be under /Users/${userState.selectedUser || 'loading...'}/.localstack-volume`}
+            {`For MacOS users it will be under /Users/${userState.selectedUser || 'loading...'} \
+            /.cache/localstack/volume`}
           </Typography>
           <Typography variant='subtitle2' gutterBottom>
             {`For Linux/Windows users it will be under \
-             /home/${userState.selectedUser || 'loading...'}/.localstack-volume`}
+             /home/${userState.selectedUser || 'loading...'}/.cache/localstack/volume`}
           </Typography>
         </Box>
       </DialogContent>

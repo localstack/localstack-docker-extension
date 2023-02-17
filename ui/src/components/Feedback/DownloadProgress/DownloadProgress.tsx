@@ -1,7 +1,8 @@
 import React, { ReactElement, useEffect, useState } from 'react';
-import { useDDClient } from '../../services/hooks';
+import { useDDClient } from '../../../services';
 import { CircularProgressWithLabel } from './CircularProgressWithLabel';
 
+const SKIPPING_KEYS = ['Digest','Status','latest']; 
 
 const statusValues = new Map([
   ['Waiting', 0],
@@ -15,19 +16,20 @@ const statusValues = new Map([
 ]);
 
 interface DownloadProgressProps {
-  callback: () => unknown;
+  callback?: () => unknown;
+  imageName: string;
 }
 
-export const DownloadProgress = ({ callback }: DownloadProgressProps): ReactElement => {
+export const DownloadProgress = ({ callback, imageName }: DownloadProgressProps): ReactElement => {
 
   const ddClient = useDDClient();
   const [statusMap, setStatusMap] = useState<Map<string, string>>(new Map());
-
+  const [isDone, setIsDone] = useState<boolean>(false);
   const percentage = Array.from(statusMap.entries())
     .reduce((partialSum, [, value]) => partialSum + statusValues.get(value), 0) / statusMap.size;
 
   useEffect(() => {
-    ddClient.docker.cli.exec('pull', ['localstack/localstack:latest'], {
+    ddClient.docker.cli.exec('pull', [imageName], {
       stream: {
         onOutput(data): void {
           if (data.stderr) {
@@ -35,7 +37,13 @@ export const DownloadProgress = ({ callback }: DownloadProgressProps): ReactElem
           }
 
           const [key, status] = data.stdout.split(':').map(item => item.trim());
-          if (key === 'Status' || key === 'Digest' || key === 'latest' || status === 'latest') {
+
+          if (SKIPPING_KEYS.includes(key) || status === 'latest') { // don't process lines that are not in the format hash: status
+            return;
+          }
+          
+          if (status.startsWith('Image is up to date')) { // otherwise if Image is up to date nothing is downloaded and the progress remains to 0
+            setIsDone(true);
             return;
           }
 
@@ -53,7 +61,8 @@ export const DownloadProgress = ({ callback }: DownloadProgressProps): ReactElem
     });
   }, []);
 
+  const percentageValue = Number.isNaN(percentage) ? 0 : percentage;
   return (
-    <CircularProgressWithLabel value={Number.isNaN(percentage) ? 0 : percentage} />
+    <CircularProgressWithLabel value={isDone ? 100 : percentageValue} />
   );
 };

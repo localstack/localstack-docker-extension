@@ -6,8 +6,8 @@ import {
   Typography,
 } from '@mui/material';
 import React, { ReactElement, useEffect, useState } from 'react';
-import { UPDATE_ARGS } from '../../constants';
-import { useDDClient } from '../../services/hooks';
+import { UPDATE_ARGS } from '../../../constants';
+import { useDDClient } from '../../../services';
 
 type Props = {
   open: boolean,

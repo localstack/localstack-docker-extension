@@ -2,7 +2,7 @@ import { Theme } from '@mui/material';
 import { createStyles, makeStyles } from '@mui/styles';
 import classnames from 'classnames';
 import React, { ReactElement } from 'react';
-import { HealthState } from '../../types';
+import { HealthState } from '../../../types';
 
 const useStyles = makeStyles((theme: Theme) => createStyles({
   dot: {
@@ -33,7 +33,7 @@ export interface SystemStatusProps {
   state: HealthState;
 }
 
-export const Status = ({ state }: SystemStatusProps): ReactElement => {
+export const SystemStatus = ({ state }: SystemStatusProps): ReactElement => {
   const classes = useStyles();
 
   return (
