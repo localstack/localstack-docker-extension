@@ -1,18 +1,18 @@
 import { Box, Card, Typography } from '@mui/material';
 import React, { ReactElement, useEffect, useState } from 'react';
-import { useDDClient, useLocalStack } from '../../services/hooks';
+import { useDDClient, useLocalStack } from '../../../services';
 
-export const Logs = (): ReactElement => {
+export const LogsPage = (): ReactElement => {
   const [logs, setLogs] = useState<string[]>([]);
   const ddClient = useDDClient();
   const { data } = useLocalStack();
-
+  
   useEffect(() => {
     if (data) {
       const listener = ddClient.docker.cli.exec('logs', ['-f', data.Id], {
         stream: {
           onOutput(data): void {
-            setLogs((current) => [...current, data.stdout]);
+            setLogs((current) => [...current, data.stdout ? data.stdout : data.stderr]);
           },
           onError(error: unknown): void {
             ddClient.desktopUI.toast.error('An error occurred');
@@ -45,7 +45,7 @@ export const Logs = (): ReactElement => {
         {logs.map(log => (
           <>
             <Typography>
-              {`${log}`}
+              {log}
             </Typography>
             <br />
           </>

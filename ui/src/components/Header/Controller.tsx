@@ -1,17 +1,18 @@
 import React, { ReactElement, useEffect, useState } from 'react';
-import { Chip, Button, ButtonGroup, Select, MenuItem, FormControl, Box } from '@mui/material';
+import { Chip, ButtonGroup, Select, MenuItem, FormControl, Box, Badge, Tooltip } from '@mui/material';
 import { PlayArrow, Stop } from '@mui/icons-material';
-import { createStyles, makeStyles } from '@mui/styles';
-import { DEFAULT_CONFIGURATION_ID, START_ARGS, STOP_ARGS } from '../../constants';
-import { DockerImage } from '../../types';
-import { useDDClient, useRunConfig, useLocalStack, useMountPoint } from '../../services/hooks';
+import { isALocalStackContainer, useDDClient, useLocalStack, useMountPoint, useRunConfig } from '../../services';
+import {
+  DEFAULT_CONFIGURATION_ID,
+  CORS_ALLOW_DEFAULT,
+  LATEST_IMAGE,
+  START_ARGS,
+  FLAGS,
+} from '../../constants';
 import { LongMenu } from './Menu';
-
-const useStyles = makeStyles(() => createStyles({
-  selectForm: {
-    color: '#ffffff',
-  },
-}));
+import { DockerContainer, DockerImage } from '../../types';
+import { DownloadProgressDialog } from '../Feedback/DownloadProgressDialog';
+import { ProgressButton } from '../Feedback';
 
 export const Controller = (): ReactElement => {
   const ddClient = useDDClient();
@@ -20,8 +21,12 @@ export const Controller = (): ReactElement => {
   const [runningConfig, setRunningConfig] = useState<string>('Default');
   const isRunning = data && data.State === 'running';
   const { data: mountPoint } = useMountPoint();
+  const [downloadProps, setDownloadProps] = useState({ open: false, image: LATEST_IMAGE });
+  const [isStarting, setIsStarting] = useState<boolean>(false);
+  const [isStopping, setIsStopping] = useState<boolean>(false);
 
-  const classes = useStyles();
+  const isUnhealthy = data && data.Status.includes('unhealthy');
+  const tooltipLabel = isUnhealthy ? 'Unhealthy' : 'Healthy';
 
   useEffect(() => {
     if (!isLoading && (!runConfig || !runConfig.find(item => item.name === 'Default'))) {
@@ -32,49 +37,120 @@ export const Controller = (): ReactElement => {
     }
   }, [isLoading]);
 
-  const start = async () => {
-    const images = await ddClient.docker.listImages() as [DockerImage];
-    if (!images.some(image => image.RepoTags?.at(0) === 'localstack/localstack:latest')) {
-      ddClient.desktopUI.toast.warning('localstack/localstack:latest not found; now pulling..');
-    } else {
-      ddClient.desktopUI.toast.success('Starting LocalStack');
-    }
-    const corsArg = '-e EXTRA_CORS_ALLOWED_ORIGINS=http://localhost:3000';
+  const buildMountArg = () => {
+    const OSPath = ddClient.host.platform === 'darwin'
+      ? 'Users'
+      : 'home';
+
+    const mountPath = mountPoint === 'tmp'
+      ? mountPoint
+      : `${OSPath}/${mountPoint}/.cache`;
+
+    return ['-e', `LOCALSTACK_VOLUME_DIR=/${mountPath}/localstack/volume`];
+  };
+
+  const normalizeArguments = async () => {
+    const extendedFlag = FLAGS.map(x => x); // clone
+
+    const corsArg = ['-e', `EXTRA_CORS_ALLOWED_ORIGINS=${CORS_ALLOW_DEFAULT}`];
+    
     const addedArgs = runConfig.find(config => config.name === runningConfig)
       .vars.map(item => {
-        if (item.variable === 'EXTRA_CORS_ALLOWED_ORIGINS') {
+        if (item.variable === 'EXTRA_CORS_ALLOWED_ORIGINS') { // prevent overriding variable
           corsArg.slice(0, 0);
-          return ['-e', `${item.variable}=${item.value},http://localhost:3000`];
+          return ['-e', `${item.variable}=${item.value},${CORS_ALLOW_DEFAULT}`];
         }
+        if (item.variable === 'DOCKER_FLAGS') {
+          extendedFlag[1] = FLAGS.at(1).slice(0, -1).concat(` ${item.value}'`);
+        }
+
         return ['-e', `${item.variable}=${item.value}`];
       }).flat();
 
+    return [...extendedFlag, ...buildMountArg(), ...corsArg, ...addedArgs, ...START_ARGS];
+  };
 
-    const standardDir = `${ddClient.host.platform === 'darwin' ? 'Users' : 'home'}/${mountPoint}`;
-    const mountArg = `-e LOCALSTACK_VOLUME_DIR=/${mountPoint === 'tmp' ? mountPoint : standardDir}/.localstack-volume`;
-      
-    ddClient.docker.cli.exec('run', [mountArg, corsArg, ...addedArgs, ...START_ARGS]).then(() => mutate());
+  const start = async () => {
+    const images = await ddClient.docker.listImages() as [DockerImage];
+    const haveLocally = images.some(image => image.RepoTags?.at(0) === LATEST_IMAGE);
+
+    if (!haveLocally) {
+      setDownloadProps({ open: true, image: LATEST_IMAGE });
+      return;
+    }
+    const args = await normalizeArguments();
+
+    setIsStarting(true);
+    ddClient.docker.cli.exec('run', args, {
+      stream: {
+        onOutput(data): void {
+          if (data.stderr
+            && !data.stderr.includes('Successfully') // Api key activation is included in the error stream
+            && !data.stderr.includes('Execution of "prepare_host"')) {
+
+            ddClient.desktopUI.toast.error(data.stderr);
+            setIsStarting(false);
+          }
+        },
+        onClose(exitCode) {
+          setIsStarting(false);
+          if (exitCode === 0) {
+            ddClient.desktopUI.toast.success('LocalStack started');
+          }
+        },
+      },
+    });
   };
 
   const stop = async () => {
-    ddClient.docker.cli.exec('run', STOP_ARGS).then(() => mutate());
+    setIsStopping(true);
+    const containers = await ddClient.docker.listContainers({ 'all': true }) as [DockerContainer];
+
+    const stoppedContainer = containers.find(container =>
+      isALocalStackContainer(container)
+      && !Object.keys(containers[0].Labels).some(key => key === 'cloud.localstack.spawner')
+      && container.Command === 'docker-entrypoint.sh');
+
+    if (stoppedContainer.State === 'created') { // not started
+
+      await ddClient.docker.cli.exec('rm', [stoppedContainer.Id]); // remove it 
+
+      const spawnerContainer = containers.find(container =>
+        Object.keys(container.Labels).includes('cloud.localstack.spawner'));
+
+      await ddClient.docker.cli.exec('stop', [spawnerContainer.Id]); // stop the spawner
+    } else {
+      await ddClient.docker.cli.exec('stop', [stoppedContainer.Id]);
+    }
+    setIsStopping(false);
+    mutate();
+  };
+
+  const onClose = () => {
+    setDownloadProps({ open: false, image: downloadProps.image });
+    start();
   };
 
   return (
     <Box display="flex" gap={1} alignItems="center">
+      <DownloadProgressDialog
+        imageName={downloadProps.image}
+        open={downloadProps.open}
+        onClose={onClose}
+      />
       <ButtonGroup variant="outlined">
-        {isRunning ?
-          <Button
+        {(isRunning && !isStarting) ?
+          <ProgressButton
             variant="contained"
+            loading={isStopping}
             onClick={stop}
             startIcon={<Stop />}>
             Stop
-          </Button>
+          </ProgressButton>
           :
           <Box display="flex" alignItems="center">
             <FormControl sx={{ m: 1, minWidth: 120, border: 'none' }} size="small">
               <Select
-                className={classes.selectForm}
                 value={runningConfig}
                 onChange={({ target }) => setRunningConfig(target.value)}
               >
@@ -86,22 +162,27 @@ export const Controller = (): ReactElement => {
               </Select>
             </FormControl>
             <Box>
-              <Button
+              <ProgressButton
                 variant="contained"
+                loading={isStarting}
                 onClick={start}
                 startIcon={<PlayArrow />}>
                 Start
-              </Button>
+              </ProgressButton>
 
             </Box>
           </Box>
         }
       </ButtonGroup>
-      <Chip
-        label={isRunning ? 'Running' : 'Stopped'}
-        color={isRunning ? 'success' : 'warning'}
-        sx={{ p: 2, borderRadius: 10 }}
-      />
+      <Tooltip title={data ? tooltipLabel : ''} >
+        <Badge color="error" overlap="circular" badgeContent=" " variant="dot" invisible={!isUnhealthy}>
+          <Chip
+            label={(isRunning && !isStarting) ? 'Running' : 'Stopped'}
+            color={(isRunning && !isStarting) ? 'success' : 'warning'}
+            sx={{ p: 2, borderRadius: 4 }}
+          />
+        </Badge>
+      </Tooltip>
       <LongMenu />
     </Box>
   );

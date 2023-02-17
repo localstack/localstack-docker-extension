@@ -1,6 +1,6 @@
 import React, { ReactElement, useState } from 'react';
 import { createStyles, makeStyles } from '@mui/styles';
-import { ControlledTabPanels, Header, Logs, OnBoarding, StartConfigs, SystemStatus } from './components';
+import { ControlledTabPanels, Header, LogsPage, MountPointForm, ConfigPage, StatusPage } from './components';
 import { useMountPoint } from './services/hooks';
 
 const useStyles = makeStyles(() => createStyles({
@@ -19,7 +19,7 @@ export const App = (): ReactElement => {
 
   return (
     <>
-      {shouldDialogOpen && <OnBoarding />}
+      {shouldDialogOpen && <MountPointForm />}
       <div className={classes.sticky}>
         <Header />
       </div>
@@ -29,15 +29,15 @@ export const App = (): ReactElement => {
         options={[
           {
             label: 'System Status',
-            panel: <SystemStatus />,
+            panel: <StatusPage />,
           },
           {
             label: 'Configurations',
-            panel: <StartConfigs />,
+            panel: <ConfigPage />,
           },
           {
             label: 'Logs',
-            panel: <Logs />,
+            panel: <LogsPage />,
           },
         ]}
       />

@@ -1,4 +1,3 @@
-
 import {
   Box,
   Button,
@@ -12,18 +11,19 @@ import {
   Typography,
 } from '@mui/material';
 import React, { ReactElement, useEffect, useState } from 'react';
-import { useDDClient, useMountPoint } from '../../services/hooks';
-import { DockerImage } from '../../types';
-import { DownloadProgress } from '../DownloadProgress/DownloadProgress';
+import { LATEST_IMAGE } from '../../../constants';
+import { useDDClient, useMountPoint } from '../../../services';
+import { DockerImage } from '../../../types';
+import { DownloadProgress } from '../../Feedback';
 
-
-export const OnBoarding = (): ReactElement => {
-  const { setMountPointUser } = useMountPoint();
-  const ddClient = useDDClient();
+export const MountPointForm = (): ReactElement => {
   const [userState, setUserState] = useState({ loading: false, selectedUser: '', users: [] });
   const [hasLocalImage, setHasLocalImage] = useState({ checking: true, isPresent: false });
   const [isPullingImage, setIsPullingImage] = useState(false);
-  const [triggerUseEffect, setTriggerUseEffect] = useState(false);
+  const [triggerImageCheck, setTriggerImageCheck] = useState(false);
+
+  const { setMountPointUser } = useMountPoint();
+  const ddClient = useDDClient();
 
   const checkHomeDir = async () => {
     setUserState({ loading: true, selectedUser: userState.selectedUser, users: userState.users });
@@ -41,19 +41,18 @@ export const OnBoarding = (): ReactElement => {
     setUserState({ loading: false, selectedUser: foundUsers[0], users: foundUsers });
   };
 
-  const checkLocalImage = async () => {
-    setHasLocalImage({ checking: true, isPresent: hasLocalImage.isPresent });
-    const images = await ddClient.docker.listImages() as [DockerImage];
-    const isPresent = images.filter(image => image.RepoTags?.at(0).split(':').at(0) === 'localstack/localstack');
-    setHasLocalImage({ checking: false, isPresent: isPresent.length > 0 });
-    return isPresent.length > 0;
-  };
-
   useEffect(() => {
     const execChecks = async () => {
       if (userState.users.length === 0) {
-        const isImagePresent = await checkLocalImage();
-        if (isImagePresent) {
+
+        setHasLocalImage({ ...hasLocalImage, checking: true });
+
+        const images = await ddClient.docker.listImages() as [DockerImage];
+        const isPresent = images.some(image => image.RepoTags?.at(0) === LATEST_IMAGE);
+
+        setHasLocalImage({ checking: false, isPresent });
+
+        if (isPresent) {
           checkHomeDir();
         } else {
           setIsPullingImage(true);
@@ -62,10 +61,15 @@ export const OnBoarding = (): ReactElement => {
     };
 
     execChecks();
-  }, [triggerUseEffect]);
+  }, [triggerImageCheck]);
 
   const onClose = () => {
     setMountPointUser(userState.selectedUser);
+  };
+
+  const endOfDownloadCallback = () => {
+    setIsPullingImage(false);
+    setTriggerImageCheck(true);
   };
 
   return (
@@ -86,12 +90,11 @@ export const OnBoarding = (): ReactElement => {
             {isPullingImage &&
               <>
                 <Typography>
-                  Pulling localstack/localstack:latest... Please do not exit this view
+                  Pulling localstack/localstack:latest
                 </Typography>
-                <DownloadProgress callback={() => {
-                  setIsPullingImage(false);
-                  setTriggerUseEffect(!triggerUseEffect);
-                }} />
+                <DownloadProgress
+                  imageName={LATEST_IMAGE}
+                  callback={endOfDownloadCallback} />
               </>
             }
             {
@@ -116,11 +119,12 @@ export const OnBoarding = (): ReactElement => {
             Select where LocalStack will be mounted
           </Typography>
           <Typography variant='subtitle2'>
-            {`For MacOS users it will be under /Users/${userState.selectedUser || 'loading...'}/.localstack-volume`}
+            {`For MacOS users it will be under /Users/${userState.selectedUser || 'loading...'} \
+            /.cache/localstack/volume`}
           </Typography>
           <Typography variant='subtitle2' gutterBottom>
             {`For Linux/Windows users it will be under \
-             /home/${userState.selectedUser || 'loading...'}/.localstack-volume`}
+             /home/${userState.selectedUser || 'loading...'}/.cache/localstack/volume`}
           </Typography>
         </Box>
       </DialogContent>
