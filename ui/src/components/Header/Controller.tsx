@@ -38,7 +38,7 @@ export const Controller = (): ReactElement => {
   }, [isLoading]);
 
   const buildMountArg = () => {
-    if(ddClient.host.platform === 'win32' && os && user){ // TODO think about it better
+    if(ddClient.host.platform === 'win32' && os && user){
       return ['-e', `LOCALSTACK_VOLUME_DIR=\\\\wsl$\\${os}\\home\\${user}\\.cache\\localstack\\volume`];
     }
 
@@ -46,7 +46,7 @@ export const Controller = (): ReactElement => {
       ? 'Users'
       : 'home';
 
-    return ['-e', `LOCALSTACK_VOLUME_DIR=/${OSPath}/${user}/localstack/volume`];
+    return ['-e', `LOCALSTACK_VOLUME_DIR=/${OSPath}/${user}/.cache/localstack/volume`];
   };
 
   const normalizeArguments = async () => {
