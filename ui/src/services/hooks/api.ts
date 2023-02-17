@@ -96,7 +96,7 @@ export const useLocalStack = (): useLocalStackReturn => {
       ), {
       refreshInterval: 2000, compare:
       /*
-       * compares whether the old (b) status aligns with that of new (a) statuss
+       * compares whether the old (b) status aligns with that of new (a) status
        */
       (a, b) => a?.Id === b?.Id && a?.Status.includes('unhealthy') === b?.Status.includes('unhealthy'), 
     },

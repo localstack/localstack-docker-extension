@@ -22,3 +22,7 @@ export function getUsersFromBinaryWindows(res: string): string[] {
     .map(str =>str.split(' ').at(-1) // get only dir name (ex "luca\r")
       .slice(0,-1)); // remove newline 
 }
+
+export function getUsersFromBinaryUnix(res: string): string[] {
+  return res.split('\n').slice(0,-1);
+}

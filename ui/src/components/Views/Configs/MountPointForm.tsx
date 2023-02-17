@@ -1,3 +1,4 @@
+import { ExecResult } from '@docker/extension-api-client-types/dist/v1';
 import {
   Box,
   Button,
@@ -12,7 +13,13 @@ import {
 } from '@mui/material';
 import React, { ReactElement, useEffect, useState } from 'react';
 import { LATEST_IMAGE } from '../../../constants';
-import { getOSsFromBinary, getUsersFromBinaryWindows, useDDClient, useMountPoint } from '../../../services';
+import { 
+  getOSsFromBinary,
+  getUsersFromBinaryUnix,
+  getUsersFromBinaryWindows,
+  useDDClient,
+  useMountPoint,
+} from '../../../services';
 import { DownloadProgress } from '../../Feedback';
 
 export const MountPointForm = (): ReactElement => {
@@ -40,19 +47,20 @@ export const MountPointForm = (): ReactElement => {
   const checkUser = async () => {
     setUserState({ ...userState, loading: true });
     
-    let binary = 'checkUser.sh';
+    let res: ExecResult;
+    let foundUsers = [];
     if (ddClient.host.platform === 'win32') {
-      binary = 'checkUser.cmd';
+      res = await ddClient.extension.host?.cli.exec('checkUser.cmd', [osState.selectedOS]);
+      foundUsers = getUsersFromBinaryWindows(res.stdout);
+    }else {
+      res = await ddClient.extension.host?.cli.exec('checkUser.sh', []);
+      foundUsers = getUsersFromBinaryUnix(res.stdout);
     }
 
-    const res = await ddClient.extension.host?.cli.exec(binary, [osState.selectedOS]);
-
-    const foundUsers = getUsersFromBinaryWindows(res.stdout);
-
     if (res.stderr !== '' || res.stdout === '') {
-      ddClient.desktopUI.toast.error(`Error while locating users: ${res.stderr} using /tmp as mount point`);
-      setUserState({ loading: false, selectedUser: 'tmp', users: ['tmp'] });
-      setMountPointData('tmp');
+      ddClient.desktopUI.toast.error(`Error while locating users: ${res.stderr} using /tmp/.cache as mount point`);
+      setUserState({ loading: false, selectedUser: '../tmp', users: ['tmp'] });
+      setMountPointData('../tmp');
     }
     
     setUserState({ loading: false, selectedUser: foundUsers[0], users: foundUsers });
@@ -177,4 +185,3 @@ export const MountPointForm = (): ReactElement => {
     </Dialog >
   );
 };
-
