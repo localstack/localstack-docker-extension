@@ -105,7 +105,7 @@ export const MountPointForm = (): ReactElement => {
     <Dialog open onClose={onClose}>
       <DialogContent>
         <Typography variant='h3'>
-            Default mount point settings
+          Default mount point settings
         </Typography>
         <br/>
         <Paper sx={{ padding: 1}}>
@@ -113,10 +113,10 @@ export const MountPointForm = (): ReactElement => {
             ddClient.host.platform === 'win32' &&
             <>
               <Typography  variant='subtitle1'>
-               WSL distro
+                WSL distro
               </Typography>
               <Typography variant='body2' >
-              Select in which WSL distro you want to mount the container
+                Select in which WSL distro you want to mount the container
               </Typography>
               {
                 osState.loading ?
@@ -139,10 +139,10 @@ export const MountPointForm = (): ReactElement => {
           }
           <>
             <Typography  variant='subtitle1'>
-               User
+              User
             </Typography>
             <Typography variant='body2'>
-                Select under which user you want to mount the container
+              Select under which user you want to mount the container
             </Typography>
             {
               userState.loading || osState.loading ?
@@ -186,14 +186,3 @@ export const MountPointForm = (): ReactElement => {
     </Dialog >
   );
 };
-
-/**
- * <Typography variant='subtitle2'>
-            {`For MacOS users it will be under \
-             /Users/${userState.selectedUser || 'loading...'}/.cache/localstack/volume`}
-          </Typography>
-          <Typography variant='subtitle2' gutterBottom>
-            {`For Linux/Windows users it will be under \
-             /home/${userState.selectedUser || 'loading...'}/.cache/localstack/volume`}
-          </Typography>
- */
