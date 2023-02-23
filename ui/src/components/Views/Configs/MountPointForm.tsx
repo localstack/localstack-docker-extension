@@ -1,18 +1,18 @@
 import { ExecResult } from '@docker/extension-api-client-types/dist/v1';
 import {
-  Box,
   Button,
   CircularProgress,
   Dialog,
   DialogActions,
   DialogContent,
+  Divider,
   FormControl,
   MenuItem,
+  Paper,
   Select,
   Typography,
 } from '@mui/material';
 import React, { ReactElement, useEffect, useState } from 'react';
-import { LATEST_IMAGE } from '../../../constants';
 import {
   getOSsFromBinary,
   getUsersFromBinaryUnix,
@@ -20,24 +20,25 @@ import {
   useDDClient,
   useMountPoint,
 } from '../../../services';
-import { DownloadProgress } from '../../Feedback';
+
+const ShrinkedCircularProgess = (): ReactElement =>  <CircularProgress size={20} sx={{ margin: 1}}/>;
 
 export const MountPointForm = (): ReactElement => {
 
   const [userState, setUserState] = useState({ loading: false, selectedUser: '', users: [] });
   const [osState, setOsState] = useState({ loading: false, selectedOS: '', OSs: [] });
-  const [isPullingImage, setIsPullingImage] = useState(false);
-  const [triggerFirstUseEffect, setTriggerFirstUseEffect] = useState(false);
   const [triggerSecondUseEffect, setTriggerSecondUseEffect] = useState(false);
 
   const { setMountPointData } = useMountPoint();
   const ddClient = useDDClient();
 
+  const firstFolder = ddClient.host.platform === 'darwin' ? 'Users' : 'home';
+
   const checkWindowsDistro = async () => {
     setOsState({ ...osState, loading: true });
 
     const res = await ddClient.extension.host?.cli.exec('checkWSLOS.cmd', []);
-
+    
     const foundOSs = getOSsFromBinary(res.stdout);
 
     setOsState({ loading: false, selectedOS: foundOSs[0], OSs: foundOSs });
@@ -83,7 +84,7 @@ export const MountPointForm = (): ReactElement => {
     };
 
     execChecks();
-  }, [triggerFirstUseEffect]);
+  }, []);
 
   useEffect(() => {
     if (osState.selectedOS) {
@@ -95,11 +96,6 @@ export const MountPointForm = (): ReactElement => {
     setMountPointData(`${userState.selectedUser},${osState.selectedOS}`);
   };
 
-  const endOfDownloadCallback = () => {
-    setIsPullingImage(false);
-    setTriggerFirstUseEffect(!triggerFirstUseEffect);
-  };
-
   const handleOsChange = (target: string) => {
     setOsState({ ...osState, selectedOS: target });
     checkUser();
@@ -108,71 +104,76 @@ export const MountPointForm = (): ReactElement => {
   return (
     <Dialog open onClose={onClose}>
       <DialogContent>
-        <Box >
+        <Typography variant='h3'>
+            Default mount point settings
+        </Typography>
+        <br/>
+        <Paper sx={{ padding: 1}}>
           {
-            osState.OSs.length > 0 &&
-            <FormControl sx={{ minWidth: 120 }} size="small" variant='outlined'>
-              <Select
-                value={osState.selectedOS || osState.OSs[0]}
-                onChange={({ target }) => handleOsChange(target.value)}
-              >
-                {osState.OSs.map(os => (
-                  <MenuItem key={os} value={os}>{os}</MenuItem>
-                ))}
-              </Select>
-            </FormControl>
+            ddClient.host.platform === 'win32' &&
+            <>
+              <Typography  variant='subtitle1'>
+               WSL distro
+              </Typography>
+              <Typography variant='body2' >
+              Select in which WSL distro you want to mount the container
+              </Typography>
+              {
+                osState.loading ?
+                  <ShrinkedCircularProgess/> 
+                  :
+                  <FormControl sx={{ minWidth: 120 }} size="small" variant='outlined'>
+                    <Select
+                      value={osState.selectedOS || osState.OSs[0]}
+                      onChange={({ target }) => handleOsChange(target.value)}
+                    >
+                      {osState.OSs.map(os => (
+                        <MenuItem key={os} value={os}>{os}</MenuItem>
+                      ))}
+                    </Select>
+                  </FormControl>
+              }
+             
+              <Divider/>
+            </>
           }
-          <Box marginBottom={5} display="flex" gap={5} alignItems="center">
-            {userState.loading &&
-              <Typography>
-                Checking for users
-              </Typography>
-            }
-            {osState.loading &&
-              <Typography>
-                Checking for your wsl OS
-              </Typography>
-            }
-            {isPullingImage &&
-              <>
-                <Typography>
-                  Pulling localstack/localstack:latest
-                </Typography>
-                <DownloadProgress
-                  imageName={LATEST_IMAGE}
-                  callback={endOfDownloadCallback} />
-              </>
-            }
+          <>
+            <Typography  variant='subtitle1'>
+               User
+            </Typography>
+            <Typography variant='body2'>
+                Select under which user you want to mount the container
+            </Typography>
             {
-              (userState.loading || osState.loading) && <CircularProgress />
+              userState.loading || osState.loading ?
+                <ShrinkedCircularProgess/> 
+                :
+                <FormControl sx={{ minWidth: 120 }} size="small" variant='outlined'>
+                  <Select
+                    value={userState.selectedUser || userState.users[0]}
+                    onChange={({ target }) => setUserState({ 
+                      loading: userState.loading,
+                      selectedUser: target.value,
+                      users: userState.users,
+                    })
+                    }
+                  >
+                    {userState.users.map(user => (
+                      <MenuItem key={user} value={user}>{user}</MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
             }
-            {
-              userState.users.length > 0 &&
-              <FormControl sx={{ minWidth: 120 }} size="small" variant='outlined'>
-                <Select
-                  value={userState.selectedUser || userState.users[0]}
-                  onChange={({ target }) =>
-                    setUserState({ loading: userState.loading, selectedUser: target.value, users: userState.users })}
-                >
-                  {userState.users.map(user => (
-                    <MenuItem key={user} value={user}>{user}</MenuItem>
-                  ))}
-                </Select>
-              </FormControl>
-            }
-          </Box>
-          <Typography variant='h3' gutterBottom>
-            Select where LocalStack will be mounted
-          </Typography>
-          <Typography variant='subtitle2'>
-            {`For MacOS users it will be under /Users/${userState.selectedUser || 'loading...'} \
-            /.cache/localstack/volume`}
-          </Typography>
-          <Typography variant='subtitle2' gutterBottom>
-            {`For Linux/Windows users it will be under \
-             /home/${userState.selectedUser || 'loading...'}/.cache/localstack/volume`}
-          </Typography>
-        </Box>
+          </>
+        </Paper>
+        <br/>
+        <Typography variant='body1'>
+          {`The LocalStack container will be mounted under \
+             /${firstFolder}/${userState.selectedUser || 'loading...'}/.cache/localstack/volume`}
+        </Typography>
+        <Typography variant="caption" display="block" gutterBottom>
+          *You can still change this by overriding the LOCALSTACK_VOLUME_DIR enviroment variable
+        </Typography>
       </DialogContent>
       <DialogActions>
         <Button
@@ -185,3 +186,14 @@ export const MountPointForm = (): ReactElement => {
     </Dialog >
   );
 };
+
+/**
+ * <Typography variant='subtitle2'>
+            {`For MacOS users it will be under \
+             /Users/${userState.selectedUser || 'loading...'}/.cache/localstack/volume`}
+          </Typography>
+          <Typography variant='subtitle2' gutterBottom>
+            {`For Linux/Windows users it will be under \
+             /home/${userState.selectedUser || 'loading...'}/.cache/localstack/volume`}
+          </Typography>
+ */
