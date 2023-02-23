@@ -111,17 +111,21 @@ export const Controller = (): ReactElement => {
       && !Object.keys(containers[0].Labels).some(key => key === 'cloud.localstack.spawner')
       && container.Command === 'docker-entrypoint.sh');
 
-    if (stoppedContainer.State === 'created') { // not started
+    const spawnerContainer = containers.find(container =>
+      Object.keys(container.Labels).includes('cloud.localstack.spawner'));
 
-      await ddClient.docker.cli.exec('rm', [stoppedContainer.Id]); // remove it 
-
-      const spawnerContainer = containers.find(container =>
-        Object.keys(container.Labels).includes('cloud.localstack.spawner'));
-
+    if (spawnerContainer) {
       await ddClient.docker.cli.exec('stop', [spawnerContainer.Id]); // stop the spawner
-    } else {
-      await ddClient.docker.cli.exec('stop', [stoppedContainer.Id]);
     }
+
+    if (stoppedContainer) {
+      if (stoppedContainer.State === 'created') { // not started
+        await ddClient.docker.cli.exec('rm', [stoppedContainer.Id]); // remove it 
+      } else {
+        await ddClient.docker.cli.exec('stop', [stoppedContainer.Id]);
+      }
+    }
+
     setIsStopping(false);
     mutate();
   };
