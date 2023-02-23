@@ -38,7 +38,9 @@ export const Controller = (): ReactElement => {
   }, [isLoading]);
 
   const buildMountArg = () => {
-    if(ddClient.host.platform === 'win32' && os && user){
+    if (ddClient.host.platform === 'win32'
+      && os
+      && user) {
       return ['-e', `LOCALSTACK_VOLUME_DIR=\\\\wsl$\\${os}\\home\\${user}\\.cache\\localstack\\volume`];
     }
 
@@ -53,7 +55,7 @@ export const Controller = (): ReactElement => {
     const extendedFlag = FLAGS.map(x => x); // clone
 
     const corsArg = ['-e', `EXTRA_CORS_ALLOWED_ORIGINS=${CORS_ALLOW_DEFAULT}`];
-    
+
     const addedArgs = runConfig.find(config => config.name === runningConfig)
       .vars.map(item => {
         if (item.variable === 'EXTRA_CORS_ALLOWED_ORIGINS') { // prevent overriding variable

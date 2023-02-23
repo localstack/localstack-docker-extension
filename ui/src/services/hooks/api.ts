@@ -40,7 +40,7 @@ export const useRunConfig = (): useRunConfigReturn => {
   };
 
   return {
-    runConfig: (!data || data?.Message === '' || error) ? [] : JSON.parse(data?.Message),
+    runConfig: (!data || !data?.Message || error) ? [] : JSON.parse(data?.Message),
     isLoading: isValidating || (!error && !data),
     createConfig,
     updateConfig,
