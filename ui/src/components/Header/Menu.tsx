@@ -76,7 +76,7 @@ export const LongMenu = () => {
           okText='Update'
           okColor='primary'
           cancelColor='error'
-          onClick={() => handleUpdateClick()}
+          onClick={handleUpdateClick}
           text={`Following images will be updated: ${images.join(', ')}`}
         >
           Update Images

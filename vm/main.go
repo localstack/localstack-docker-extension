@@ -44,6 +44,7 @@ func main() {
 	router.DELETE("/configs/:id", deleteSetting)
 	router.GET("/mount", getMount)
 	router.POST("/mount", setMount)
+	router.DELETE("/mount", deleteMount)
 
 	log.Fatal(router.Start(startURL))
 }
@@ -85,6 +86,13 @@ func setMount(ctx echo.Context) error {
 	err := os.WriteFile(MOUNT_POINT_FILE, []byte(payload.Data), 0644)
 	if err != nil {
 		return ctx.JSON(http.StatusConflict, HTTPMessageBody{Message: ERRORS[2]})
+	}
+	return ctx.NoContent(http.StatusOK)
+}
+
+func deleteMount(ctx echo.Context) error {
+	if err := os.Truncate(MOUNT_POINT_FILE, 0); err != nil {
+		return ctx.JSON(http.StatusConflict, HTTPMessageBody{Message: ERRORS[1]})
 	}
 	return ctx.NoContent(http.StatusOK)
 }

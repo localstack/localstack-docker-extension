@@ -27,12 +27,17 @@ export const MountPointForm = (): ReactElement => {
 
   const [userState, setUserState] = useState({ loading: false, selectedUser: '', users: [] });
   const [osState, setOsState] = useState({ loading: false, selectedOS: '', OSs: [] });
-  const [triggerSecondUseEffect, setTriggerSecondUseEffect] = useState(false);
+  const [triggerUserCheck, setTriggerUserCheck] = useState(false);
 
   const { setMountPointData } = useMountPoint();
   const ddClient = useDDClient();
 
-  const firstFolder = ddClient.host.platform === 'darwin' ? 'Users' : 'home';
+  const getMountPointPath = (): string => {
+    if(ddClient.host.platform === 'darwin'){
+      return `/Users/${userState.selectedUser || 'loading...'}/Library/Caches/localstack/volume`;
+    }
+    return `/home/${userState.selectedUser || 'loading...'}/.cache/localstack/volume`;
+  };
 
   const checkWindowsDistro = async () => {
     setOsState({ ...osState, loading: true });
@@ -42,7 +47,7 @@ export const MountPointForm = (): ReactElement => {
     const foundOSs = getOSsFromBinary(res.stdout);
 
     setOsState({ loading: false, selectedOS: foundOSs[0], OSs: foundOSs });
-    setTriggerSecondUseEffect(!triggerSecondUseEffect);
+    setTriggerUserCheck(!triggerUserCheck);
   };
 
   const checkUser = async () => {
@@ -90,7 +95,7 @@ export const MountPointForm = (): ReactElement => {
     if (osState.selectedOS) {
       checkUser();
     }
-  }, [triggerSecondUseEffect]);
+  }, [triggerUserCheck]);
 
   const onClose = () => {
     setMountPointData(`${userState.selectedUser},${osState.selectedOS}`);
@@ -133,7 +138,6 @@ export const MountPointForm = (): ReactElement => {
                     </Select>
                   </FormControl>
               }
-             
               <Divider/>
             </>
           }
@@ -168,8 +172,7 @@ export const MountPointForm = (): ReactElement => {
         </Paper>
         <br/>
         <Typography variant='body1'>
-          {`The LocalStack container will be mounted under \
-             /${firstFolder}/${userState.selectedUser || 'loading...'}/.cache/localstack/volume`}
+          {`The LocalStack container will be mounted under ${getMountPointPath()}`}
         </Typography>
         <Typography variant="caption" display="block" gutterBottom>
           *You can still change this by overriding the LOCALSTACK_VOLUME_DIR enviroment variable
