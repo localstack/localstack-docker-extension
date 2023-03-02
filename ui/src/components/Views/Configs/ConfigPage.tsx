@@ -89,7 +89,8 @@ export const ConfigPage = (): ReactElement => {
       <Box sx={{ marginTop: 3 }}>
         <DataGrid
           autoHeight
-          rows={runConfig} columns={columns}
+          rows={runConfig.filter(config => config.id !== DEFAULT_CONFIGURATION_ID)}
+          columns={columns}
           getRowId={(row) => (row).id as string || uuid()}
           disableSelectionOnClick
         />
