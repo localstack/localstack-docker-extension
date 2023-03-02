@@ -105,7 +105,7 @@ export const UpsertConfig = ({ config, open, onClose }: Props): ReactElement => 
                 fullWidth
                 variant="outlined"
                 label='Variable'
-                onChange={(e) => setNewVar(e.target.value)}
+                onChange={(e) => setNewVar(e.target.value.toLocaleUpperCase())}
                 className={classes.textField}
                 value={newVar}
               />
