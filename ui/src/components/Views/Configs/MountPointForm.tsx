@@ -27,12 +27,17 @@ export const MountPointForm = (): ReactElement => {
 
   const [userState, setUserState] = useState({ loading: false, selectedUser: '', users: [] });
   const [osState, setOsState] = useState({ loading: false, selectedOS: '', OSs: [] });
-  const [triggerSecondUseEffect, setTriggerSecondUseEffect] = useState(false);
+  const [triggerUserCheck, setTriggerUserCheck] = useState(false);
 
   const { setMountPointData } = useMountPoint();
   const ddClient = useDDClient();
 
-  const firstFolder = ddClient.host.platform === 'darwin' ? 'Users' : 'home';
+  const getMountPointPath = (): string => {
+    if(ddClient.host.platform === 'darwin'){
+      return `/Users/${userState.selectedUser || 'loading...'}/Library/Caches/localstack/volume`;
+    }
+    return `/home/${userState.selectedUser || 'loading...'}/.cache/localstack/volume`;
+  };
 
   const checkWindowsDistro = async () => {
     setOsState({ ...osState, loading: true });
@@ -42,7 +47,7 @@ export const MountPointForm = (): ReactElement => {
     const foundOSs = getOSsFromBinary(res.stdout);
 
     setOsState({ loading: false, selectedOS: foundOSs[0], OSs: foundOSs });
-    setTriggerSecondUseEffect(!triggerSecondUseEffect);
+    setTriggerUserCheck(!triggerUserCheck);
   };
 
   const checkUser = async () => {
@@ -90,7 +95,7 @@ export const MountPointForm = (): ReactElement => {
     if (osState.selectedOS) {
       checkUser();
     }
-  }, [triggerSecondUseEffect]);
+  }, [triggerUserCheck]);
 
   const onClose = () => {
     setMountPointData(`${userState.selectedUser},${osState.selectedOS}`);
@@ -105,7 +110,7 @@ export const MountPointForm = (): ReactElement => {
     <Dialog open onClose={onClose}>
       <DialogContent>
         <Typography variant='h3'>
-            Default mount point settings
+          Default mount point settings
         </Typography>
         <br/>
         <Paper sx={{ padding: 1}}>
@@ -113,10 +118,10 @@ export const MountPointForm = (): ReactElement => {
             ddClient.host.platform === 'win32' &&
             <>
               <Typography  variant='subtitle1'>
-               WSL distro
+                WSL distro
               </Typography>
               <Typography variant='body2' >
-              Select in which WSL distro you want to mount the container
+                Select in which WSL distro you want to mount the container
               </Typography>
               {
                 osState.loading ?
@@ -133,16 +138,15 @@ export const MountPointForm = (): ReactElement => {
                     </Select>
                   </FormControl>
               }
-             
               <Divider/>
             </>
           }
           <>
             <Typography  variant='subtitle1'>
-               User
+              User
             </Typography>
             <Typography variant='body2'>
-                Select under which user you want to mount the container
+              Select under which user you want to mount the container
             </Typography>
             {
               userState.loading || osState.loading ?
@@ -168,8 +172,7 @@ export const MountPointForm = (): ReactElement => {
         </Paper>
         <br/>
         <Typography variant='body1'>
-          {`The LocalStack container will be mounted under \
-             /${firstFolder}/${userState.selectedUser || 'loading...'}/.cache/localstack/volume`}
+          {`The LocalStack container will be mounted under ${getMountPointPath()}`}
         </Typography>
         <Typography variant="caption" display="block" gutterBottom>
           *You can still change this by overriding the LOCALSTACK_VOLUME_DIR enviroment variable
@@ -186,14 +189,3 @@ export const MountPointForm = (): ReactElement => {
     </Dialog >
   );
 };
-
-/**
- * <Typography variant='subtitle2'>
-            {`For MacOS users it will be under \
-             /Users/${userState.selectedUser || 'loading...'}/.cache/localstack/volume`}
-          </Typography>
-          <Typography variant='subtitle2' gutterBottom>
-            {`For Linux/Windows users it will be under \
-             /home/${userState.selectedUser || 'loading...'}/.cache/localstack/volume`}
-          </Typography>
- */

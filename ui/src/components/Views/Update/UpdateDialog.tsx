@@ -51,16 +51,29 @@ export const UpdateDialog = ({ open, onClose }: Props): ReactElement => {
     <Dialog open={open} onClose={onClose}>
       <DialogContent>
         <Box m={2} width={500} height={400}>
-          {logs.map(log => (
-            <>
-              <Typography>
-                {`${log}`}
-              </Typography>
-              <br />
-            </>
-          ))}
-          {logs.length === 0 && <><Typography>Updating docker images</Typography><br/></>}
-          {isUpdating && <Skeleton animation="wave" />}
+          {
+            logs.map(log => (
+              <>
+                <Typography>
+                  {log}
+                </Typography>
+                <br />
+              </>
+            ))
+          }
+          {
+            logs.length === 0 && 
+          <>
+            <Typography>
+            Updating docker images
+            </Typography>
+            <br/>
+          </>
+          }
+          {
+            isUpdating && 
+          <Skeleton animation="wave" />
+          }
         </Box>
       </DialogContent>
     </Dialog >

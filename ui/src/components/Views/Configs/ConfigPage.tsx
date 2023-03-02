@@ -19,7 +19,7 @@ const useStyles = makeStyles((theme: Theme) => createStyles({
 export const ConfigPage = (): ReactElement => {
 
   const { runConfig, deleteConfig } = useRunConfig();
-  const { setMountPointData } = useMountPoint();
+  const { deleteMountPointData } = useMountPoint();
   const [openModal, setOpenModal] = useState<boolean>(false);
   const [targetConfig, setTargetConfig] = useState<RunConfig | null>(null);
 
@@ -37,7 +37,6 @@ export const ConfigPage = (): ReactElement => {
       flex: 1,
       minWidth: 100,
       renderCell: (params: GridRenderCellParams) =>
-        // eslint-disable-next-line react/jsx-no-useless-fragment
         <>
           <IconButton disabled={params.row.id === DEFAULT_CONFIGURATION_ID} onClick={() => openModalSetup(params.row)} >
             <Edit fontSize='small' />
@@ -83,7 +82,7 @@ export const ConfigPage = (): ReactElement => {
         >
           New
         </Button>
-        <Button onClick={() => setMountPointData('')}>
+        <Button onClick={deleteMountPointData}>
           Change mount point
         </Button>
       </ButtonGroup>
