@@ -68,6 +68,32 @@ export const UpsertConfig = ({ config, open, onClose }: Props): ReactElement => 
     });
   };
 
+  const updateConfigKey = (id: string, key: string) => {
+    setNewConfig({
+      ...newConfig,vars: newConfig.vars.map(envVar => {
+        if(envVar.id === id){
+          const updatedVar = envVar;
+          updatedVar.variable=key;
+          return updatedVar;
+        }
+        return envVar;
+      }),
+    });
+  };
+
+  const updateConfigValue = (id: string, value: string) => {
+    setNewConfig({
+      ...newConfig,vars: newConfig.vars.map(envVar => {
+        if(envVar.id === id){
+          const updatedVar = envVar;
+          updatedVar.value=value;
+          return updatedVar;
+        }
+        return envVar;
+      }),
+    });
+  };
+
   return (
     <Dialog open={open} onClose={onClose}>
       <DialogContent>
@@ -91,8 +117,19 @@ export const UpsertConfig = ({ config, open, onClose }: Props): ReactElement => 
           {newConfig?.vars.map(item => (
             <ListItem key={item.id} disableGutters>
               <Box display="flex" width={DEFAULT_COLUMN_WIDTH} key={item.id}>
-                <TextField fullWidth variant="outlined" className={classes.textField} disabled value={item.variable} />
-                <TextField fullWidth variant="outlined" className={classes.textField} disabled value={item.value} />
+                <TextField 
+                  fullWidth 
+                  variant="outlined"
+                  className={classes.textField}
+                  onChange={(e) => updateConfigKey(item.id,e.target.value.toLocaleUpperCase())}
+                  value={item.variable}
+                />
+                <TextField
+                  fullWidth
+                  variant="outlined"
+                  className={classes.textField}
+                  onChange={(e) => updateConfigValue(item.id,e.target.value)}
+                  value={item.value} />
                 <IconButton onClick={() => handleRemoveButtonPress(item.id)} >
                   <Remove />
                 </IconButton>
