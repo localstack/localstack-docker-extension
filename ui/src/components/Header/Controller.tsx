@@ -40,12 +40,18 @@ export const Controller = (): ReactElement => {
   }, [isLoading]);
 
   const buildMountArg = () => {
+    if(user === '../temp'){
+      return ['-e','LOCALSTACK_VOLUME_DIR=/tmp/localstack/volume'];
+    }
+
     if (ddClient.host.platform === 'win32') {
       return ['-e', `LOCALSTACK_VOLUME_DIR=\\\\wsl$\\${os}\\home\\${user}\\.cache\\localstack\\volume`];
     }
+
     if (ddClient.host.platform === 'darwin'){
       return ['-e', `LOCALSTACK_VOLUME_DIR=/Users/${user}/Library/Caches/localstack/volume`];
-    } 
+    }
+     
     return ['-e', `LOCALSTACK_VOLUME_DIR=/home/${user}/.cache/localstack/volume`];
     
   };

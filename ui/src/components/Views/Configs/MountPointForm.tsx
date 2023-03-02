@@ -64,7 +64,7 @@ export const MountPointForm = (): ReactElement => {
     }
 
     if (res.stderr || !res.stdout) {
-      ddClient.desktopUI.toast.error(`Error while locating users: ${res.stderr} using /tmp/.cache as mount point`);
+      ddClient.desktopUI.toast.error(`Error while locating users: ${res.stderr} using /tmp as mount point`);
       setUserState({ loading: false, selectedUser: '../tmp', users: ['tmp'] });
       setMountPointData('../tmp');
     }
