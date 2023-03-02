@@ -21,7 +21,7 @@ import {
   useMountPoint,
 } from '../../../services';
 
-const ShrinkedCircularProgess = (): ReactElement =>  <CircularProgress size={20} sx={{ margin: 1}}/>;
+const ShrinkedCircularProgress = (): ReactElement =>  <CircularProgress size={20} sx={{ margin: 1}}/>;
 
 export const MountPointForm = (): ReactElement => {
 
@@ -120,7 +120,7 @@ export const MountPointForm = (): ReactElement => {
               </Typography>
               {
                 osState.loading ?
-                  <ShrinkedCircularProgess/> 
+                  <ShrinkedCircularProgress/> 
                   :
                   <FormControl sx={{ minWidth: 120 }} size="small" variant='outlined'>
                     <Select
@@ -146,7 +146,7 @@ export const MountPointForm = (): ReactElement => {
             </Typography>
             {
               userState.loading || osState.loading ?
-                <ShrinkedCircularProgess/> 
+                <ShrinkedCircularProgress/> 
                 :
                 <FormControl sx={{ minWidth: 120 }} size="small" variant='outlined'>
                   <Select

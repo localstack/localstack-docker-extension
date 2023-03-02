@@ -14,6 +14,8 @@ import { DockerContainer, DockerImage } from '../../types';
 import { DownloadProgressDialog } from '../Feedback/DownloadProgressDialog';
 import { ProgressButton } from '../Feedback';
 
+const EXCLUDED_ERROR_TOAST = ['Successfully activated API key','Execution of "prepare_host"','DEBUG'];
+
 export const Controller = (): ReactElement => {
   const ddClient = useDDClient();
   const { runConfig, isLoading, createConfig } = useRunConfig();
@@ -86,10 +88,7 @@ export const Controller = (): ReactElement => {
     ddClient.docker.cli.exec('run', args, {
       stream: {
         onOutput(data): void {
-          if (data.stderr
-            && !data.stderr.includes('Successfully') // Api key activation is included in the error stream
-            && !data.stderr.includes('Execution of "prepare_host"')) {
-
+          if (!EXCLUDED_ERROR_TOAST.some(item => data.stderr.includes(item))) {
             ddClient.desktopUI.toast.error(data.stderr);
             setIsStarting(false);
           }
