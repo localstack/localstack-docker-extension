@@ -84,7 +84,7 @@ export const MountPointForm = (): ReactElement => {
   useEffect(() => {
     const execChecks = async () => {
       if (userState.users.length === 0
-        || (ddClient.host.platform === 'win32' && osState.OSs.length === 0)) {
+      || (ddClient.host.platform === 'win32' && osState.OSs.length === 0)) {
         locateMountPoint();
       }
     };
