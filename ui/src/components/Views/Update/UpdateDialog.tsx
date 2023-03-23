@@ -70,7 +70,7 @@ export const UpdateDialog = ({ open, onClose }: Props): ReactElement => {
             logs.length === 0 &&
             <>
               <Typography>
-                Updating docker images
+                Updating Docker images
               </Typography>
               <br />
             </>

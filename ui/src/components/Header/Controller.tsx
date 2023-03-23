@@ -92,7 +92,8 @@ export const Controller = (): ReactElement => {
     ddClient.docker.cli.exec('run', args, {
       stream: {
         onOutput(data): void {
-          if (!EXCLUDED_ERROR_TOAST.some(item => data.stderr.includes(item))) {
+          const shouldDisplayError = !EXCLUDED_ERROR_TOAST.some(item => data.stderr.includes(item));
+          if (shouldDisplayError) {
             ddClient.desktopUI.toast.error(data.stderr);
             setIsStarting(false);
           }
