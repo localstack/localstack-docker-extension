@@ -21,7 +21,7 @@ import {
   useMountPoint,
 } from '../../../services';
 
-const ShrinkedCircularProgress = (): ReactElement =>  <CircularProgress size={20} sx={{ margin: 1}}/>;
+const ShrinkedCircularProgress = (): ReactElement => <CircularProgress size={20} sx={{ margin: 1 }} />;
 
 export const MountPointForm = (): ReactElement => {
 
@@ -33,7 +33,7 @@ export const MountPointForm = (): ReactElement => {
   const ddClient = useDDClient();
 
   const getMountPointPath = (): string => {
-    if(ddClient.host.platform === 'darwin'){
+    if (ddClient.host.platform === 'darwin') {
       return `/Users/${userState.selectedUser || 'loading...'}/Library/Caches/localstack/volume`;
     }
     return `/home/${userState.selectedUser || 'loading...'}/.cache/localstack/volume`;
@@ -43,7 +43,7 @@ export const MountPointForm = (): ReactElement => {
     setOsState({ ...osState, loading: true });
 
     const res = await ddClient.extension.host?.cli.exec('checkWSLOS.cmd', []);
-    
+
     const foundOSs = getOSsFromBinary(res.stdout);
 
     setOsState({ loading: false, selectedOS: foundOSs[0], OSs: foundOSs });
@@ -112,12 +112,12 @@ export const MountPointForm = (): ReactElement => {
         <Typography variant='h3'>
           Default mount point settings
         </Typography>
-        <br/>
-        <Paper sx={{ padding: 1}}>
+        <br />
+        <Paper sx={{ padding: 1 }}>
           {
             ddClient.host.platform === 'win32' &&
             <>
-              <Typography  variant='subtitle1'>
+              <Typography variant='subtitle1'>
                 WSL distro
               </Typography>
               <Typography variant='body2' >
@@ -125,7 +125,7 @@ export const MountPointForm = (): ReactElement => {
               </Typography>
               {
                 osState.loading ?
-                  <ShrinkedCircularProgress/> 
+                  <ShrinkedCircularProgress />
                   :
                   <FormControl sx={{ minWidth: 120 }} size="small" variant='outlined'>
                     <Select
@@ -138,11 +138,11 @@ export const MountPointForm = (): ReactElement => {
                     </Select>
                   </FormControl>
               }
-              <Divider/>
+              <Divider />
             </>
           }
           <>
-            <Typography  variant='subtitle1'>
+            <Typography variant='subtitle1'>
               User
             </Typography>
             <Typography variant='body2'>
@@ -150,12 +150,12 @@ export const MountPointForm = (): ReactElement => {
             </Typography>
             {
               userState.loading || osState.loading ?
-                <ShrinkedCircularProgress/> 
+                <ShrinkedCircularProgress />
                 :
                 <FormControl sx={{ minWidth: 120 }} size="small" variant='outlined'>
                   <Select
                     value={userState.selectedUser || userState.users[0]}
-                    onChange={({ target }) => setUserState({ 
+                    onChange={({ target }) => setUserState({
                       loading: userState.loading,
                       selectedUser: target.value,
                       users: userState.users,
@@ -170,7 +170,7 @@ export const MountPointForm = (): ReactElement => {
             }
           </>
         </Paper>
-        <br/>
+        <br />
         <Typography variant='body1'>
           {`The LocalStack container will be mounted under ${getMountPointPath()}`}
         </Typography>

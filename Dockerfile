@@ -59,9 +59,9 @@ COPY docker-compose.yaml .
 COPY metadata.json .
 COPY localstack.svg .
 COPY --from=client-builder /ui/build ui
-COPY --chmod=0755 binaries/windows/checkWSLOS.cmd /windows/checkWSLOS.cmd
-COPY --chmod=0755 binaries/windows/checkUser.cmd /windows/checkUser.cmd
-COPY --chmod=0755 binaries/darwin/checkUser.sh /darwin/checkUser.sh
-COPY --chmod=0755 binaries/linux/checkUser.sh /linux/checkUser.sh
+COPY --chmod=0755 scripts/windows/checkWSLOS.cmd /windows/checkWSLOS.cmd
+COPY --chmod=0755 scripts/windows/checkUser.cmd /windows/checkUser.cmd
+COPY --chmod=0755 scripts/darwin/checkUser.sh /darwin/checkUser.sh
+COPY --chmod=0755 scripts/linux/checkUser.sh /linux/checkUser.sh
 
 CMD /service -socket /run/guest-services/extension-LocalStack.sock

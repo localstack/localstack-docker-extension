@@ -14,7 +14,7 @@ import { DockerContainer, DockerImage } from '../../types';
 import { DownloadProgressDialog } from '../Feedback/DownloadProgressDialog';
 import { ProgressButton } from '../Feedback';
 
-const EXCLUDED_ERROR_TOAST = ['Successfully activated API key','Execution of "prepare_host"','DEBUG'];
+const EXCLUDED_ERROR_TOAST = ['Successfully activated API key', 'Execution of "prepare_host"', 'DEBUG'];
 
 export const Controller = (): ReactElement => {
   const ddClient = useDDClient();
@@ -40,20 +40,20 @@ export const Controller = (): ReactElement => {
   }, [isLoading]);
 
   const buildMountArg = () => {
-    if(user === '../temp'){
-      return ['-e','LOCALSTACK_VOLUME_DIR=/tmp/localstack/volume'];
+    if (user === '../temp') {
+      return ['-e', 'LOCALSTACK_VOLUME_DIR=/tmp/localstack/volume'];
     }
 
     if (ddClient.host.platform === 'win32') {
       return ['-e', `LOCALSTACK_VOLUME_DIR=\\\\wsl$\\${os}\\home\\${user}\\.cache\\localstack\\volume`];
     }
 
-    if (ddClient.host.platform === 'darwin'){
+    if (ddClient.host.platform === 'darwin') {
       return ['-e', `LOCALSTACK_VOLUME_DIR=/Users/${user}/Library/Caches/localstack/volume`];
     }
-     
+
     return ['-e', `LOCALSTACK_VOLUME_DIR=/home/${user}/.cache/localstack/volume`];
-    
+
   };
 
   const normalizeArguments = async () => {

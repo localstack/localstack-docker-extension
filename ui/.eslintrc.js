@@ -47,6 +47,8 @@ module.exports = {
         'import/prefer-default-export': 'off',
         'import/no-named-as-default': 'off',
         'no-use-before-define': 'off',
+        'no-multi-spaces': 'error',
+        'comma-spacing': ['error', { 'before': false, 'after': true }],
         'no-shadow': 'off',
         'curly': 'error',
         'no-unused-vars': 'warn',
