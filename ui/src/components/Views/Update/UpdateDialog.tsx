@@ -77,7 +77,7 @@ export const UpdateDialog = ({ open, onClose }: Props): ReactElement => {
           }
           {
             isUpdating &&
-            <Skeleton animation="wave" />
+            <Skeleton animation='wave' />
           }
         </Box>
       </DialogContent>

@@ -70,7 +70,7 @@ export const StatusPage = (): ReactElement => {
             <Fragment key={status}>
               {statusesMap[status] && (
                 <Box>
-                  <Typography variant="caption">
+                  <Typography variant='caption'>
                     {capitalize(status)}
                   </Typography>
                   <List className={classes.list} dense>

@@ -127,7 +127,7 @@ export const MountPointForm = (): ReactElement => {
                 osState.loading ?
                   <ShrinkedCircularProgress />
                   :
-                  <FormControl sx={{ minWidth: 120 }} size="small" variant='outlined'>
+                  <FormControl sx={{ minWidth: 120 }} size='small' variant='outlined'>
                     <Select
                       value={osState.selectedOS || osState.OSs[0]}
                       onChange={({ target }) => handleOsChange(target.value)}
@@ -152,7 +152,7 @@ export const MountPointForm = (): ReactElement => {
               userState.loading || osState.loading ?
                 <ShrinkedCircularProgress />
                 :
-                <FormControl sx={{ minWidth: 120 }} size="small" variant='outlined'>
+                <FormControl sx={{ minWidth: 120 }} size='small' variant='outlined'>
                   <Select
                     value={userState.selectedUser || userState.users[0]}
                     onChange={({ target }) => setUserState({
@@ -174,8 +174,8 @@ export const MountPointForm = (): ReactElement => {
         <Typography variant='body1'>
           {`The LocalStack container will be mounted under ${getMountPointPath()}`}
         </Typography>
-        <Typography variant="caption" display="block" gutterBottom>
-          *You can still change this by overriding the LOCALSTACK_VOLUME_DIR enviroment variable
+        <Typography variant='caption' display='block' gutterBottom>
+          *You can still change this by overriding the LOCALSTACK_VOLUME_DIR environment variable
         </Typography>
       </DialogContent>
       <DialogActions>

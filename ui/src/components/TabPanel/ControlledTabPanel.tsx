@@ -17,7 +17,7 @@ export const TabPanel: React.FC<{ index: number; tab: number }> = ({
   index,
   tab,
 }) => (
-  <div role="tabpanel" hidden={tab !== index}>
+  <div role='tabpanel' hidden={tab !== index}>
     {children}
   </div>
 );
@@ -57,7 +57,7 @@ export const ControlledTabPanels: React.FC<ControlledTabPanelsProps & TabsProps>
     <>
       <Tabs
         className={classes.tabs}
-        variant="fullWidth"
+        variant='fullWidth'
         {...rest}
         value={tab}
         onChange={(_event, newValue) => switchTab(newValue)}

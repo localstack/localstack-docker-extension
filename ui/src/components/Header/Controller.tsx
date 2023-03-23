@@ -140,24 +140,24 @@ export const Controller = (): ReactElement => {
   };
 
   return (
-    <Box display="flex" gap={1} alignItems="center">
+    <Box display='flex' gap={1} alignItems='center'>
       <DownloadProgressDialog
         imageName={downloadProps.image}
         open={downloadProps.open}
         onClose={onClose}
       />
-      <ButtonGroup variant="outlined">
+      <ButtonGroup variant='outlined'>
         {(isRunning && !isStarting) ?
           <ProgressButton
-            variant="contained"
+            variant='contained'
             loading={isStopping}
             onClick={stop}
             startIcon={<Stop />}>
             Stop
           </ProgressButton>
           :
-          <Box display="flex" alignItems="center">
-            <FormControl sx={{ m: 1, minWidth: 120, border: 'none' }} size="small">
+          <Box display='flex' alignItems='center'>
+            <FormControl sx={{ m: 1, minWidth: 120, border: 'none' }} size='small'>
               <Select
                 value={runningConfig}
                 onChange={({ target }) => setRunningConfig(target.value)}
@@ -171,7 +171,7 @@ export const Controller = (): ReactElement => {
             </FormControl>
             <Box>
               <ProgressButton
-                variant="contained"
+                variant='contained'
                 loading={isStarting}
                 onClick={start}
                 startIcon={<PlayArrow />}>
@@ -183,7 +183,7 @@ export const Controller = (): ReactElement => {
         }
       </ButtonGroup>
       <Tooltip title={data ? tooltipLabel : ''} >
-        <Badge color="error" overlap="circular" badgeContent=" " variant="dot" invisible={!isUnhealthy}>
+        <Badge color='error' overlap='circular' badgeContent=' ' variant='dot' invisible={!isUnhealthy}>
           <Chip
             label={(isRunning && !isStarting) ? 'Running' : 'Stopped'}
             color={(isRunning && !isStarting) ? 'success' : 'warning'}

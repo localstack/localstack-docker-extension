@@ -97,12 +97,12 @@ export const UpsertConfig = ({ config, open, onClose }: Props): ReactElement => 
   return (
     <Dialog open={open} onClose={onClose}>
       <DialogContent>
-        <Box display="flex" width='full' flexDirection="column">
+        <Box display='flex' width='full' flexDirection='column'>
           <Settings fontSize='large' />
           <Box className={classes.emptyBox} />
           <TextField
             fullWidth
-            variant="outlined"
+            variant='outlined'
             label='Configuration Name'
             value={configName}
             onChange={(e) => setConfigName(e.target.value)}
@@ -116,17 +116,17 @@ export const UpsertConfig = ({ config, open, onClose }: Props): ReactElement => 
         >
           {newConfig?.vars.map(item => (
             <ListItem key={item.id} disableGutters>
-              <Box display="flex" width={DEFAULT_COLUMN_WIDTH} key={item.id}>
+              <Box display='flex' width={DEFAULT_COLUMN_WIDTH} key={item.id}>
                 <TextField
                   fullWidth
-                  variant="outlined"
+                  variant='outlined'
                   className={classes.textField}
                   onChange={(e) => updateConfigKey(item.id, e.target.value.toLocaleUpperCase())}
                   value={item.variable}
                 />
                 <TextField
                   fullWidth
-                  variant="outlined"
+                  variant='outlined'
                   className={classes.textField}
                   onChange={(e) => updateConfigValue(item.id, e.target.value)}
                   value={item.value} />
@@ -137,10 +137,10 @@ export const UpsertConfig = ({ config, open, onClose }: Props): ReactElement => 
             </ListItem>
           ))}
           <ListItem key='addItem' disableGutters>
-            <Box display="flex" width={DEFAULT_COLUMN_WIDTH} key='addItem' >
+            <Box display='flex' width={DEFAULT_COLUMN_WIDTH} key='addItem' >
               <TextField
                 fullWidth
-                variant="outlined"
+                variant='outlined'
                 label='Variable'
                 onChange={(e) => setNewVar(e.target.value.toLocaleUpperCase())}
                 className={classes.textField}
@@ -149,7 +149,7 @@ export const UpsertConfig = ({ config, open, onClose }: Props): ReactElement => 
 
               <TextField
                 fullWidth
-                variant="outlined"
+                variant='outlined'
                 label='Value'
                 onChange={(e) => setNewValue(e.target.value)}
                 className={classes.textField}
