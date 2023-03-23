@@ -28,7 +28,7 @@ export const UpdateDialog = ({ open, onClose }: Props): ReactElement => {
             .replaceAll('â', '✅')
             .replaceAll('â', '❌');
 
-          if (resultStr.endsWith('updated')) {
+          if (resultStr.endsWith('updated.')) {
             resultStr = resultStr.concat(' 🔼');
           }
           setLogs((current) => [...current, resultStr]);
