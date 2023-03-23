@@ -23,13 +23,13 @@ export const UpdateDialog = ({ open, onClose }: Props): ReactElement => {
     const listener = ddClient.docker.cli.exec('run', UPDATE_ARGS, {
       stream: {
         onOutput(data): void {
-          const resultStr = data.stdout
+          let resultStr = data.stdout
             .replaceAll('â', '')
             .replaceAll('â', '✅')
             .replaceAll('â', '❌');
 
           if (resultStr.endsWith('updated')) {
-            resultStr.concat(' 🔼');
+            resultStr = resultStr.concat(' 🔼');
           }
           setLogs((current) => [...current, resultStr]);
         },

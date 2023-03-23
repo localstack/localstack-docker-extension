@@ -8,6 +8,7 @@ import {
   LATEST_IMAGE,
   START_ARGS,
   FLAGS,
+  ERROR_USER,
 } from '../../constants';
 import { LongMenu } from './Menu';
 import { DockerContainer, DockerImage } from '../../types';
@@ -40,7 +41,7 @@ export const Controller = (): ReactElement => {
   }, [isLoading]);
 
   const buildMountArg = () => {
-    if (user === '../temp') {
+    if (user === ERROR_USER) {
       return ['-e', 'LOCALSTACK_VOLUME_DIR=/tmp/localstack/volume'];
     }
 
