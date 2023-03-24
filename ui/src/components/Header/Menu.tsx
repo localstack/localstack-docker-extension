@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { MoreVert } from '@mui/icons-material';
-import { IconButton, Menu } from '@mui/material';
+import { IconButton, Menu, Typography } from '@mui/material';
 import { removeRepoFromImage, useDDClient } from '../../services';
 import { DockerImage } from '../../types';
 import { ConfirmableButton } from '../Feedback';
@@ -33,10 +33,10 @@ export const LongMenu = () => {
 
     const fetchImages = async () => {
       const images = (await ddClient.docker.listImages()) as DockerImage[];
-      
+
       const localstackImages = images.filter(image => image.RepoTags?.at(0).startsWith('localstack/'));
-      const imagesWithoutOrgname = localstackImages.map(image => removeRepoFromImage(image.RepoTags?.at(0)));
-      setImages(imagesWithoutOrgname);
+      const imagesWithoutOrgName = localstackImages.map(image => removeRepoFromImage(image.RepoTags?.at(0)));
+      setImages(imagesWithoutOrgName);
     };
 
     fetchImages();
@@ -76,8 +76,15 @@ export const LongMenu = () => {
           okText='Update'
           okColor='primary'
           cancelColor='error'
-          onClick={() => handleUpdateClick()}
-          text={`Following images will be updated: ${images.join(', ')}`}
+          onClick={handleUpdateClick}
+          text={
+            <>
+              Following images will be updated:
+              <Typography style={{ fontWeight: 600 }}>
+                {images.join(', ')}
+              </Typography>
+            </>
+          }
         >
           Update Images
         </ConfirmableButton>

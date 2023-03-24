@@ -19,7 +19,7 @@ const useStyles = makeStyles((theme: Theme) => createStyles({
 export const ConfigPage = (): ReactElement => {
 
   const { runConfig, deleteConfig } = useRunConfig();
-  const { setMountPointUser } = useMountPoint();
+  const { deleteMountPointData } = useMountPoint();
   const [openModal, setOpenModal] = useState<boolean>(false);
   const [targetConfig, setTargetConfig] = useState<RunConfig | null>(null);
 
@@ -37,18 +37,17 @@ export const ConfigPage = (): ReactElement => {
       flex: 1,
       minWidth: 100,
       renderCell: (params: GridRenderCellParams) =>
-        // eslint-disable-next-line react/jsx-no-useless-fragment
         <>
           <IconButton disabled={params.row.id === DEFAULT_CONFIGURATION_ID} onClick={() => openModalSetup(params.row)} >
             <Edit fontSize='small' />
           </IconButton>
           <ConfirmableButton
-            component="IconButton"
+            component='IconButton'
             disabled={params.row.id === DEFAULT_CONFIGURATION_ID}
             title={`Delete ${params.row.name} configuration?`}
-            okText="Delete"
+            okText='Delete'
             onClick={() => deleteConfig(params.row.id)}
-            text="Selected configuration will be permanently deleted"
+            text='Selected configuration will be permanently deleted'
           >
             <Delete fontSize='small' />
           </ConfirmableButton>
@@ -83,14 +82,15 @@ export const ConfigPage = (): ReactElement => {
         >
           New
         </Button>
-        <Button onClick={() => setMountPointUser('')}>
+        <Button onClick={deleteMountPointData}>
           Change mount point
         </Button>
       </ButtonGroup>
       <Box sx={{ marginTop: 3 }}>
         <DataGrid
           autoHeight
-          rows={runConfig} columns={columns}
+          rows={runConfig.filter(config => config.id !== DEFAULT_CONFIGURATION_ID)}
+          columns={columns}
           getRowId={(row) => (row).id as string || uuid()}
           disableSelectionOnClick
         />

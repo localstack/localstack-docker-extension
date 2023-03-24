@@ -8,11 +8,14 @@ import {
   LATEST_IMAGE,
   START_ARGS,
   FLAGS,
+  ERROR_USER,
 } from '../../constants';
 import { LongMenu } from './Menu';
 import { DockerContainer, DockerImage } from '../../types';
 import { DownloadProgressDialog } from '../Feedback/DownloadProgressDialog';
 import { ProgressButton } from '../Feedback';
+
+const EXCLUDED_ERROR_TOAST = ['Successfully activated API key', 'Execution of "prepare_host"', 'DEBUG'];
 
 export const Controller = (): ReactElement => {
   const ddClient = useDDClient();
@@ -20,7 +23,7 @@ export const Controller = (): ReactElement => {
   const { data, mutate } = useLocalStack();
   const [runningConfig, setRunningConfig] = useState<string>('Default');
   const isRunning = data && data.State === 'running';
-  const { data: mountPoint } = useMountPoint();
+  const { user, os } = useMountPoint();
   const [downloadProps, setDownloadProps] = useState({ open: false, image: LATEST_IMAGE });
   const [isStarting, setIsStarting] = useState<boolean>(false);
   const [isStopping, setIsStopping] = useState<boolean>(false);
@@ -38,22 +41,28 @@ export const Controller = (): ReactElement => {
   }, [isLoading]);
 
   const buildMountArg = () => {
-    const OSPath = ddClient.host.platform === 'darwin'
-      ? 'Users'
-      : 'home';
+    let location = 'LOCALSTACK_VOLUME_DIR=/tmp/localstack/volume';
 
-    const mountPath = mountPoint === 'tmp'
-      ? mountPoint
-      : `${OSPath}/${mountPoint}/.cache`;
-
-    return ['-e', `LOCALSTACK_VOLUME_DIR=/${mountPath}/localstack/volume`];
+    if (user !== ERROR_USER) {
+      switch (ddClient.host.platform) {
+        case 'win32':
+          location = `LOCALSTACK_VOLUME_DIR=\\\\wsl$\\${os}\\home\\${user}\\.cache\\localstack\\volume`;
+          break;
+        case 'darwin':
+          location = `LOCALSTACK_VOLUME_DIR=/Users/${user}/Library/Caches/localstack/volume`;
+          break;
+        default:
+          location = `LOCALSTACK_VOLUME_DIR=/home/${user}/.cache/localstack/volume`;
+      }
+    }
+    return ['-e', location];
   };
 
   const normalizeArguments = async () => {
     const extendedFlag = FLAGS.map(x => x); // clone
 
     const corsArg = ['-e', `EXTRA_CORS_ALLOWED_ORIGINS=${CORS_ALLOW_DEFAULT}`];
-    
+
     const addedArgs = runConfig.find(config => config.name === runningConfig)
       .vars.map(item => {
         if (item.variable === 'EXTRA_CORS_ALLOWED_ORIGINS') { // prevent overriding variable
@@ -84,10 +93,8 @@ export const Controller = (): ReactElement => {
     ddClient.docker.cli.exec('run', args, {
       stream: {
         onOutput(data): void {
-          if (data.stderr
-            && !data.stderr.includes('Successfully') // Api key activation is included in the error stream
-            && !data.stderr.includes('Execution of "prepare_host"')) {
-
+          const shouldDisplayError = !EXCLUDED_ERROR_TOAST.some(item => data.stderr.includes(item));
+          if (shouldDisplayError) {
             ddClient.desktopUI.toast.error(data.stderr);
             setIsStarting(false);
           }
@@ -111,17 +118,21 @@ export const Controller = (): ReactElement => {
       && !Object.keys(containers[0].Labels).some(key => key === 'cloud.localstack.spawner')
       && container.Command === 'docker-entrypoint.sh');
 
-    if (stoppedContainer.State === 'created') { // not started
+    const spawnerContainer = containers.find(container =>
+      Object.keys(container.Labels).includes('cloud.localstack.spawner'));
 
-      await ddClient.docker.cli.exec('rm', [stoppedContainer.Id]); // remove it 
-
-      const spawnerContainer = containers.find(container =>
-        Object.keys(container.Labels).includes('cloud.localstack.spawner'));
-
+    if (spawnerContainer) {
       await ddClient.docker.cli.exec('stop', [spawnerContainer.Id]); // stop the spawner
-    } else {
-      await ddClient.docker.cli.exec('stop', [stoppedContainer.Id]);
     }
+
+    if (stoppedContainer) {
+      if (stoppedContainer.State === 'created') { // not started
+        await ddClient.docker.cli.exec('rm', [stoppedContainer.Id]); // remove it 
+      } else {
+        await ddClient.docker.cli.exec('stop', [stoppedContainer.Id]);
+      }
+    }
+
     setIsStopping(false);
     mutate();
   };
@@ -132,24 +143,24 @@ export const Controller = (): ReactElement => {
   };
 
   return (
-    <Box display="flex" gap={1} alignItems="center">
+    <Box display='flex' gap={1} alignItems='center'>
       <DownloadProgressDialog
         imageName={downloadProps.image}
         open={downloadProps.open}
         onClose={onClose}
       />
-      <ButtonGroup variant="outlined">
+      <ButtonGroup variant='outlined'>
         {(isRunning && !isStarting) ?
           <ProgressButton
-            variant="contained"
+            variant='contained'
             loading={isStopping}
             onClick={stop}
             startIcon={<Stop />}>
             Stop
           </ProgressButton>
           :
-          <Box display="flex" alignItems="center">
-            <FormControl sx={{ m: 1, minWidth: 120, border: 'none' }} size="small">
+          <Box display='flex' alignItems='center'>
+            <FormControl sx={{ m: 1, minWidth: 120, border: 'none' }} size='small'>
               <Select
                 value={runningConfig}
                 onChange={({ target }) => setRunningConfig(target.value)}
@@ -163,7 +174,7 @@ export const Controller = (): ReactElement => {
             </FormControl>
             <Box>
               <ProgressButton
-                variant="contained"
+                variant='contained'
                 loading={isStarting}
                 onClick={start}
                 startIcon={<PlayArrow />}>
@@ -175,7 +186,7 @@ export const Controller = (): ReactElement => {
         }
       </ButtonGroup>
       <Tooltip title={data ? tooltipLabel : ''} >
-        <Badge color="error" overlap="circular" badgeContent=" " variant="dot" invisible={!isUnhealthy}>
+        <Badge color='error' overlap='circular' badgeContent=' ' variant='dot' invisible={!isUnhealthy}>
           <Chip
             label={(isRunning && !isStarting) ? 'Running' : 'Stopped'}
             color={(isRunning && !isStarting) ? 'success' : 'warning'}

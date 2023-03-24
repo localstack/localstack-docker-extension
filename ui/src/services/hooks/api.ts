@@ -1,7 +1,7 @@
 import useSWR from 'swr';
 import { STORAGE_KEY_ENVVARS, STORAGE_KEY_LOCALSTACK, STORAGE_KEY_MOUNT } from '../../constants';
-import { DockerContainer, RunConfig } from '../../types';
-import { isALocalStackContainer } from '../util';
+import { DockerContainer, mountPointData, RunConfig } from '../../types';
+import { isALocalStackContainer, isJson } from '../util';
 import { useDDClient } from './utils';
 
 interface useRunConfigReturn {
@@ -40,7 +40,7 @@ export const useRunConfig = (): useRunConfigReturn => {
   };
 
   return {
-    runConfig: (!data || data?.Message === '' || error) ? [] : JSON.parse(data?.Message),
+    runConfig: (!data || !data?.Message || error) ? [] : JSON.parse(data?.Message),
     isLoading: isValidating || (!error && !data),
     createConfig,
     updateConfig,
@@ -49,9 +49,11 @@ export const useRunConfig = (): useRunConfigReturn => {
 };
 
 interface useMountPointReturn {
-  data: string | null,
+  user: string | null,
+  os: string | null,
   isLoading: boolean,
-  setMountPointUser: (data: string) => unknown;
+  setMountPointData: (data: mountPointData) => void;
+  deleteMountPointData: () => void;
 }
 
 export const useMountPoint = (): useMountPointReturn => {
@@ -63,15 +65,25 @@ export const useMountPoint = (): useMountPointReturn => {
     async () => (ddClient.extension.vm.service.get('/mount') as Promise<HTTPMessageBody>),
   );
 
-  const setMountPointUser = async (user: string) => {
-    await ddClient.extension.vm.service.post('/mount', { Data: user });
+  const setMountPointData = async (data: mountPointData) => {
+    await ddClient.extension.vm.service.post('/mount', { Data: JSON.stringify(data) });
     mutate();
   };
 
+  const deleteMountPointData = async () => {
+    await ddClient.extension.vm.service.delete('/mount');
+    mutate();
+  };
+
+  const fileContent = (!error && data) ? data.Message : null;
+  const mountPointData = isJson(fileContent) ? JSON.parse(fileContent) as mountPointData : null;
+
   return {
-    data: (!error && data) ? data.Message : null,
+    user: mountPointData?.user,
+    os: mountPointData?.os,
     isLoading: isValidating || (!error && !data),
-    setMountPointUser,
+    setMountPointData,
+    deleteMountPointData,
   };
 };
 
@@ -92,7 +104,7 @@ export const useLocalStack = (): useLocalStackReturn => {
       ), {
       refreshInterval: 2000, compare:
       /*
-       * compares whether the old (b) status aligns with that of new (a) statuss
+       * compares whether the old (b) status aligns with that of new (a) status
        */
       (a, b) => a?.Id === b?.Id && a?.Status.includes('unhealthy') === b?.Status.includes('unhealthy'), 
     },

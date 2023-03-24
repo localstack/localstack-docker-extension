@@ -2,7 +2,7 @@ import React, { ReactElement, useEffect, useState } from 'react';
 import { useDDClient } from '../../../services';
 import { CircularProgressWithLabel } from './CircularProgressWithLabel';
 
-const SKIPPING_KEYS = ['Digest','Status','latest']; 
+const SKIPPING_KEYS = ['Digest', 'Status', 'latest'];
 
 const statusValues = new Map([
   ['Waiting', 0],
@@ -41,7 +41,7 @@ export const DownloadProgress = ({ callback, imageName }: DownloadProgressProps)
           if (SKIPPING_KEYS.includes(key) || status === 'latest') { // don't process lines that are not in the format hash: status
             return;
           }
-          
+
           if (status.startsWith('Image is up to date')) { // otherwise if Image is up to date nothing is downloaded and the progress remains to 0
             setIsDone(true);
             return;

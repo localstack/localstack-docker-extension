@@ -40,7 +40,7 @@ LABEL org.opencontainers.image.title="LocalStack" \
   on their local machine without connecting to a remote cloud provider! LocalStack empowers developers to use over 75+ AWS services locally while helping them simplify their testing \
   and development workflow. LocalStack supports a comprehensive list of APIs, which you can view on our <a href=\"https://docs.localstack.cloud/user-guide/aws/feature-coverage/\"> \
   Feature coverage page</a>. <br><br> \
-  Make sure to have also installed awscli-local. You can install it via pip: <b>pip install awscli-local</b> \
+  Make sure to have the option \"Show Docker Extensions system containers\" enabled. You can enable it by going to Settings > Extensions > Show Docker Extensions system containers  \
   <h2>This extension supports the following main features:</h2>\
   <ul>\
   <li> Control LocalStack: Start, stop, and restart LocalStack from the Docker Desktop. You can also see the current status of your LocalStack instance and navigate to LocalStack Web Application. </li>\
@@ -59,4 +59,9 @@ COPY docker-compose.yaml .
 COPY metadata.json .
 COPY localstack.svg .
 COPY --from=client-builder /ui/build ui
+COPY --chmod=0755 scripts/windows/checkWSLOS.cmd /windows/checkWSLOS.cmd
+COPY --chmod=0755 scripts/windows/checkUser.cmd /windows/checkUser.cmd
+COPY --chmod=0755 scripts/darwin/checkUser.sh /darwin/checkUser.sh
+COPY --chmod=0755 scripts/linux/checkUser.sh /linux/checkUser.sh
+
 CMD /service -socket /run/guest-services/extension-LocalStack.sock

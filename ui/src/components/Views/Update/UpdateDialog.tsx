@@ -23,10 +23,15 @@ export const UpdateDialog = ({ open, onClose }: Props): ReactElement => {
     const listener = ddClient.docker.cli.exec('run', UPDATE_ARGS, {
       stream: {
         onOutput(data): void {
-          setLogs((current) => [...current, data.stdout
+          let resultStr = data.stdout
             .replaceAll('â', '')
             .replaceAll('â', '✅')
-            .replaceAll('â', '❌')]);
+            .replaceAll('â', '❌');
+
+          if (resultStr.endsWith('updated.')) {
+            resultStr = resultStr.concat(' 🔼');
+          }
+          setLogs((current) => [...current, resultStr]);
         },
         onError(error: unknown): void {
           ddClient.desktopUI.toast.error('An error occurred');
@@ -36,7 +41,6 @@ export const UpdateDialog = ({ open, onClose }: Props): ReactElement => {
           setIsUpdating(false);
           console.log(`onClose with exit code ${exitCode}`);
         },
-        splitOutputLines: true,
       },
     });
 
@@ -51,16 +55,29 @@ export const UpdateDialog = ({ open, onClose }: Props): ReactElement => {
     <Dialog open={open} onClose={onClose}>
       <DialogContent>
         <Box m={2} width={500} height={400}>
-          {logs.map(log => (
+          {
+            logs.map(log => (
+              <>
+                <Typography>
+                  {log}
+                </Typography>
+                <br />
+              </>
+            ))
+          }
+          {
+            logs.length === 0 &&
             <>
               <Typography>
-                {`${log}`}
+                Updating Docker images
               </Typography>
               <br />
             </>
-          ))}
-          {logs.length === 0 && <><Typography>Updating docker images</Typography><br/></>}
-          {isUpdating && <Skeleton animation="wave" />}
+          }
+          {
+            isUpdating &&
+            <Skeleton animation='wave' />
+          }
         </Box>
       </DialogContent>
     </Dialog >

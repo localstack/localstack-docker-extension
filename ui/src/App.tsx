@@ -1,7 +1,7 @@
 import React, { ReactElement, useState } from 'react';
 import { createStyles, makeStyles } from '@mui/styles';
 import { ControlledTabPanels, Header, LogsPage, MountPointForm, ConfigPage, StatusPage } from './components';
-import { useMountPoint } from './services/hooks';
+import { useDDClient, useMountPoint } from './services/hooks';
 
 const useStyles = makeStyles(() => createStyles({
   sticky: {
@@ -13,9 +13,11 @@ const useStyles = makeStyles(() => createStyles({
 
 export const App = (): ReactElement => {
   const [selected, setSelected] = useState<number>(0);
-  const { data: mountPoint } = useMountPoint();
+  const { user, os } = useMountPoint();
   const classes = useStyles();
-  const shouldDialogOpen = !mountPoint || mountPoint === '';
+  const ddClient = useDDClient();
+  const userMissing = !user;
+  const shouldDialogOpen = ddClient.host.platform === 'win32' ? !os || userMissing : userMissing;
 
   return (
     <>

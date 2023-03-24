@@ -10,7 +10,7 @@ export const CircularProgressWithLabel = (
   const { value } = props;
   return (
     <Box sx={{ position: 'relative', display: 'inline-flex' }}>
-      <CircularProgress variant="determinate" {...props} />
+      <CircularProgress variant='determinate' {...props} />
       <Box
         sx={{
           top: 0,
@@ -24,9 +24,9 @@ export const CircularProgressWithLabel = (
         }}
       >
         <Typography
-          variant="caption"
-          component="div"
-          color="text.secondary"
+          variant='caption'
+          component='div'
+          color='text.secondary'
         >
           {Math.round(value)}
         </Typography>

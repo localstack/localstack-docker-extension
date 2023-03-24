@@ -11,7 +11,7 @@ interface DownloadProgressDialogProps {
 export const DownloadProgressDialog = ({ imageName, open, onClose }: DownloadProgressDialogProps): ReactElement => (
   <Dialog open={open} onClose={onClose}>
     <DialogContent>
-      <Box display='flex' gap={5} alignItems="center">
+      <Box display='flex' gap={5} alignItems='center'>
         <Typography>
           Pulling {imageName}
         </Typography>
