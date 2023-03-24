@@ -41,7 +41,6 @@ export const UpdateDialog = ({ open, onClose }: Props): ReactElement => {
           setIsUpdating(false);
           console.log(`onClose with exit code ${exitCode}`);
         },
-        splitOutputLines: true,
       },
     });
 

@@ -16,8 +16,8 @@ export const App = (): ReactElement => {
   const { user, os } = useMountPoint();
   const classes = useStyles();
   const ddClient = useDDClient();
-  const userPresent = !user;
-  const shouldDialogOpen = ddClient.host.platform === 'win32' ? !os || userPresent : userPresent;
+  const userMissing = !user;
+  const shouldDialogOpen = ddClient.host.platform === 'win32' ? !os || userMissing : userMissing;
 
   return (
     <>

@@ -38,7 +38,7 @@ module.exports = {
         'react/require-default-props': 'off',
         'react/function-component-definition': 'off',
         'react/jsx-props-no-spreading': 'off',
-        'indent': ['error', 2],
+        'indent': ['error', 2,{ 'SwitchCase': 1 }],
         'react/jsx-filename-extension': [1, { extensions: ['.tsx', '.jsx'] }],
         'eol-last': ['error', 'always'],
         'no-param-reassign': 'off',

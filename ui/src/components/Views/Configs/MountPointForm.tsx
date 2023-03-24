@@ -67,7 +67,7 @@ export const MountPointForm = (): ReactElement => {
     if (res.stderr || !res.stdout) {
       ddClient.desktopUI.toast.error(`Error while locating users: ${res.stderr} using /tmp as mount point`);
       setUserState({ loading: false, selectedUser: ERROR_USER, users: ['tmp'] });
-      setMountPointData([ERROR_USER]);
+      setMountPointData({ user: ERROR_USER, os: '' });
     }
 
     setUserState({ loading: false, selectedUser: foundUsers[0], users: foundUsers });
@@ -99,7 +99,7 @@ export const MountPointForm = (): ReactElement => {
   }, [triggerUserCheck]);
 
   const onClose = () => {
-    setMountPointData([userState.selectedUser, osState.selectedOS]);
+    setMountPointData({ user: userState.selectedUser, os: osState.selectedOS });
   };
 
   const handleOsChange = (target: string) => {

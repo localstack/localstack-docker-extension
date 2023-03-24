@@ -12,3 +12,8 @@ export interface RunConfig {
   id: string,
   vars: Optional<envVar[]>,
 }
+
+export interface mountPointData {
+  user: string,
+  os: string,
+}

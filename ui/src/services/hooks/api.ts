@@ -1,6 +1,6 @@
 import useSWR from 'swr';
 import { STORAGE_KEY_ENVVARS, STORAGE_KEY_LOCALSTACK, STORAGE_KEY_MOUNT } from '../../constants';
-import { DockerContainer, RunConfig } from '../../types';
+import { DockerContainer, mountPointData, RunConfig } from '../../types';
 import { isALocalStackContainer, isJson } from '../util';
 import { useDDClient } from './utils';
 
@@ -52,7 +52,7 @@ interface useMountPointReturn {
   user: string | null,
   os: string | null,
   isLoading: boolean,
-  setMountPointData: (data: string[]) => void;
+  setMountPointData: (data: mountPointData) => void;
   deleteMountPointData: () => void;
 }
 
@@ -65,7 +65,7 @@ export const useMountPoint = (): useMountPointReturn => {
     async () => (ddClient.extension.vm.service.get('/mount') as Promise<HTTPMessageBody>),
   );
 
-  const setMountPointData = async (data: string[]) => {
+  const setMountPointData = async (data: mountPointData) => {
     await ddClient.extension.vm.service.post('/mount', { Data: JSON.stringify(data) });
     mutate();
   };
@@ -76,11 +76,11 @@ export const useMountPoint = (): useMountPointReturn => {
   };
 
   const fileContent = (!error && data) ? data.Message : null;
-  const returnedArray = isJson(fileContent) ? JSON.parse(fileContent) : null;
+  const mountPointData = isJson(fileContent) ? JSON.parse(fileContent) as mountPointData : null;
 
   return {
-    user: returnedArray?.at(0),
-    os: returnedArray?.at(1),
+    user: mountPointData?.user,
+    os: mountPointData?.os,
     isLoading: isValidating || (!error && !data),
     setMountPointData,
     deleteMountPointData,

@@ -41,20 +41,21 @@ export const Controller = (): ReactElement => {
   }, [isLoading]);
 
   const buildMountArg = () => {
-    if (user === ERROR_USER) {
-      return ['-e', 'LOCALSTACK_VOLUME_DIR=/tmp/localstack/volume'];
+    let location = 'LOCALSTACK_VOLUME_DIR=/tmp/localstack/volume';
+
+    if (user !== ERROR_USER) {
+      switch (ddClient.host.platform) {
+        case 'win32':
+          location = `LOCALSTACK_VOLUME_DIR=\\\\wsl$\\${os}\\home\\${user}\\.cache\\localstack\\volume`;
+          break;
+        case 'darwin':
+          location = `LOCALSTACK_VOLUME_DIR=/Users/${user}/Library/Caches/localstack/volume`;
+          break;
+        default:
+          location = `LOCALSTACK_VOLUME_DIR=/home/${user}/.cache/localstack/volume`;
+      }
     }
-
-    if (ddClient.host.platform === 'win32') {
-      return ['-e', `LOCALSTACK_VOLUME_DIR=\\\\wsl$\\${os}\\home\\${user}\\.cache\\localstack\\volume`];
-    }
-
-    if (ddClient.host.platform === 'darwin') {
-      return ['-e', `LOCALSTACK_VOLUME_DIR=/Users/${user}/Library/Caches/localstack/volume`];
-    }
-
-    return ['-e', `LOCALSTACK_VOLUME_DIR=/home/${user}/.cache/localstack/volume`];
-
+    return ['-e', location];
   };
 
   const normalizeArguments = async () => {
