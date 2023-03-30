@@ -13,7 +13,6 @@ import {
   Typography,
 } from '@mui/material';
 import React, { ReactElement, useEffect, useState } from 'react';
-import { ERROR_USER } from '../../../constants';
 import {
   getOSsFromBinary,
   getUsersFromBinaryUnix,
@@ -21,6 +20,7 @@ import {
   useDDClient,
   useMountPoint,
 } from '../../../services';
+import { ConfirmableButton } from '../../Feedback';
 
 const ShrinkedCircularProgress = (): ReactElement => <CircularProgress size={20} sx={{ margin: 1 }} />;
 
@@ -66,8 +66,7 @@ export const MountPointForm = (): ReactElement => {
 
     if (res.stderr || !res.stdout) {
       ddClient.desktopUI.toast.error(`Error while locating users: ${res.stderr} using /tmp as mount point`);
-      setUserState({ loading: false, selectedUser: ERROR_USER, users: ['tmp'] });
-      setMountPointData({ user: ERROR_USER, os: '' });
+      closeWithoutSetting();
     }
 
     setUserState({ loading: false, selectedUser: foundUsers[0], users: foundUsers });
@@ -98,8 +97,28 @@ export const MountPointForm = (): ReactElement => {
     }
   }, [triggerUserCheck]);
 
+  const saveAndClose = () => {
+    setMountPointData({
+      user: userState.selectedUser,
+      os: osState.selectedOS,
+      showForm: false,
+      showSetupWarning: false,
+      hasSkippedConfiguration: false,
+    });
+  };
+
+  const closeWithoutSetting = () => {
+    setMountPointData({
+      user: userState.selectedUser,
+      os: osState.selectedOS,
+      showForm: false,
+      showSetupWarning: false,
+      hasSkippedConfiguration: true,
+    });
+  };
+
   const onClose = () => {
-    setMountPointData({ user: userState.selectedUser, os: osState.selectedOS });
+    ddClient.desktopUI.toast.warning('Complete the setup first');
   };
 
   const handleOsChange = (target: string) => {
@@ -180,8 +199,21 @@ export const MountPointForm = (): ReactElement => {
         </Typography>
       </DialogContent>
       <DialogActions>
+        <ConfirmableButton
+          component='Button'
+          title='Close without setting mount point'
+          okText='Close'
+          okColor='error'
+          cancelColor='primary'
+          onClick={closeWithoutSetting}
+          text="Are you sure you want to close without setting a default mount point?
+          You'll need to use a configuration where LOCALSTACK_VOLUME_DIR is set-up otherwise the LocalStack
+          container will be mounted under /tmp and some features will not work!"
+        >
+          Close 
+        </ConfirmableButton>
         <Button
-          onClick={onClose}
+          onClick={saveAndClose}
           disabled={!userState.selectedUser}
         >
           Confirm

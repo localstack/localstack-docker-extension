@@ -16,4 +16,7 @@ export interface RunConfig {
 export interface mountPointData {
   user: string,
   os: string,
+  showForm: boolean,
+  showSetupWarning: boolean,
+  hasSkippedConfiguration: boolean,
 }

@@ -23,7 +23,7 @@ export const Controller = (): ReactElement => {
   const { data, mutate } = useLocalStack();
   const [runningConfig, setRunningConfig] = useState<string>('Default');
   const isRunning = data && data.State === 'running';
-  const { user, os } = useMountPoint();
+  const { user, os, hasSkippedConfiguration } = useMountPoint();
   const [downloadProps, setDownloadProps] = useState({ open: false, image: LATEST_IMAGE });
   const [isStarting, setIsStarting] = useState<boolean>(false);
   const [isStopping, setIsStopping] = useState<boolean>(false);
@@ -41,6 +41,10 @@ export const Controller = (): ReactElement => {
   }, [isLoading]);
 
   const buildMountArg = () => {
+    if (hasSkippedConfiguration) {
+      return [];
+    }
+
     let location = 'LOCALSTACK_VOLUME_DIR=/tmp/localstack/volume';
 
     if (user !== ERROR_USER) {
