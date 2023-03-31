@@ -8,7 +8,6 @@ import {
   LATEST_IMAGE,
   START_ARGS,
   FLAGS,
-  ERROR_USER,
 } from '../../constants';
 import { LongMenu } from './Menu';
 import { DockerContainer, DockerImage } from '../../types';
@@ -41,13 +40,9 @@ export const Controller = (): ReactElement => {
   }, [isLoading]);
 
   const buildMountArg = () => {
-    if (hasSkippedConfiguration) {
-      return [];
-    }
-
     let location = 'LOCALSTACK_VOLUME_DIR=/tmp/localstack/volume';
 
-    if (user !== ERROR_USER) {
+    if (!hasSkippedConfiguration) {
       switch (ddClient.host.platform) {
         case 'win32':
           location = `LOCALSTACK_VOLUME_DIR=\\\\wsl$\\${os}\\home\\${user}\\.cache\\localstack\\volume`;
