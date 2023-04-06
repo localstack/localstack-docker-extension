@@ -1,1 +1,1 @@
-dir \\wsl.localhost\%1\home
+dir \\wsl.localhost\%1\home /d
