@@ -38,9 +38,8 @@ export const SettingsForm = ({ initialState }: MountPointFormProps): ReactElemen
   const [triggerUserCheck, setTriggerUserCheck] = useState(false);
   const [activeStep, setActiveStep] = useState(initialState);
 
-  const { setMountPointData } = useMountPoint();
+  const { setMountPointData, user, os } = useMountPoint();
   const ddClient = useDDClient();
-
 
   const steps = ['Enable Docker Desktop option', 'Set mount point'];
 
@@ -68,7 +67,7 @@ export const SettingsForm = ({ initialState }: MountPointFormProps): ReactElemen
 
     const foundOSs = getOSsFromBinary(res.stdout);
 
-    setOsState({ loading: false, selectedOS: foundOSs[0], OSs: foundOSs });
+    setOsState({ loading: false, selectedOS: os || foundOSs[0], OSs: foundOSs });
     setTriggerUserCheck(!triggerUserCheck);
   };
 
@@ -90,7 +89,7 @@ export const SettingsForm = ({ initialState }: MountPointFormProps): ReactElemen
       closeWithoutSetting();
     }
 
-    setUserState({ loading: false, selectedUser: foundUsers[0], users: foundUsers });
+    setUserState({ loading: false, selectedUser: user || foundUsers[0], users: foundUsers });
   };
 
   const locateMountPoint = async () => {
