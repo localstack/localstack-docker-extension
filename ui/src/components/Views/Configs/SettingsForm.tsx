@@ -68,7 +68,7 @@ export const SettingsForm = ({ initialState }: MountPointFormProps): ReactElemen
     const foundOSs = getOSsFromBinary(res.stdout);
 
     setOsState({ loading: false, selectedOS: os || foundOSs[0], OSs: foundOSs });
-    setTriggerUserCheck(!triggerUserCheck);
+    setTriggerUserCheck(true);
   };
 
   const checkUser = async () => {
