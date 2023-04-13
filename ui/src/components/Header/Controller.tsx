@@ -8,26 +8,24 @@ import {
   LATEST_IMAGE,
   START_ARGS,
   FLAGS,
-  ERROR_USER,
 } from '../../constants';
 import { LongMenu } from './Menu';
 import { DockerContainer, DockerImage } from '../../types';
 import { DownloadProgressDialog } from '../Feedback/DownloadProgressDialog';
 import { ProgressButton } from '../Feedback';
 
-const EXCLUDED_ERROR_TOAST = ['Successfully activated API key', 'Execution of "prepare_host"', 'DEBUG'];
+const EXCLUDED_ERROR_TOAST = ['INFO', 'WARN', 'DEBUG'];
 
 export const Controller = (): ReactElement => {
-  const ddClient = useDDClient();
   const { runConfig, isLoading, createConfig } = useRunConfig();
   const { data, mutate } = useLocalStack();
+  const { user, os, hasSkippedConfiguration } = useMountPoint();
   const [runningConfig, setRunningConfig] = useState<string>('Default');
-  const isRunning = data && data.State === 'running';
-  const { user, os } = useMountPoint();
   const [downloadProps, setDownloadProps] = useState({ open: false, image: LATEST_IMAGE });
   const [isStarting, setIsStarting] = useState<boolean>(false);
   const [isStopping, setIsStopping] = useState<boolean>(false);
-
+  const ddClient = useDDClient();
+  const isRunning = data && data.State === 'running';
   const isUnhealthy = data && data.Status.includes('unhealthy');
   const tooltipLabel = isUnhealthy ? 'Unhealthy' : 'Healthy';
 
@@ -43,7 +41,7 @@ export const Controller = (): ReactElement => {
   const buildMountArg = () => {
     let location = 'LOCALSTACK_VOLUME_DIR=/tmp/localstack/volume';
 
-    if (user !== ERROR_USER) {
+    if (!hasSkippedConfiguration) {
       switch (ddClient.host.platform) {
         case 'win32':
           location = `LOCALSTACK_VOLUME_DIR=\\\\wsl$\\${os}\\home\\${user}\\.cache\\localstack\\volume`;

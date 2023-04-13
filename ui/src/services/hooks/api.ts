@@ -51,9 +51,11 @@ export const useRunConfig = (): useRunConfigReturn => {
 interface useMountPointReturn {
   user: string | null,
   os: string | null,
+  showForm: boolean,
+  showSetupWarning: boolean,
+  hasSkippedConfiguration: boolean,
   isLoading: boolean,
   setMountPointData: (data: mountPointData) => void;
-  deleteMountPointData: () => void;
 }
 
 export const useMountPoint = (): useMountPointReturn => {
@@ -70,20 +72,17 @@ export const useMountPoint = (): useMountPointReturn => {
     mutate();
   };
 
-  const deleteMountPointData = async () => {
-    await ddClient.extension.vm.service.delete('/mount');
-    mutate();
-  };
-
   const fileContent = (!error && data) ? data.Message : null;
   const mountPointData = isJson(fileContent) ? JSON.parse(fileContent) as mountPointData : null;
 
   return {
     user: mountPointData?.user,
     os: mountPointData?.os,
+    showForm: mountPointData?.showForm == null? true : mountPointData?.showForm,
+    showSetupWarning: mountPointData?.showSetupWarning == null ? true : mountPointData?.showSetupWarning,
+    hasSkippedConfiguration: mountPointData?.hasSkippedConfiguration || false,
     isLoading: isValidating || (!error && !data),
     setMountPointData,
-    deleteMountPointData,
   };
 };
 
