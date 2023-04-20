@@ -39,11 +39,11 @@ export const DownloadProgress = ({ callback, imageName }: DownloadProgressProps)
 
           const [key, status] = data.stdout.split(':').map(item => item.trim());
 
-          if (key === SKIPPING_KEY || status === SKIPPING_KEY) { // don't process lines that are not in the format hash: status
+          if ([key, status].includes(SKIPPING_KEY)) { // prevent inserting in the map non related info
             return;
           }
 
-          if (status.startsWith('Image is up to date') || END_KEYS.includes(key)) { 
+          if (status.startsWith('Image is up to date') || END_KEYS.includes(key)) {
             setIsDone(true);
             return;
           }
