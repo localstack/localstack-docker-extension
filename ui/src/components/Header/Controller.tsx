@@ -1,13 +1,21 @@
 import React, { ReactElement, useEffect, useState } from 'react';
 import { Chip, ButtonGroup, Select, MenuItem, FormControl, Box, Badge, Tooltip } from '@mui/material';
 import { PlayArrow, Stop } from '@mui/icons-material';
-import { isALocalStackContainer, useDDClient, useLocalStack, useMountPoint, useRunConfig } from '../../services';
+import { 
+  isALocalStackContainer,
+  removeTagFromImage,
+  useDDClient,
+  useLocalStack,
+  useMountPoint,
+  useRunConfig,
+} from '../../services';
 import {
   DEFAULT_CONFIGURATION_ID,
   CORS_ALLOW_DEFAULT,
-  LATEST_IMAGE,
   START_ARGS,
   FLAGS,
+  IMAGE,
+  PRO_IMAGE,
 } from '../../constants';
 import { LongMenu } from './Menu';
 import { DockerContainer, DockerImage } from '../../types';
@@ -21,7 +29,7 @@ export const Controller = (): ReactElement => {
   const { data, mutate } = useLocalStack();
   const { user, os, hasSkippedConfiguration } = useMountPoint();
   const [runningConfig, setRunningConfig] = useState<string>('Default');
-  const [downloadProps, setDownloadProps] = useState({ open: false, image: LATEST_IMAGE });
+  const [downloadProps, setDownloadProps] = useState({ open: false, image: IMAGE });
   const [isStarting, setIsStarting] = useState<boolean>(false);
   const [isStopping, setIsStopping] = useState<boolean>(false);
   const ddClient = useDDClient();
@@ -79,10 +87,15 @@ export const Controller = (): ReactElement => {
 
   const start = async () => {
     const images = await ddClient.docker.listImages() as [DockerImage];
-    const haveLocally = images.some(image => image.RepoTags?.at(0) === LATEST_IMAGE);
+
+    const isPro = runConfig.find(config => config.name === runningConfig)
+      .vars.some(item => item.variable === 'LOCALSTACK_API_KEY');
+
+    const willBeUsedImage = isPro ? PRO_IMAGE : IMAGE;
+    const haveLocally = images.some(image => removeTagFromImage(image) === willBeUsedImage);
 
     if (!haveLocally) {
-      setDownloadProps({ open: true, image: LATEST_IMAGE });
+      setDownloadProps({ open: true, image: willBeUsedImage });
       return;
     }
     const args = await normalizeArguments();
