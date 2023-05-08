@@ -7,7 +7,7 @@ import {
   useDDClient,
   useLocalStack,
   useMountPoint,
-  useRunConfig,
+  useRunConfigs,
 } from '../../services';
 import {
   DEFAULT_CONFIGURATION_ID,
@@ -25,7 +25,7 @@ import { ProgressButton } from '../Feedback';
 const EXCLUDED_ERROR_TOAST = ['INFO', 'WARN', 'DEBUG'];
 
 export const Controller = (): ReactElement => {
-  const { runConfig, isLoading, createConfig } = useRunConfig();
+  const { runConfigs, isLoading, createConfig } = useRunConfigs();
   const { data, mutate } = useLocalStack();
   const { user, os, hasSkippedConfiguration } = useMountPoint();
   const [runningConfig, setRunningConfig] = useState<string>('Default');
@@ -38,7 +38,7 @@ export const Controller = (): ReactElement => {
   const tooltipLabel = isUnhealthy ? 'Unhealthy' : 'Healthy';
 
   useEffect(() => {
-    if (!isLoading && (!runConfig || !runConfig.find(item => item.name === 'Default'))) {
+    if (!isLoading && (!runConfigs || !runConfigs.find(item => item.name === 'Default'))) {
       createConfig({
         name: 'Default', id: DEFAULT_CONFIGURATION_ID, vars: [],
       },
@@ -69,7 +69,7 @@ export const Controller = (): ReactElement => {
 
     const corsArg = ['-e', `EXTRA_CORS_ALLOWED_ORIGINS=${CORS_ALLOW_DEFAULT}`];
 
-    const addedArgs = runConfig.find(config => config.name === runningConfig)
+    const addedArgs = runConfigs.find(config => config.name === runningConfig)
       .vars.map(item => {
         if (item.variable === 'EXTRA_CORS_ALLOWED_ORIGINS') { // prevent overriding variable
           corsArg.slice(0, 0);
@@ -88,14 +88,14 @@ export const Controller = (): ReactElement => {
   const start = async () => {
     const images = await ddClient.docker.listImages() as [DockerImage];
 
-    const isPro = runConfig.find(config => config.name === runningConfig)
+    const isPro = runConfigs.find(config => config.name === runningConfig)
       .vars.some(item => item.variable === 'LOCALSTACK_API_KEY');
 
-    const willBeUsedImage = isPro ? PRO_IMAGE : IMAGE;
-    const haveLocally = images.some(image => removeTagFromImage(image) === willBeUsedImage);
+    const imageToUse = isPro ? PRO_IMAGE : IMAGE;
+    const haveLocally = images.some(image => removeTagFromImage(image) === imageToUse);
 
     if (!haveLocally) {
-      setDownloadProps({ open: true, image: willBeUsedImage });
+      setDownloadProps({ open: true, image: imageToUse });
       return;
     }
     const args = await normalizeArguments();
@@ -177,7 +177,7 @@ export const Controller = (): ReactElement => {
                 onChange={({ target }) => setRunningConfig(target.value)}
               >
                 {
-                  runConfig?.map(config => (
+                  runConfigs?.map(config => (
                     <MenuItem key={config.id} value={config.name}>{config.name}</MenuItem>
                   ))
                 }

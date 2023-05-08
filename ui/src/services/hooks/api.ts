@@ -4,8 +4,8 @@ import { DockerContainer, mountPointData, RunConfig } from '../../types';
 import { isALocalStackContainer, isJson } from '../util';
 import { useDDClient } from './utils';
 
-interface useRunConfigReturn {
-  runConfig: RunConfig[],
+interface useRunConfigsReturn {
+  runConfigs: RunConfig[],
   isLoading: boolean,
   createConfig: (data: RunConfig) => unknown;
   updateConfig: (data: RunConfig) => unknown;
@@ -16,7 +16,7 @@ interface HTTPMessageBody {
   Message: string,
 }
 
-export const useRunConfig = (): useRunConfigReturn => {
+export const useRunConfigs = (): useRunConfigsReturn => {
   const cacheKey = STORAGE_KEY_ENVVARS;
   const ddClient = useDDClient();
   const { data, mutate, isValidating, error } = useSWR(
@@ -40,7 +40,7 @@ export const useRunConfig = (): useRunConfigReturn => {
   };
 
   return {
-    runConfig: (!data || !data?.Message || error) ? [] : JSON.parse(data?.Message),
+    runConfigs: (!data || !data?.Message || error) ? [] : JSON.parse(data?.Message),
     isLoading: isValidating || (!error && !data),
     createConfig,
     updateConfig,
