@@ -4,7 +4,7 @@ import React, { ReactElement, useState } from 'react';
 import { createStyles, makeStyles } from '@mui/styles';
 import { DataGrid, GridColDef, GridRenderCellParams } from '@mui/x-data-grid';
 import { v4 as uuid } from 'uuid';
-import { useMountPoint, useRunConfig } from '../../../services';
+import { useMountPoint, useRunConfigs } from '../../../services';
 import { DEFAULT_CONFIGURATION_ID } from '../../../constants';
 import { RunConfig, Optional } from '../../../types';
 import { ConfirmableButton } from '../../Feedback';
@@ -18,7 +18,7 @@ const useStyles = makeStyles((theme: Theme) => createStyles({
 
 export const ConfigPage = (): ReactElement => {
 
-  const { runConfig, deleteConfig } = useRunConfig();
+  const { runConfigs, deleteConfig } = useRunConfigs();
   const mountPoint = useMountPoint();
   const [openModal, setOpenModal] = useState<boolean>(false);
   const [targetConfig, setTargetConfig] = useState<RunConfig | null>(null);
@@ -89,7 +89,7 @@ export const ConfigPage = (): ReactElement => {
       <Box sx={{ marginTop: 3 }}>
         <DataGrid
           autoHeight
-          rows={runConfig.filter(config => config.id !== DEFAULT_CONFIGURATION_ID)}
+          rows={runConfigs.filter(config => config.id !== DEFAULT_CONFIGURATION_ID)}
           columns={columns}
           getRowId={(row) => (row).id as string || uuid()}
           disableSelectionOnClick

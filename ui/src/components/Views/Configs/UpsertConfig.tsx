@@ -15,7 +15,7 @@ import { Add, Remove, Settings } from '@mui/icons-material';
 import React, { ReactElement, useState } from 'react';
 import { v4 as uuid } from 'uuid';
 import { createStyles, makeStyles } from '@mui/styles';
-import { useRunConfig } from '../../../services/hooks';
+import { useRunConfigs } from '../../../services/hooks';
 import { RunConfig } from '../../../types';
 
 const DEFAULT_COLUMN_WIDTH = 2000;
@@ -38,7 +38,7 @@ const useStyles = makeStyles((theme: Theme) => createStyles({
 
 export const UpsertConfig = ({ config, open, onClose }: Props): ReactElement => {
 
-  const { updateConfig } = useRunConfig();
+  const { updateConfig } = useRunConfigs();
   const [newVar, setNewVar] = useState<string>('');
   const [newValue, setNewValue] = useState<string>('');
   const [configName, setConfigName] = useState<string>(config?.name || '');

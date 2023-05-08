@@ -2,7 +2,8 @@ import React, { ReactElement, useEffect, useState } from 'react';
 import { useDDClient } from '../../../services';
 import { CircularProgressWithLabel } from './CircularProgressWithLabel';
 
-const SKIPPING_KEYS = ['Digest', 'Status', 'latest'];
+const SKIPPING_KEY = 'latest';
+const END_KEYS = ['Digest', 'Status'];
 
 const statusValues = new Map([
   ['Waiting', 0],
@@ -38,16 +39,17 @@ export const DownloadProgress = ({ callback, imageName }: DownloadProgressProps)
 
           const [key, status] = data.stdout.split(':').map(item => item.trim());
 
-          if (SKIPPING_KEYS.includes(key) || status === 'latest') { // don't process lines that are not in the format hash: status
+          if ([key, status].includes(SKIPPING_KEY)) { // prevent inserting in the map non related info
             return;
           }
 
-          if (status.startsWith('Image is up to date')) { // otherwise if Image is up to date nothing is downloaded and the progress remains to 0
+          if (status.startsWith('Image is up to date') || END_KEYS.includes(key)) {
             setIsDone(true);
             return;
           }
-
-          setStatusMap(new Map(statusMap.set(key, status)));
+          if (!status.startsWith('Retrying in')) {
+            setStatusMap(new Map(statusMap.set(key, status)));
+          }
         },
         onError(error: unknown): void {
           ddClient.desktopUI.toast.error('An error occurred');
