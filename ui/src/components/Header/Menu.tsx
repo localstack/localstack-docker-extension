@@ -8,6 +8,14 @@ import { UpdateDialog } from '../Views';
 
 const ITEM_HEIGHT = 80;
 
+const IMAGE_PREFIXES = [
+  'localstack/',
+  'lambci/lambda:',
+  'mlupin/docker-lambda:',
+  'public.ecr.aws/lambda',
+];
+
+
 export const LongMenu = () => {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [openModal, setOpenModal] = useState<boolean>(false);
@@ -34,7 +42,9 @@ export const LongMenu = () => {
     const fetchImages = async () => {
       const images = (await ddClient.docker.listImages()) as DockerImage[];
 
-      const localstackImages = images.filter(image => image.RepoTags?.at(0).startsWith('localstack/'));
+      const localstackImages = images.filter(image =>
+        IMAGE_PREFIXES.some(prefix => image.RepoTags?.at(0).startsWith(prefix))); 
+
       const imagesWithoutOrgName = localstackImages.map(image => removeRepoFromImage(image.RepoTags?.at(0)));
       setImages(imagesWithoutOrgName);
     };
