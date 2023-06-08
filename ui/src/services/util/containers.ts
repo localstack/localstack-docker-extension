@@ -11,7 +11,7 @@ export function removeRepoFromImage(repoTag: string) {
 }
 
 export function removeTagFromImage(image: DockerImage){
-  return image.RepoTags[0].split(':').slice(0, -1).join(':');
+  return image.RepoTags?.at(0).split(':').slice(0, -1).join(':');
 }
 
 export const isALocalStackContainer = (container: DockerContainer) =>
