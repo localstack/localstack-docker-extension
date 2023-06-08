@@ -1,7 +1,7 @@
 import React, { ReactElement, useEffect, useState } from 'react';
 import { Chip, ButtonGroup, Select, MenuItem, FormControl, Box, Badge, Tooltip } from '@mui/material';
 import { PlayArrow, Stop } from '@mui/icons-material';
-import { 
+import {
   isALocalStackContainer,
   removeTagFromImage,
   useDDClient,
@@ -91,13 +91,20 @@ export const Controller = (): ReactElement => {
     const isPro = runConfigs.find(config => config.name === runningConfig)
       .vars.some(item => item.variable === 'LOCALSTACK_API_KEY');
 
-    const imageToUse = isPro ? PRO_IMAGE : IMAGE;
-    const haveLocally = images.some(image => removeTagFromImage(image) === imageToUse);
-
-    if (!haveLocally) {
-      setDownloadProps({ open: true, image: imageToUse });
+    const haveCommunity = images.some(image => removeTagFromImage(image) === IMAGE);
+    if (!haveCommunity) {
+      setDownloadProps({ open: true, image: IMAGE });
       return;
     }
+
+    if (isPro) {
+      const havePro = images.some(image => removeTagFromImage(image) === PRO_IMAGE);
+      if (!havePro) {
+        setDownloadProps({ open: true, image: PRO_IMAGE });
+        return;
+      }
+    }
+
     const args = await normalizeArguments();
 
     setIsStarting(true);
