@@ -30,6 +30,8 @@ export const DownloadProgress = ({ callback, imageName }: DownloadProgressProps)
     .reduce((partialSum, [, value]) => partialSum + statusValues.get(value), 0) / statusMap.size;
 
   useEffect(() => {
+    setIsDone(false);
+    setStatusMap(new Map());
     ddClient.docker.cli.exec('pull', [imageName], {
       stream: {
         onOutput(data): void {
@@ -61,7 +63,7 @@ export const DownloadProgress = ({ callback, imageName }: DownloadProgressProps)
         splitOutputLines: true,
       },
     });
-  }, []);
+  }, [imageName]);
 
   const percentageValue = Number.isNaN(percentage) ? 0 : percentage;
   return (
