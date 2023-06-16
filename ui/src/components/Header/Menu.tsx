@@ -34,7 +34,7 @@ export const LongMenu = () => {
     const fetchImages = async () => {
       const images = (await ddClient.docker.listImages()) as DockerImage[];
 
-      const localstackImages = images.filter(image => image.RepoTags?.at(0).startsWith('localstack/'));
+      const localstackImages = images.filter(image => image.RepoTags?.at(0)?.startsWith('localstack/'));
       const imagesWithoutOrgName = localstackImages.map(image => removeRepoFromImage(image.RepoTags?.at(0)));
       setImages(imagesWithoutOrgName);
     };
