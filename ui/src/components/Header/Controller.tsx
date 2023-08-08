@@ -91,7 +91,7 @@ export const Controller = (): ReactElement => {
     const isPro = runConfigs.find(config => config.name === runningConfig)
       .vars.some(item => item.variable === 'LOCALSTACK_API_KEY');
 
-    const haveCommunity = images.some(image => removeTagFromImage(image) === IMAGE);
+    const haveCommunity = images.some(image => image.RepoTags?.at(0) === IMAGE);
     if (!haveCommunity) {
       setDownloadProps({ open: true, image: IMAGE });
       return;
@@ -106,7 +106,6 @@ export const Controller = (): ReactElement => {
     }
 
     const args = await normalizeArguments();
-
     setIsStarting(true);
     ddClient.docker.cli.exec('run', args, {
       stream: {

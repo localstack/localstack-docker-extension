@@ -6,7 +6,7 @@ const COMMON_ARGS = [
   '--entrypoint=',
   '-v',
   '/var/run/docker.sock:/var/run/docker.sock',
-  'localstack/localstack',
+  'localstack/localstack:2.1.0',
   'bin/localstack',
 ];
 
