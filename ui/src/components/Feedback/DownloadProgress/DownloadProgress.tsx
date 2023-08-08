@@ -3,6 +3,8 @@ import { useDDClient } from '../../../services';
 import { CircularProgressWithLabel } from './CircularProgressWithLabel';
 
 const SKIPPING_KEY = 'latest';
+const SKIPPING_ERROR = 'What\'s Next?';
+const SKIPPING_TAG_MESSAGE = 'Pulling from'; // message that get's sent if you pull a specific tag
 const END_KEYS = ['Digest', 'Status'];
 
 const statusValues = new Map([
@@ -35,13 +37,14 @@ export const DownloadProgress = ({ callback, imageName }: DownloadProgressProps)
     ddClient.docker.cli.exec('pull', [imageName], {
       stream: {
         onOutput(data): void {
-          if (data.stderr) {
+          if (data.stderr && data.stderr !== SKIPPING_ERROR) {
             ddClient.desktopUI.toast.error(data.stderr);
           }
 
           const [key, status] = data.stdout.split(':').map(item => item.trim());
 
-          if ([key, status].includes(SKIPPING_KEY)) { // prevent inserting in the map non related info
+          if ([key, status].includes(SKIPPING_KEY) ||
+            status.startsWith(SKIPPING_TAG_MESSAGE)) { // prevent inserting in the map non related info
             return;
           }
 
