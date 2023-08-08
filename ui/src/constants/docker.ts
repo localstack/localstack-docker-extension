@@ -1,3 +1,5 @@
+import { IMAGE } from './common';
+
 const COMMON_ARGS = [
   '--label',
   'cloud.localstack.spawner=true',
@@ -6,7 +8,7 @@ const COMMON_ARGS = [
   '--entrypoint=',
   '-v',
   '/var/run/docker.sock:/var/run/docker.sock',
-  'localstack/localstack:2.1.0',
+  IMAGE,
   'bin/localstack',
 ];
 
