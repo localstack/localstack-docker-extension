@@ -9,6 +9,8 @@ const useStyles = makeStyles((theme: Theme) => createStyles({
     zIndex: 2,
     top: 64,
     backgroundColor: theme.palette.background.default,
+    paddingTop: theme.spacing(1),
+    paddingBottom: theme.spacing(1),
   },
 }));
 
