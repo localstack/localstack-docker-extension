@@ -41,7 +41,7 @@ export const SettingsForm = ({ initialState }: MountPointFormProps): ReactElemen
   const { setMountPointData, user, os } = useMountPoint();
   const ddClient = useDDClient();
 
-  const steps = ['Enable Docker Desktop option', 'Set mount point'];
+  const steps = ['Enable Docker Desktop option', 'Launching pro container', 'Set mount point'];
 
   const handleNext = () => {
     if (activeStep !== steps.length - 1) {
@@ -158,7 +158,7 @@ export const SettingsForm = ({ initialState }: MountPointFormProps): ReactElemen
           )}
         </Stepper>
         <Box sx={{ margin: 5 }}>
-          {activeStep === 0 ?
+          {activeStep === 0 &&
             <>
               <Typography>
                 Make sure to have the option &quot;Show Docker Extensions system containers&quot; enabled.
@@ -171,7 +171,15 @@ export const SettingsForm = ({ initialState }: MountPointFormProps): ReactElemen
                 <li>In the bottom-right corner, select Apply & Restart</li>
               </ul>
             </>
-            :
+          }
+          {
+            activeStep === 1 &&
+            <Typography>
+              In order to start the Pro container, add a configuration with the variable LOCALSTACK_API_KEY 
+              set to your API key and select that configuration in the top right corner
+            </Typography>
+          }
+          {activeStep === 2 &&
             <>
               <Typography variant='h3'>
                 Default mount point settings
