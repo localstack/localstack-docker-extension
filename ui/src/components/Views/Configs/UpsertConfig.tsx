@@ -105,6 +105,7 @@ export const UpsertConfig = ({ config, open, onClose }: Props): ReactElement => 
             variant='outlined'
             label='Configuration Name'
             value={configName}
+            required
             onChange={(e) => setConfigName(e.target.value)}
           />
         </Box>
@@ -173,6 +174,7 @@ export const UpsertConfig = ({ config, open, onClose }: Props): ReactElement => 
         <Button
           variant='contained'
           onClick={handleSaveButtonPress}
+          disabled={!configName}
         >
           Save & Exit
         </Button>
