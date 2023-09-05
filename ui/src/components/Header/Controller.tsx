@@ -73,7 +73,7 @@ export const Controller = (): ReactElement => {
 
     const corsArg = ['-e', `EXTRA_CORS_ALLOWED_ORIGINS=${CORS_ALLOW_DEFAULT}`];
 
-    const addedArgs = configData.configs.find(config => config.name === runningConfig)
+    const addedArgs = configData.configs.find(config => config.id === runningConfig)
       .vars.map(item => {
         if (item.variable === 'EXTRA_CORS_ALLOWED_ORIGINS') { // prevent overriding variable
           corsArg.slice(0, 0);
@@ -92,8 +92,8 @@ export const Controller = (): ReactElement => {
   const start = async () => {
     const images = await ddClient.docker.listImages() as [DockerImage];
 
-    const isPro = configData.configs.find(config => config.name === runningConfig)
-      .vars.some(item => item.variable === 'LOCALSTACK_API_KEY');
+    const isPro = configData.configs.find(config => config.id === runningConfig)
+      .vars.some(item => item.variable === 'LOCALSTACK_API_KEY' && item.value);
 
     const haveCommunity = images.some(image => image.RepoTags?.at(0) === IMAGE);
     if (!haveCommunity) {
