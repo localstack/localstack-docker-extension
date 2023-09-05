@@ -1,12 +1,13 @@
 import useSWR from 'swr';
 import { STORAGE_KEY_ENVVARS, STORAGE_KEY_LOCALSTACK, STORAGE_KEY_MOUNT } from '../../constants';
-import { DockerContainer, mountPointData, RunConfig } from '../../types';
+import { ConfigData, DockerContainer, mountPointData, RunConfig } from '../../types';
 import { isALocalStackContainer, isJson } from '../util';
 import { useDDClient } from './utils';
 
 interface useRunConfigsReturn {
-  runConfigs: RunConfig[],
+  configData: ConfigData,
   isLoading: boolean,
+  setRunningConfig: (data: string) => unknown;
   createConfig: (data: RunConfig) => unknown;
   updateConfig: (data: RunConfig) => unknown;
   deleteConfig: (data: string) => unknown;
@@ -15,6 +16,17 @@ interface useRunConfigsReturn {
 interface HTTPMessageBody {
   Message: string,
 }
+
+const adaptVersionData = (data: HTTPMessageBody, error: Error) => {
+  const newData = (!data || !data?.Message || error) ?
+    { configs: [], runningConfig: null }
+    :
+    JSON.parse(data?.Message);
+  if (Array.isArray(newData)) {
+    return { configs: newData, runningConfig: newData.at(0).id ?? null };
+  }
+  return newData;
+};
 
 export const useRunConfigs = (): useRunConfigsReturn => {
   const cacheKey = STORAGE_KEY_ENVVARS;
@@ -29,6 +41,11 @@ export const useRunConfigs = (): useRunConfigsReturn => {
     mutate();
   };
 
+  const setRunningConfig = async (configId: string) => {
+    await ddClient.extension.vm.service.put('/configs/running', { Data: JSON.stringify(configId) });
+    mutate();
+  };
+
   const createConfig = async (newData: RunConfig) => {
     await ddClient.extension.vm.service.post('/configs', { Data: JSON.stringify(newData) });
     mutate();
@@ -39,9 +56,11 @@ export const useRunConfigs = (): useRunConfigsReturn => {
     mutate();
   };
 
+
   return {
-    runConfigs: (!data || !data?.Message || error) ? [] : JSON.parse(data?.Message),
+    configData: adaptVersionData(data, error),
     isLoading: isValidating || (!error && !data),
+    setRunningConfig,
     createConfig,
     updateConfig,
     deleteConfig,
@@ -78,7 +97,7 @@ export const useMountPoint = (): useMountPointReturn => {
   return {
     user: mountPointData?.user,
     os: mountPointData?.os,
-    showForm: mountPointData?.showForm == null? true : mountPointData?.showForm,
+    showForm: mountPointData?.showForm == null ? true : mountPointData?.showForm,
     showSetupWarning: mountPointData?.showSetupWarning == null ? true : mountPointData?.showSetupWarning,
     hasSkippedConfiguration: mountPointData?.hasSkippedConfiguration || false,
     isLoading: isValidating || (!error && !data),
@@ -105,7 +124,7 @@ export const useLocalStack = (): useLocalStackReturn => {
       /*
        * compares whether the old (b) status aligns with that of new (a) status
        */
-      (a, b) => a?.Id === b?.Id && a?.Status.includes('unhealthy') === b?.Status.includes('unhealthy'), 
+      (a, b) => a?.Id === b?.Id && a?.Status.includes('unhealthy') === b?.Status.includes('unhealthy'),
     },
   );
 

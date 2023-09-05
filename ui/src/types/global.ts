@@ -13,6 +13,11 @@ export interface RunConfig {
   vars: Optional<envVar[]>,
 }
 
+export interface ConfigData {
+  runningConfig: string,
+  configs: RunConfig[],
+}
+
 export interface mountPointData {
   user: string,
   os: string,

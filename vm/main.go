@@ -41,6 +41,7 @@ func main() {
 	router.GET("/configs", getSettings)
 	router.POST("/configs", createSetting)
 	router.PUT("/configs", updateSetting)
+	router.PUT("/configs/running", updateRunningConfig)
 	router.DELETE("/configs/:id", deleteSetting)
 	router.GET("/mount", getMount)
 	router.POST("/mount", setMount)
@@ -67,8 +68,47 @@ type Configuration struct {
 	} `json:"vars"`
 }
 
+type ConfigurationData struct {
+	RunningConfig string          `json:"runningConfig"`
+	Configs       []Configuration `json:"configs"`
+}
+
 type Payload struct {
 	Data string `json:"data"`
+}
+
+func convertConfigurationVersion(loadedData []byte) ([]Configuration, error) {
+	var parsedContent []Configuration
+	err := json.Unmarshal(loadedData, &parsedContent)
+	return parsedContent, err
+}
+
+func updateRunningConfig(ctx echo.Context) error {
+	var payload Payload
+	var reqContent string
+	var parsedContent ConfigurationData
+
+	ctx.Bind(&payload)
+	json.Unmarshal([]byte(payload.Data), &reqContent)
+	savedData, file, _ := readDataKeepOpen()
+	defer file.Close()
+
+	err := json.Unmarshal(savedData, &parsedContent)
+
+	if err != nil {
+		configuration, newErr := convertConfigurationVersion(savedData)
+		if newErr != nil {
+			return ctx.JSON(http.StatusInternalServerError, HTTPMessageBody{Message: ERRORS[0]})
+		}
+		parsedContent.Configs = configuration
+	}
+
+	parsedContent.RunningConfig = reqContent
+	err = writeData(parsedContent, file)
+	if err == nil {
+		return ctx.NoContent(http.StatusOK)
+	}
+	return ctx.JSON(http.StatusInternalServerError, HTTPMessageBody{Message: ERRORS[1]})
 }
 
 func getMount(ctx echo.Context) error {
@@ -108,7 +148,7 @@ func getSettings(ctx echo.Context) error {
 func updateSetting(ctx echo.Context) error {
 	var payload Payload
 	var reqContent Configuration
-	var parsedContent []Configuration
+	var parsedContent ConfigurationData
 	var indexToChange int = -1
 
 	ctx.Bind(&payload)
@@ -119,21 +159,26 @@ func updateSetting(ctx echo.Context) error {
 	err := json.Unmarshal(savedData, &parsedContent)
 
 	if err != nil {
-		return ctx.JSON(http.StatusInternalServerError, HTTPMessageBody{Message: ERRORS[0]})
+		configuration, newErr := convertConfigurationVersion(savedData)
+		if newErr != nil {
+			return ctx.JSON(http.StatusInternalServerError, HTTPMessageBody{Message: ERRORS[0]})
+		}
+		parsedContent.Configs = configuration
 	}
 
-	for index, item := range parsedContent {
+	for index, item := range parsedContent.Configs {
 		if item.ID == reqContent.ID {
 			indexToChange = index
 		}
 	}
 
 	if indexToChange == -1 { //no config with that id found
-		parsedContent = append(parsedContent, reqContent)
+		parsedContent.Configs = append(parsedContent.Configs, reqContent)
 	} else {
-		parsedContent[indexToChange] = reqContent
+		parsedContent.Configs[indexToChange] = reqContent
 	}
 
+	parsedContent.RunningConfig = reqContent.ID
 	err = writeData(parsedContent, file)
 	if err == nil {
 		return ctx.NoContent(http.StatusOK)
@@ -144,7 +189,7 @@ func updateSetting(ctx echo.Context) error {
 func deleteSetting(ctx echo.Context) error {
 
 	var idToDelete string
-	var parsedContent []Configuration
+	var parsedContent ConfigurationData
 	var indexToDelete int = -1
 
 	idToDelete = ctx.Param("id")
@@ -153,20 +198,22 @@ func deleteSetting(ctx echo.Context) error {
 	err := json.Unmarshal(savedData, &parsedContent)
 
 	if err != nil {
+		logrus.New().Infof("Zwei\n")
 		return ctx.JSON(http.StatusInternalServerError, HTTPMessageBody{Message: ERRORS[0]})
 	}
 
-	for index, item := range parsedContent {
+	for index, item := range parsedContent.Configs {
 		if item.ID == idToDelete {
 			indexToDelete = index
 		}
 	}
 
 	if indexToDelete != -1 {
-		if indexToDelete != len(parsedContent)-1 {
-			parsedContent[indexToDelete] = parsedContent[len(parsedContent)-1]
+		if indexToDelete != len(parsedContent.Configs)-1 {
+			parsedContent.Configs[indexToDelete] = parsedContent.Configs[len(parsedContent.Configs)-1]
 		}
-		parsedContent = parsedContent[:len(parsedContent)-1]
+		parsedContent.Configs = parsedContent.Configs[:len(parsedContent.Configs)-1]
+		parsedContent.RunningConfig = "00000000-0000-0000-0000-000000000000"
 	}
 
 	err = writeData(parsedContent, file)
@@ -182,7 +229,7 @@ func createSetting(ctx echo.Context) error {
 
 	var payload Payload
 	var reqContent Configuration
-	var parsedContent []Configuration
+	var parsedContent ConfigurationData
 
 	ctx.Bind(&payload)
 	json.Unmarshal([]byte(payload.Data), &reqContent)
@@ -191,11 +238,18 @@ func createSetting(ctx echo.Context) error {
 	err := json.Unmarshal(savedData, &parsedContent)
 
 	if err != nil {
-		return ctx.JSON(http.StatusInternalServerError, HTTPMessageBody{Message: ERRORS[0]})
+		configuration, newErr := convertConfigurationVersion(savedData)
+		if newErr != nil {
+			logrus.New().Infof("Drei\n")
+			return ctx.JSON(http.StatusInternalServerError, HTTPMessageBody{Message: ERRORS[0]})
+		}
+		parsedContent.Configs = configuration
 	}
 
-	updatedArray := append(parsedContent, reqContent)
-	err = writeData(updatedArray, file)
+	updatedArray := append(parsedContent.Configs, reqContent)
+	parsedContent.Configs = updatedArray
+	parsedContent.RunningConfig = reqContent.ID
+	err = writeData(parsedContent, file)
 
 	if err != nil {
 		return ctx.JSON(http.StatusInternalServerError, HTTPMessageBody{Message: ERRORS[1]})
@@ -241,7 +295,7 @@ func readDataKeepOpen() ([]byte, *os.File, error) {
 	return content, file, err
 }
 
-func writeData(data []Configuration, file *os.File) error {
+func writeData(data ConfigurationData, file *os.File) error {
 	jsonData, err := json.Marshal(data)
 	if err == nil {
 		file.Truncate(0)

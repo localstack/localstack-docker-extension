@@ -15,6 +15,16 @@ install-extension: build-extension ## Install the extension
 update-extension: build-extension ## Update the extension
 	docker extension update $(IMAGE):$(TAG)
 
+debug: ## Start the extension in debug mode
+	docker extension dev debug $(IMAGE)
+
+hot-reload: ## Enable hot reloading
+	cd ui/ && npm start &
+	docker extension dev ui-source $(IMAGE) http://localhost:3000
+
+stop-hot-realoading: ## Disable hot reloading
+	docker extension dev reset $(IMAGE)
+	
 prepare-buildx: ## Create buildx builder for multi-arch build, if not exists
 	docker buildx inspect $(BUILDER) || docker buildx create --name=$(BUILDER) --driver=docker-container --driver-opt=network=host
 

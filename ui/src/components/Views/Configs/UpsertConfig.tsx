@@ -20,6 +20,12 @@ import { RunConfig } from '../../../types';
 
 const DEFAULT_COLUMN_WIDTH = 2000;
 
+const COMMON_CONFIGURATIONS = [
+  ['DEBUG', '0'],
+  ['PERSISTENCE', '1'],
+  ['LOCALSTACK_API_KEY', ''],
+];
+
 type Props = {
   config?: RunConfig,
   open: boolean,
@@ -42,7 +48,12 @@ export const UpsertConfig = ({ config, open, onClose }: Props): ReactElement => 
   const [newVar, setNewVar] = useState<string>('');
   const [newValue, setNewValue] = useState<string>('');
   const [configName, setConfigName] = useState<string>(config?.name || '');
-  const [newConfig, setNewConfig] = useState<RunConfig>(config || { name: '', id: uuid(), vars: [] } as RunConfig);
+  const [newConfig, setNewConfig] = useState<RunConfig>(config ||
+    {
+      name: '',
+      id: uuid(),
+      vars: COMMON_CONFIGURATIONS.map(([varName, varValue]) => ({ variable: varName, value: varValue, id: uuid() })),
+    } as RunConfig);
   const classes = useStyles();
 
   const handleAddButtonPress = () => {
@@ -112,7 +123,7 @@ export const UpsertConfig = ({ config, open, onClose }: Props): ReactElement => 
         <Box className={classes.emptyBox} />
         <List
           subheader={
-            <Typography>Environment Variables </Typography>
+            <Typography>Environment Variables</Typography>
           }
         >
           {newConfig?.vars.map(item => (
@@ -128,6 +139,7 @@ export const UpsertConfig = ({ config, open, onClose }: Props): ReactElement => 
                 <TextField
                   fullWidth
                   variant='outlined'
+                  label='Value'
                   className={classes.textField}
                   onChange={(e) => updateConfigValue(item.id, e.target.value)}
                   value={item.value} />
