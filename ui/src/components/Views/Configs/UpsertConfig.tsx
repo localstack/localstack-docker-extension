@@ -21,9 +21,9 @@ import { RunConfig } from '../../../types';
 const DEFAULT_COLUMN_WIDTH = 2000;
 
 const COMMON_CONFIGURATIONS = [
-  ['DEBUG', '0'],
-  ['PERSISTENCE', '1'],
-  ['LOCALSTACK_API_KEY', ''],
+  ['DEBUG', '0', 'Flag to increase log level and print more verbose logs'],
+  ['PERSISTENCE', '0', 'Enable persistence'],
+  ['LOCALSTACK_API_KEY', '', 'API key to activate LocalStack Pro.'],
 ];
 
 type Props = {
@@ -52,7 +52,9 @@ export const UpsertConfig = ({ config, open, onClose }: Props): ReactElement => 
     {
       name: '',
       id: uuid(),
-      vars: COMMON_CONFIGURATIONS.map(([varName, varValue]) => ({ variable: varName, value: varValue, id: uuid() })),
+      vars: COMMON_CONFIGURATIONS.map(
+        ([variable, value, description]) => ({ variable, value, id: uuid(), description }),
+      ),
     } as RunConfig);
   const classes = useStyles();
 
@@ -128,24 +130,29 @@ export const UpsertConfig = ({ config, open, onClose }: Props): ReactElement => 
         >
           {newConfig?.vars.map(item => (
             <ListItem key={item.id} disableGutters>
-              <Box display='flex' width={DEFAULT_COLUMN_WIDTH} key={item.id}>
-                <TextField
-                  fullWidth
-                  variant='outlined'
-                  className={classes.textField}
-                  onChange={(e) => updateConfigKey(item.id, e.target.value.toLocaleUpperCase())}
-                  value={item.variable}
-                />
-                <TextField
-                  fullWidth
-                  variant='outlined'
-                  label='Value'
-                  className={classes.textField}
-                  onChange={(e) => updateConfigValue(item.id, e.target.value)}
-                  value={item.value} />
-                <IconButton onClick={() => handleRemoveButtonPress(item.id)} >
-                  <Remove />
-                </IconButton>
+              <Box width={DEFAULT_COLUMN_WIDTH}>
+                <Box display='flex' key={item.id}>
+                  <TextField
+                    fullWidth
+                    variant='outlined'
+                    className={classes.textField}
+                    onChange={(e) => updateConfigKey(item.id, e.target.value.toLocaleUpperCase())}
+                    value={item.variable}
+                  />
+                  <TextField
+                    fullWidth
+                    variant='outlined'
+                    label='Value'
+                    className={classes.textField}
+                    onChange={(e) => updateConfigValue(item.id, e.target.value)}
+                    value={item.value} />
+                  <IconButton onClick={() => handleRemoveButtonPress(item.id)} >
+                    <Remove />
+                  </IconButton>
+                </Box>
+                {item.description &&
+                  <Typography variant='caption'>{item.description}</Typography>
+                }
               </Box>
             </ListItem>
           ))}

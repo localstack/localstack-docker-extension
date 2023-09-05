@@ -5,6 +5,7 @@ interface envVar {
   variable: string,
   value: string,
   id: string;
+  description?: string;
 }
 
 export interface RunConfig {
