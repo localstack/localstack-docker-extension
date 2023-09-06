@@ -52,6 +52,10 @@ To contribute, check out our [issue tracker](https://github.com/localstack/local
     $ make hot-reloading
     ```
 
+4. Disable hot reloading:
+    ```bash
+    $ make stop-hot-reloading
+    ```
 ## Releases
 
 Please refer to [`CHANGELOG`](CHANGELOG.md) to see the complete list of changes for each release.
