@@ -198,7 +198,6 @@ func deleteSetting(ctx echo.Context) error {
 	err := json.Unmarshal(savedData, &parsedContent)
 
 	if err != nil {
-		logrus.New().Infof("Zwei\n")
 		return ctx.JSON(http.StatusInternalServerError, HTTPMessageBody{Message: ERRORS[0]})
 	}
 
@@ -240,7 +239,6 @@ func createSetting(ctx echo.Context) error {
 	if err != nil {
 		configuration, newErr := convertConfigurationVersion(savedData)
 		if newErr != nil {
-			logrus.New().Infof("Drei\n")
 			return ctx.JSON(http.StatusInternalServerError, HTTPMessageBody{Message: ERRORS[0]})
 		}
 		parsedContent.Configs = configuration
