@@ -44,15 +44,18 @@ To contribute, check out our [issue tracker](https://github.com/localstack/local
 
 2. Open the Developer Tools or create new features:
     ```bash
-    $ docker extension dev debug localstack/localstack-docker-desktop
+    $ make debug
     ```
 
 3. Start the Extension on Docker Desktop and enable hot-reload using the following command:
     ```bash
-    $ npm start 
-    $ docker extension dev ui-source localstack/localstack-docker-desktop http://localhost:3000
+    $ make hot-reloading
     ```
 
+4. Disable hot reloading:
+    ```bash
+    $ make stop-hot-reloading
+    ```
 ## Releases
 
 Please refer to [`CHANGELOG`](CHANGELOG.md) to see the complete list of changes for each release.

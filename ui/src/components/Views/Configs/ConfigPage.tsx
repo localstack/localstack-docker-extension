@@ -18,7 +18,7 @@ const useStyles = makeStyles((theme: Theme) => createStyles({
 
 export const ConfigPage = (): ReactElement => {
 
-  const { runConfigs, deleteConfig } = useRunConfigs();
+  const { configData, deleteConfig } = useRunConfigs();
   const mountPoint = useMountPoint();
   const [openModal, setOpenModal] = useState<boolean>(false);
   const [targetConfig, setTargetConfig] = useState<RunConfig | null>(null);
@@ -89,7 +89,7 @@ export const ConfigPage = (): ReactElement => {
       <Box sx={{ marginTop: 3 }}>
         <DataGrid
           autoHeight
-          rows={runConfigs.filter(config => config.id !== DEFAULT_CONFIGURATION_ID)}
+          rows={configData?.configs?.filter(config => config.id !== DEFAULT_CONFIGURATION_ID) || []}
           columns={columns}
           getRowId={(row) => (row).id as string || uuid()}
           disableSelectionOnClick

@@ -25,10 +25,10 @@ import { ProgressButton } from '../Feedback';
 const EXCLUDED_ERROR_TOAST = ['INFO', 'WARN', 'DEBUG'];
 
 export const Controller = (): ReactElement => {
-  const { runConfigs, isLoading, createConfig } = useRunConfigs();
+  const { configData, isLoading, setRunningConfig: setBackendRunningConfig, createConfig } = useRunConfigs();
   const { data, mutate } = useLocalStack();
   const { user, os, hasSkippedConfiguration } = useMountPoint();
-  const [runningConfig, setRunningConfig] = useState<string>('Default');
+  const [runningConfig, setRunningConfig] = useState<string>(configData.runningConfig ?? DEFAULT_CONFIGURATION_ID);
   const [downloadProps, setDownloadProps] = useState({ open: false, image: IMAGE });
   const [isStarting, setIsStarting] = useState<boolean>(false);
   const [isStopping, setIsStopping] = useState<boolean>(false);
@@ -38,13 +38,17 @@ export const Controller = (): ReactElement => {
   const tooltipLabel = isUnhealthy ? 'Unhealthy' : 'Healthy';
 
   useEffect(() => {
-    if (!isLoading && (!runConfigs || !runConfigs.find(item => item.name === 'Default'))) {
+    if (!isLoading &&
+      (!configData?.configs || !configData.configs?.find(item => item.id === DEFAULT_CONFIGURATION_ID))) {
       createConfig({
         name: 'Default', id: DEFAULT_CONFIGURATION_ID, vars: [],
-      },
-      );
+      });
+    } 
+    if (!isLoading) {
+      setRunningConfig(configData.runningConfig ?? DEFAULT_CONFIGURATION_ID);
     }
   }, [isLoading]);
+
 
   const buildMountArg = () => {
     let location = 'LOCALSTACK_VOLUME_DIR=/tmp/localstack/volume';
@@ -69,7 +73,7 @@ export const Controller = (): ReactElement => {
 
     const corsArg = ['-e', `EXTRA_CORS_ALLOWED_ORIGINS=${CORS_ALLOW_DEFAULT}`];
 
-    const addedArgs = runConfigs.find(config => config.name === runningConfig)
+    const addedArgs = configData.configs.find(config => config.id === runningConfig)
       .vars.map(item => {
         if (item.variable === 'EXTRA_CORS_ALLOWED_ORIGINS') { // prevent overriding variable
           corsArg.slice(0, 0);
@@ -88,8 +92,8 @@ export const Controller = (): ReactElement => {
   const start = async () => {
     const images = await ddClient.docker.listImages() as [DockerImage];
 
-    const isPro = runConfigs.find(config => config.name === runningConfig)
-      .vars.some(item => item.variable === 'LOCALSTACK_API_KEY');
+    const isPro = configData.configs.find(config => config.id === runningConfig)
+      .vars.some(item => item.variable === 'LOCALSTACK_API_KEY' && item.value);
 
     const haveCommunity = images.some(image => image.RepoTags?.at(0) === IMAGE);
     if (!haveCommunity) {
@@ -180,11 +184,11 @@ export const Controller = (): ReactElement => {
             <FormControl sx={{ m: 1, minWidth: 120, border: 'none' }} size='small'>
               <Select
                 value={runningConfig}
-                onChange={({ target }) => setRunningConfig(target.value)}
+                onChange={({ target }) => setBackendRunningConfig(target.value)}
               >
                 {
-                  runConfigs?.map(config => (
-                    <MenuItem key={config.id} value={config.name}>{config.name}</MenuItem>
+                  configData?.configs?.map(config => (
+                    <MenuItem key={config.id} value={config.id}>{config.name}</MenuItem>
                   ))
                 }
               </Select>

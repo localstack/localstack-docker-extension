@@ -18,7 +18,9 @@ export const App = (): ReactElement => {
 
   return (
     <>
-      {showForm && <SettingsForm initialState={showSetupWarning ? 0 : 1} />}
+      {showForm &&
+        <SettingsForm initialState={showSetupWarning ? 0 : 2} />
+      }
       <div className={classes.sticky}>
         <Header />
       </div>

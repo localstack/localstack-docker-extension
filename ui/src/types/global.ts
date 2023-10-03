@@ -5,12 +5,18 @@ interface envVar {
   variable: string,
   value: string,
   id: string;
+  description?: string;
 }
 
 export interface RunConfig {
   name: string,
   id: string,
   vars: Optional<envVar[]>,
+}
+
+export interface ConfigData {
+  runningConfig: string,
+  configs: RunConfig[],
 }
 
 export interface mountPointData {
