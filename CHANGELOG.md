@@ -2,6 +2,25 @@
 
 All notable changes to this project will be documented in this file. The format is based on [Keep a Changelog](http://keepachangelog.com/) and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [0.5.0] — 2023-11-02
+
+### Changed
+
+- Improved and enhanced onboarding and configuration management experience
+
+### Fixed
+
+- Fixed the logic to get the users
+- Fixed the issue of downloading correct Docker image
+- Fixed the issue of container startup
+
+## [0.4.0] — 2023-03-24
+
+### Changed
+
+- Refactoring and UX improvements
+- Full support on Windows
+
 ## [0.3.0] - 2023-01-10
 
 ### Added
