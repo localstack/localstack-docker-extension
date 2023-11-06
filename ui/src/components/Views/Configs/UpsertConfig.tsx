@@ -23,7 +23,7 @@ const DEFAULT_COLUMN_WIDTH = 2000;
 const COMMON_CONFIGURATIONS = [
   ['DEBUG', '0', 'Flag to increase log level and print more verbose logs'],
   ['PERSISTENCE', '0', 'Enable persistence'],
-  ['LOCALSTACK_API_KEY', '', 'API key to activate LocalStack Pro.'],
+  ['LOCALSTACK_AUTH_TOKEN', '', 'Auth token to activate LocalStack Pro.'],
 ];
 
 type Props = {

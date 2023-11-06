@@ -42,7 +42,7 @@ export const Controller = (): ReactElement => {
       createConfig({
         name: 'Default', id: DEFAULT_CONFIGURATION_ID, vars: [],
       });
-    } 
+    }
     if (!isLoading) {
       setRunningConfig(configData.runningConfig ?? DEFAULT_CONFIGURATION_ID);
     }
@@ -86,7 +86,8 @@ export const Controller = (): ReactElement => {
     const images = await ddClient.docker.listImages() as [DockerImage];
 
     const isPro = configData.configs.find(config => config.id === runningConfig)
-      .vars.some(item => item.variable === 'LOCALSTACK_API_KEY' && item.value);
+      .vars.some(item => (item.variable === 'LOCALSTACK_API_KEY' ||
+        item.variable === 'LOCALSTACK_AUTH_TOKEN') && item.value);
 
     const haveCommunity = images.some(image => image.RepoTags?.at(0) === IMAGE);
     if (!haveCommunity) {
