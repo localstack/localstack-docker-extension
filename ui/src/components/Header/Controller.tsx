@@ -11,7 +11,6 @@ import {
 } from '../../services';
 import {
   DEFAULT_CONFIGURATION_ID,
-  CORS_ALLOW_DEFAULT,
   START_ARGS,
   FLAGS,
   IMAGE,
@@ -71,14 +70,8 @@ export const Controller = (): ReactElement => {
   const normalizeArguments = async () => {
     const extendedFlag = FLAGS.map(x => x); // clone
 
-    const corsArg = ['-e', `EXTRA_CORS_ALLOWED_ORIGINS=${CORS_ALLOW_DEFAULT}`];
-
     const addedArgs = configData.configs.find(config => config.id === runningConfig)
       .vars.map(item => {
-        if (item.variable === 'EXTRA_CORS_ALLOWED_ORIGINS') { // prevent overriding variable
-          corsArg.slice(0, 0);
-          return ['-e', `${item.variable}=${item.value},${CORS_ALLOW_DEFAULT}`];
-        }
         if (item.variable === 'DOCKER_FLAGS') {
           extendedFlag[1] = FLAGS.at(1).slice(0, -1).concat(` ${item.value}'`);
         }
@@ -86,7 +79,7 @@ export const Controller = (): ReactElement => {
         return ['-e', `${item.variable}=${item.value}`];
       }).flat();
 
-    return [...extendedFlag, ...buildMountArg(), ...corsArg, ...addedArgs, ...START_ARGS];
+    return [...extendedFlag, ...buildMountArg(), ...addedArgs, ...START_ARGS];
   };
 
   const start = async () => {
