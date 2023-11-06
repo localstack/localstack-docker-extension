@@ -8,10 +8,10 @@ export const Header = (): ReactElement => {
   const ddClient = useDDClient();
 
   return (
-    <AppBar position='relative' elevation={0}>
+    <AppBar position='relative' elevation={0} enableColorOnDark style={{ height: 'auto'}}>
       <Toolbar>
         <Box display='flex' flexGrow={1} alignItems='center' flexWrap='wrap'>
-          <Typography variant='h3' color={(theme) => theme.palette.text.primary} sx={{ my: 2, mr: 3 }}>
+          <Typography variant='h3' sx={{ my: 2, mr: 3 }}>
             LocalStack
           </Typography>
           <Box>
