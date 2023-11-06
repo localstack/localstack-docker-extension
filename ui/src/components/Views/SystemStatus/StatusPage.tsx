@@ -73,7 +73,7 @@ export const StatusPage = (): ReactElement => {
                   <Typography variant='caption'>
                     {capitalize(status)}
                   </Typography>
-                  <List className={classes.list} dense>
+                  <List className={classes.list} dense style={{ display: 'grid' }}>
                     {Object.entries(statusesMap[status] ?? {}).map(([k, v]) => (
                       <ListItem key={k}>
                         <ListItemText
