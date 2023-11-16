@@ -11,7 +11,7 @@ export function removeRepoFromImage(repoTag: string) {
   return repoTag.split('/').at(-1);
 }
 
-const removeDockerTag = (imageString:string ) => {
+const removeDockerTag = (imageString: string) => {
   // Split the image string by ":" to check if it has a tag
   const parts = imageString.split(':');
   
@@ -24,7 +24,8 @@ const removeDockerTag = (imageString:string ) => {
   return parts.slice(0, -1).join(':');
 };
 export function removeTagFromImage(image: DockerImage){
-  return removeDockerTag(image.RepoTags?.at(0));
+
+  return removeDockerTag(image.RepoTags?.at(0) || '');
 }
 
 export const isALocalStackContainer = (container: DockerContainer) => {

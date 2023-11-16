@@ -11,7 +11,6 @@ import {
 } from '../../services';
 import {
   DEFAULT_CONFIGURATION_ID,
-  CORS_ALLOW_DEFAULT,
   START_ARGS,
   FLAGS,
   IMAGE,
@@ -43,7 +42,7 @@ export const Controller = (): ReactElement => {
       createConfig({
         name: 'Default', id: DEFAULT_CONFIGURATION_ID, vars: [],
       });
-    } 
+    }
     if (!isLoading) {
       setRunningConfig(configData.runningConfig ?? DEFAULT_CONFIGURATION_ID);
     }
@@ -71,14 +70,8 @@ export const Controller = (): ReactElement => {
   const normalizeArguments = async () => {
     const extendedFlag = FLAGS.map(x => x); // clone
 
-    const corsArg = ['-e', `EXTRA_CORS_ALLOWED_ORIGINS=${CORS_ALLOW_DEFAULT}`];
-
     const addedArgs = configData.configs.find(config => config.id === runningConfig)
       .vars.map(item => {
-        if (item.variable === 'EXTRA_CORS_ALLOWED_ORIGINS') { // prevent overriding variable
-          corsArg.slice(0, 0);
-          return ['-e', `${item.variable}=${item.value},${CORS_ALLOW_DEFAULT}`];
-        }
         if (item.variable === 'DOCKER_FLAGS') {
           extendedFlag[1] = FLAGS.at(1).slice(0, -1).concat(` ${item.value}'`);
         }
@@ -86,14 +79,15 @@ export const Controller = (): ReactElement => {
         return ['-e', `${item.variable}=${item.value}`];
       }).flat();
 
-    return [...extendedFlag, ...buildMountArg(), ...corsArg, ...addedArgs, ...START_ARGS];
+    return [...extendedFlag, ...buildMountArg(), ...addedArgs, ...START_ARGS];
   };
 
   const start = async () => {
     const images = await ddClient.docker.listImages() as [DockerImage];
 
     const isPro = configData.configs.find(config => config.id === runningConfig)
-      .vars.some(item => item.variable === 'LOCALSTACK_API_KEY' && item.value);
+      .vars.some(item => (item.variable === 'LOCALSTACK_API_KEY' ||
+        item.variable === 'LOCALSTACK_AUTH_TOKEN') && item.value);
 
     const haveCommunity = images.some(image => image.RepoTags?.at(0) === IMAGE);
     if (!haveCommunity) {
