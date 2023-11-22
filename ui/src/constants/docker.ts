@@ -1,15 +1,15 @@
-import { IMAGE } from './common';
+import { PRO_IMAGE } from './common';
 
 const COMMON_ARGS = [
-  '--label',
-  'cloud.localstack.spawner=true',
-  '--rm',
   '-i',
+  '--rm',
   '--entrypoint=',
   '-v',
   '/var/run/docker.sock:/var/run/docker.sock',
-  IMAGE,
-  'bin/localstack',
+  PRO_IMAGE,
+  './.venv/bin/python3',
+  '-m',
+  'localstack.cli.main',
 ];
 
 export const START_ARGS = [
@@ -32,5 +32,5 @@ export const UPDATE_ARGS = [
 export const FLAGS = [
   '-e',
   // eslint-disable-next-line max-len
-  'DOCKER_FLAGS=\'--label com.docker.compose.project=localstack_localstack-docker-desktop-desktop-extension --label com.docker.desktop.extension=true --label com.docker.compose.project.config_files\'',
+  'DOCKER_FLAGS=--label com.docker.compose.project=localstack_localstack-docker-desktop-desktop-extension --label com.docker.desktop.extension=true --label com.docker.compose.project.config_files',
 ];

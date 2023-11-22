@@ -48,23 +48,26 @@ export const Controller = (): ReactElement => {
     }
   }, [isLoading]);
 
-
-  const buildMountArg = () => {
+  const buildHostArgs = () => {
     let location = 'LOCALSTACK_VOLUME_DIR=/tmp/localstack/volume';
+    let homeDir = `HOME=/home/${user}`;
 
     if (!hasSkippedConfiguration) {
       switch (ddClient.host.platform) {
         case 'win32':
           location = `LOCALSTACK_VOLUME_DIR=\\\\wsl$\\${os}\\home\\${user}\\.cache\\localstack\\volume`;
+          homeDir = `HOME=\\\\wsl$\\${os}\\home\\${user}`;
           break;
         case 'darwin':
           location = `LOCALSTACK_VOLUME_DIR=/Users/${user}/Library/Caches/localstack/volume`;
+          homeDir = `HOME=/Users/${user}`;
           break;
         default:
           location = `LOCALSTACK_VOLUME_DIR=/home/${user}/.cache/localstack/volume`;
+          homeDir = `HOME=/home/${user}`;
       }
     }
-    return ['-e', location];
+    return ['-e', location, '-e', homeDir];
   };
 
   const normalizeArguments = async () => {
@@ -79,15 +82,17 @@ export const Controller = (): ReactElement => {
         return ['-e', `${item.variable}=${item.value}`];
       }).flat();
 
-    return [...extendedFlag, ...buildMountArg(), ...addedArgs, ...START_ARGS];
+    return [...extendedFlag, ...buildHostArgs(), ...addedArgs, ...START_ARGS];
   };
 
   const start = async () => {
     const images = await ddClient.docker.listImages() as [DockerImage];
 
-    const isPro = configData.configs.find(config => config.id === runningConfig)
-      .vars.some(item => (item.variable === 'LOCALSTACK_API_KEY' ||
-        item.variable === 'LOCALSTACK_AUTH_TOKEN') && item.value);
+    const havePro = images.some(image => removeTagFromImage(image) === PRO_IMAGE);
+    if (!havePro) {
+      setDownloadProps({ open: true, image: PRO_IMAGE });
+      return;
+    }
 
     const haveCommunity = images.some(image => image.RepoTags?.at(0) === IMAGE);
     if (!haveCommunity) {
@@ -95,20 +100,13 @@ export const Controller = (): ReactElement => {
       return;
     }
 
-    if (isPro) {
-      const havePro = images.some(image => removeTagFromImage(image) === PRO_IMAGE);
-      if (!havePro) {
-        setDownloadProps({ open: true, image: PRO_IMAGE });
-        return;
-      }
-    }
-
     const args = await normalizeArguments();
+    console.log('docker run ', args.join(' '));
     setIsStarting(true);
     ddClient.docker.cli.exec('run', args, {
       stream: {
         onOutput(data): void {
-          const shouldDisplayError = !EXCLUDED_ERROR_TOAST.some(item => data.stderr.includes(item));
+          const shouldDisplayError = !EXCLUDED_ERROR_TOAST.some(item => data.stderr?.includes(item));
           if (shouldDisplayError) {
             ddClient.desktopUI.toast.error(data.stderr);
             setIsStarting(false);
