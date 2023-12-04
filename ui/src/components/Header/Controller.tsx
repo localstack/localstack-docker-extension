@@ -101,12 +101,12 @@ export const Controller = (): ReactElement => {
     }
 
     const args = await normalizeArguments();
-    console.log('docker run ', args.join(' '));
+
     setIsStarting(true);
     ddClient.docker.cli.exec('run', args, {
       stream: {
         onOutput(data): void {
-          const shouldDisplayError = !EXCLUDED_ERROR_TOAST.some(item => data.stderr?.includes(item));
+          const shouldDisplayError = !EXCLUDED_ERROR_TOAST.some(item => data.stderr?.includes(item)) && data.stderr;
           if (shouldDisplayError) {
             ddClient.desktopUI.toast.error(data.stderr);
             setIsStarting(false);
