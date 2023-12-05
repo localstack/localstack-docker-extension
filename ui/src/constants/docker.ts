@@ -1,30 +1,30 @@
-import { PRO_IMAGE } from './common';
+import { PRO_IMAGE, COMMUNITY_IMAGE } from './common';
 
-const COMMON_ARGS = [
-  '-i',
+export const COMMON_ARGS = [
+  '--label',
+  'cloud.localstack.spawner=true',
   '--rm',
+  '-i',
   '--entrypoint=',
   '-v',
   '/var/run/docker.sock:/var/run/docker.sock',
+];
+
+export const PRO_CLI = [
   PRO_IMAGE,
   './.venv/bin/python3',
   '-m',
   'localstack.cli.main',
 ];
 
+export const COMMUNITY_CLI = [COMMUNITY_IMAGE, 'bin/localstack'];
+
 export const START_ARGS = [
-  ...COMMON_ARGS,
   'start',
   '-d',
 ];
 
-export const STATUS_ARGS = [
-  ...COMMON_ARGS,
-  'status',
-];
-
 export const UPDATE_ARGS = [
-  ...COMMON_ARGS,
   'update',
   'docker-images',
 ];

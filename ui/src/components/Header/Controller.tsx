@@ -11,15 +11,15 @@ import {
 } from '../../services';
 import {
   DEFAULT_CONFIGURATION_ID,
-  START_ARGS,
   FLAGS,
-  IMAGE,
   PRO_IMAGE,
+  COMMUNITY_IMAGE,
 } from '../../constants';
 import { LongMenu } from './Menu';
 import { DockerContainer, DockerImage } from '../../types';
 import { DownloadProgressDialog } from '../Feedback/DownloadProgressDialog';
 import { ProgressButton } from '../Feedback';
+import { generateCLIArgs } from '../../services/util/cli';
 
 const EXCLUDED_ERROR_TOAST = ['INFO', 'WARN', 'DEBUG'];
 
@@ -28,7 +28,7 @@ export const Controller = (): ReactElement => {
   const { data, mutate } = useLocalStack();
   const { user, os, hasSkippedConfiguration } = useMountPoint();
   const [runningConfig, setRunningConfig] = useState<string>(configData.runningConfig ?? DEFAULT_CONFIGURATION_ID);
-  const [downloadProps, setDownloadProps] = useState({ open: false, image: IMAGE });
+  const [downloadProps, setDownloadProps] = useState({ open: false, image: COMMUNITY_IMAGE });
   const [isStarting, setIsStarting] = useState<boolean>(false);
   const [isStopping, setIsStopping] = useState<boolean>(false);
   const ddClient = useDDClient();
@@ -72,31 +72,43 @@ export const Controller = (): ReactElement => {
 
   const normalizeArguments = async () => {
     const extendedFlag = FLAGS.map(x => x); // clone
-
+    let isPro = false;
     const addedArgs = configData.configs.find(config => config.id === runningConfig)
       .vars.map(item => {
         if (item.variable === 'DOCKER_FLAGS') {
           extendedFlag[1] = FLAGS.at(1).slice(0, -1).concat(` ${item.value}'`);
         }
+        if (item.variable === 'LOCALSTACK_AUTH_TOKEN') {
+          isPro = true;
+        }
 
         return ['-e', `${item.variable}=${item.value}`];
       }).flat();
 
-    return [...extendedFlag, ...buildHostArgs(), ...addedArgs, ...START_ARGS];
+    return [
+      ...extendedFlag,
+      ...buildHostArgs(),
+      ...addedArgs,
+      ...generateCLIArgs({ call: 'start', pro: isPro }),
+    ];
   };
 
   const start = async () => {
     const images = await ddClient.docker.listImages() as [DockerImage];
 
+    const isPro = configData.configs.find(config => config.id === runningConfig)
+      .vars.some(item => (item.variable === 'LOCALSTACK_API_KEY' ||
+        item.variable === 'LOCALSTACK_AUTH_TOKEN') && item.value);
+
     const havePro = images.some(image => removeTagFromImage(image) === PRO_IMAGE);
-    if (!havePro) {
+    if (!havePro && isPro) {
       setDownloadProps({ open: true, image: PRO_IMAGE });
       return;
     }
 
-    const haveCommunity = images.some(image => image.RepoTags?.at(0) === IMAGE);
+    const haveCommunity = images.some(image => removeTagFromImage(image) === COMMUNITY_IMAGE);
     if (!haveCommunity) {
-      setDownloadProps({ open: true, image: IMAGE });
+      setDownloadProps({ open: true, image: COMMUNITY_IMAGE });
       return;
     }
 
