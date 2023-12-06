@@ -11,15 +11,15 @@ import {
 } from '../../services';
 import {
   DEFAULT_CONFIGURATION_ID,
-  START_ARGS,
   FLAGS,
-  IMAGE,
   PRO_IMAGE,
+  COMMUNITY_IMAGE,
 } from '../../constants';
 import { LongMenu } from './Menu';
 import { DockerContainer, DockerImage } from '../../types';
 import { DownloadProgressDialog } from '../Feedback/DownloadProgressDialog';
 import { ProgressButton } from '../Feedback';
+import { generateCLIArgs } from '../../services/util/cli';
 
 const EXCLUDED_ERROR_TOAST = ['INFO', 'WARN', 'DEBUG'];
 
@@ -28,7 +28,7 @@ export const Controller = (): ReactElement => {
   const { data, mutate } = useLocalStack();
   const { user, os, hasSkippedConfiguration } = useMountPoint();
   const [runningConfig, setRunningConfig] = useState<string>(configData.runningConfig ?? DEFAULT_CONFIGURATION_ID);
-  const [downloadProps, setDownloadProps] = useState({ open: false, image: IMAGE });
+  const [downloadProps, setDownloadProps] = useState({ open: false, image: COMMUNITY_IMAGE });
   const [isStarting, setIsStarting] = useState<boolean>(false);
   const [isStopping, setIsStopping] = useState<boolean>(false);
   const ddClient = useDDClient();
@@ -48,38 +48,49 @@ export const Controller = (): ReactElement => {
     }
   }, [isLoading]);
 
-
-  const buildMountArg = () => {
+  const buildHostArgs = () => {
     let location = 'LOCALSTACK_VOLUME_DIR=/tmp/localstack/volume';
+    let homeDir = `HOME=/home/${user}`;
 
     if (!hasSkippedConfiguration) {
       switch (ddClient.host.platform) {
         case 'win32':
           location = `LOCALSTACK_VOLUME_DIR=\\\\wsl$\\${os}\\home\\${user}\\.cache\\localstack\\volume`;
+          homeDir = `HOME=\\\\wsl$\\${os}\\home\\${user}`;
           break;
         case 'darwin':
           location = `LOCALSTACK_VOLUME_DIR=/Users/${user}/Library/Caches/localstack/volume`;
+          homeDir = `HOME=/Users/${user}`;
           break;
         default:
           location = `LOCALSTACK_VOLUME_DIR=/home/${user}/.cache/localstack/volume`;
+          homeDir = `HOME=/home/${user}`;
       }
     }
-    return ['-e', location];
+    return ['-e', location, '-e', homeDir];
   };
 
   const normalizeArguments = async () => {
     const extendedFlag = FLAGS.map(x => x); // clone
-
+    let isPro = false;
     const addedArgs = configData.configs.find(config => config.id === runningConfig)
       .vars.map(item => {
         if (item.variable === 'DOCKER_FLAGS') {
           extendedFlag[1] = FLAGS.at(1).slice(0, -1).concat(` ${item.value}'`);
         }
+        if (item.variable === 'LOCALSTACK_AUTH_TOKEN') {
+          isPro = true;
+        }
 
         return ['-e', `${item.variable}=${item.value}`];
       }).flat();
 
-    return [...extendedFlag, ...buildMountArg(), ...addedArgs, ...START_ARGS];
+    return [
+      ...extendedFlag,
+      ...buildHostArgs(),
+      ...addedArgs,
+      ...generateCLIArgs({ call: 'start', pro: isPro }),
+    ];
   };
 
   const start = async () => {
@@ -89,26 +100,25 @@ export const Controller = (): ReactElement => {
       .vars.some(item => (item.variable === 'LOCALSTACK_API_KEY' ||
         item.variable === 'LOCALSTACK_AUTH_TOKEN') && item.value);
 
-    const haveCommunity = images.some(image => image.RepoTags?.at(0) === IMAGE);
-    if (!haveCommunity) {
-      setDownloadProps({ open: true, image: IMAGE });
+    const havePro = images.some(image => removeTagFromImage(image) === PRO_IMAGE);
+    if (!havePro && isPro) {
+      setDownloadProps({ open: true, image: PRO_IMAGE });
       return;
     }
 
-    if (isPro) {
-      const havePro = images.some(image => removeTagFromImage(image) === PRO_IMAGE);
-      if (!havePro) {
-        setDownloadProps({ open: true, image: PRO_IMAGE });
-        return;
-      }
+    const haveCommunity = images.some(image => removeTagFromImage(image) === COMMUNITY_IMAGE);
+    if (!haveCommunity) {
+      setDownloadProps({ open: true, image: COMMUNITY_IMAGE });
+      return;
     }
 
     const args = await normalizeArguments();
+
     setIsStarting(true);
     ddClient.docker.cli.exec('run', args, {
       stream: {
         onOutput(data): void {
-          const shouldDisplayError = !EXCLUDED_ERROR_TOAST.some(item => data.stderr.includes(item));
+          const shouldDisplayError = !EXCLUDED_ERROR_TOAST.some(item => data.stderr?.includes(item)) && data.stderr;
           if (shouldDisplayError) {
             ddClient.desktopUI.toast.error(data.stderr);
             setIsStarting(false);

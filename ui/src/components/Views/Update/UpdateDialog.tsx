@@ -6,8 +6,8 @@ import {
   Typography,
 } from '@mui/material';
 import React, { ReactElement, useEffect, useState } from 'react';
-import { UPDATE_ARGS } from '../../../constants';
 import { useDDClient } from '../../../services';
+import { generateCLIArgs } from '../../../services/util/cli';
 
 type Props = {
   open: boolean,
@@ -20,13 +20,17 @@ export const UpdateDialog = ({ open, onClose }: Props): ReactElement => {
   const [isUpdating, setIsUpdating] = useState<boolean>(true);
 
   useEffect(() => {
-    const listener = ddClient.docker.cli.exec('run', UPDATE_ARGS, {
+    const listener = ddClient.docker.cli.exec('run', generateCLIArgs({ call: 'update' }), {
       stream: {
         onOutput(data): void {
           let resultStr = data.stdout
             .replaceAll('â', '')
             .replaceAll('â', '✅')
             .replaceAll('â', '❌');
+
+          if (data.stdout.includes('Updating docker images')) {
+            resultStr = 'Updating Docker images';
+          }
 
           if (resultStr.endsWith('updated.')) {
             resultStr = resultStr.concat(' 🔼');

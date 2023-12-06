@@ -21,7 +21,7 @@ const EXCLUDED_USER_WSL = ['[.]', '[..]', '\r'];
 
 export function getUsersFromBinaryWindows(res: string): string[] {
   return res.split('\n').filter(string => string.startsWith('[')) // get only directory rows (they are in form "[user1] [user2]" )
-    .map(elem =>elem.split(' ').filter(item => item.length > 0 && !EXCLUDED_USER_WSL.includes(item)))// get only dir names
+    .map(elem => elem.split(' ').filter(item => item.length > 0 && !EXCLUDED_USER_WSL.includes(item)))// get only dir names
     .reduce((accumulator, currentValue) => accumulator.concat(currentValue), []) // combine multiple lines into one
     .map(user => user.slice(1, -1)); // remove "[" and "]" from names
 }
