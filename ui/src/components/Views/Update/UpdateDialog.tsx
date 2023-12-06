@@ -28,6 +28,10 @@ export const UpdateDialog = ({ open, onClose }: Props): ReactElement => {
             .replaceAll('â', '✅')
             .replaceAll('â', '❌');
 
+          if (data.stdout.includes('Updating docker images')) {
+            resultStr = 'Updating Docker images';
+          }
+
           if (resultStr.endsWith('updated.')) {
             resultStr = resultStr.concat(' 🔼');
           }
