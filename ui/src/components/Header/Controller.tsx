@@ -19,7 +19,7 @@ import { LongMenu } from './Menu';
 import { DockerContainer, DockerImage } from '../../types';
 import { DownloadProgressDialog } from '../Feedback/DownloadProgressDialog';
 import { ProgressButton } from '../Feedback';
-import { generateCLIArgs } from '../../services/util/cli';
+// import { generateCLIArgs } from '../../services/util/cli';
 
 const EXCLUDED_ERROR_TOAST = ['INFO', 'WARN', 'DEBUG'];
 
@@ -50,36 +50,32 @@ export const Controller = (): ReactElement => {
 
   const buildHostArgs = () => {
     let location = 'LOCALSTACK_VOLUME_DIR=/tmp/localstack/volume';
-    let homeDir = `HOME=/home/${user}`;
+    // let homeDir = `HOME=/home/${user}`;
 
     if (!hasSkippedConfiguration) {
       switch (ddClient.host.platform) {
         case 'win32':
           location = `LOCALSTACK_VOLUME_DIR=\\\\wsl$\\${os}\\home\\${user}\\.cache\\localstack\\volume`;
-          homeDir = `HOME=\\\\wsl$\\${os}\\home\\${user}`;
+          // homeDir = `HOME=\\\\wsl$\\${os}\\home\\${user}`;
           break;
         case 'darwin':
           location = `LOCALSTACK_VOLUME_DIR=/Users/${user}/Library/Caches/localstack/volume`;
-          homeDir = `HOME=/Users/${user}`;
+          // homeDir = `HOME=/Users/${user}`;
           break;
         default:
           location = `LOCALSTACK_VOLUME_DIR=/home/${user}/.cache/localstack/volume`;
-          homeDir = `HOME=/home/${user}`;
+        // homeDir = `HOME=/home/${user}`;
       }
     }
-    return ['-e', location, '-e', homeDir];
+    return ['-e', location];
   };
 
   const normalizeArguments = async () => {
     const extendedFlag = FLAGS.map(x => x); // clone
-    let isPro = false;
     const addedArgs = configData.configs.find(config => config.id === runningConfig)
       .vars.map(item => {
         if (item.variable === 'DOCKER_FLAGS') {
           extendedFlag[1] = FLAGS.at(1).slice(0, -1).concat(` ${item.value}'`);
-        }
-        if (item.variable === 'LOCALSTACK_AUTH_TOKEN') {
-          isPro = true;
         }
 
         return ['-e', `${item.variable}=${item.value}`];
@@ -89,8 +85,34 @@ export const Controller = (): ReactElement => {
       ...extendedFlag,
       ...buildHostArgs(),
       ...addedArgs,
-      ...generateCLIArgs({ call: 'start', pro: isPro }),
     ];
+  };
+
+  const getBinary = async () => {
+    let architecture = '';
+    if (ddClient.host.arch === 'x64') {
+      architecture = 'amd';
+    } else if (ddClient.host.arch === 'arm64') {
+      architecture = 'arm';
+    } else {
+      ddClient.desktopUI.toast.error(`Extension does not support ${ddClient.host.arch} architecture`);
+      return null;
+    }
+
+    let os = '';
+    if (ddClient.host.platform === 'darwin' || ddClient.host.platform === 'linux') {
+      os = ddClient.host.platform;
+    } else if (ddClient.host.platform === 'win32' && architecture === 'amd') {
+      os = 'windows';
+    } else {
+      ddClient.desktopUI.toast.error(
+        `Extension does not support ${ddClient.host.platform} operating system platform (${architecture})`,
+      );
+      return null;
+    }
+
+    const fullName = `localstack-${os}-${os === 'windows' ? `${architecture}.exe` : architecture}`;
+    return fullName;
   };
 
   const start = async () => {
@@ -115,9 +137,15 @@ export const Controller = (): ReactElement => {
     const args = await normalizeArguments();
 
     setIsStarting(true);
-    ddClient.docker.cli.exec('run', args, {
+    const binary = await getBinary();
+    if (!binary) {
+      return;
+    }
+
+    const res = ddClient.extension.host?.cli.exec(binary, ['start', ...args], {
       stream: {
         onOutput(data): void {
+          console.log(data);
           const shouldDisplayError = !EXCLUDED_ERROR_TOAST.some(item => data.stderr?.includes(item)) && data.stderr;
           if (shouldDisplayError) {
             ddClient.desktopUI.toast.error(data.stderr);
@@ -125,6 +153,7 @@ export const Controller = (): ReactElement => {
           }
         },
         onClose(exitCode) {
+          console.log(exitCode);
           setIsStarting(false);
           if (exitCode === 0) {
             ddClient.desktopUI.toast.success('LocalStack started');
@@ -132,6 +161,26 @@ export const Controller = (): ReactElement => {
         },
       },
     });
+    console.log(res);
+    setIsStarting(false);
+
+    // ddClient.docker.cli.exec('run', args, {
+    //   stream: {
+    //     onOutput(data): void {
+    //       const shouldDisplayError = !EXCLUDED_ERROR_TOAST.some(item => data.stderr?.includes(item)) && data.stderr;
+    //       if (shouldDisplayError) {
+    //         ddClient.desktopUI.toast.error(data.stderr);
+    //         setIsStarting(false);
+    //       }
+    //     },
+    //     onClose(exitCode) {
+    //       setIsStarting(false);
+    //       if (exitCode === 0) {
+    //         ddClient.desktopUI.toast.success('LocalStack started');
+    //       }
+    //     },
+    //   },
+    // });
   };
 
   const stop = async () => {

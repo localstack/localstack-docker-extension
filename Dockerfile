@@ -1,4 +1,4 @@
-FROM golang:1.17-alpine AS builder
+FROM golang:latest AS builder
 ENV CGO_ENABLED=0
 WORKDIR /backend
 COPY vm/go.* .
@@ -55,6 +55,7 @@ LABEL org.opencontainers.image.title="LocalStack" \
   com.docker.extension.changelog="https://github.com/localstack/localstack-docker-extension/blob/main/CHANGELOG.md"
 
 COPY --from=builder /backend/bin/service /
+
 COPY docker-compose.yaml .
 COPY metadata.json .
 COPY localstack.svg .
@@ -63,5 +64,10 @@ COPY --chmod=0755 scripts/windows/checkWSLOS.cmd /windows/checkWSLOS.cmd
 COPY --chmod=0755 scripts/windows/checkUser.cmd /windows/checkUser.cmd
 COPY --chmod=0755 scripts/darwin/checkUser.sh /darwin/checkUser.sh
 COPY --chmod=0755 scripts/linux/checkUser.sh /linux/checkUser.sh
+COPY --chmod=0755 binaries/windows/localstack-windows-amd.exe /windows/localstack-windows-amd.exe
+COPY --chmod=0755 binaries/darwin/localstack-darwin-amd /darwin/localstack-darwin-amd
+COPY --chmod=0755 binaries/darwin/localstack-darwin-arm /darwin/localstack-darwin-arm
+COPY --chmod=0755 binaries/linux/localstack-linux-arm /linux/localstack-linux-arm
+COPY --chmod=0755 binaries/linux/localstack-linux-amd /linux/localstack-linux-amd
 
 CMD /service -socket /run/guest-services/extension-LocalStack.sock

@@ -7,7 +7,7 @@ import {
 import { createStyles, makeStyles } from '@mui/styles';
 import { Refresh } from '@mui/icons-material';
 import { SystemStatus as SystemStatusIcon } from './SystemStatus';
-import { useLocalStackHealth, useLocalStack, capitalize } from '../../../services';
+import { useLocalStackHealth, useLocalStack, capitalize, useDDClient } from '../../../services';
 import { HealthState } from '../../../types';
 
 const ORDER = [
@@ -38,6 +38,7 @@ const useStyles = makeStyles((theme: Theme) => createStyles({
 export const StatusPage = (): ReactElement => {
   const { health, mutate } = useLocalStackHealth();
   const { data } = useLocalStack();
+  const ddClient = useDDClient();
 
   const isRunning = data && data.State === 'running';
 
@@ -64,6 +65,14 @@ export const StatusPage = (): ReactElement => {
       >
         Refresh
       </Button>
+      <Button onClick={() => {
+        ddClient.extension.host?.cli.exec('localstack', ['start'], {
+          env:
+          {
+            LOCALSTACK_AUTH_TOKEN: 'ls-vOXILOWo-6431-7556-jUYu-QefAHIfA075c',
+          },
+        });
+      }}>aaaa</Button>
       <div className={classes.servicesBlock}>
         {
           ORDER.map((status) => (
