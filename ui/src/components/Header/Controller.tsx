@@ -146,7 +146,6 @@ export const Controller = (): ReactElement => {
       env: args,
       stream: {
         onOutput(data): void {
-          console.log(data);
           const shouldDisplayError = !EXCLUDED_ERROR_TOAST.some(item => data.stderr?.includes(item)) && data.stderr;
           if (shouldDisplayError) {
             ddClient.desktopUI.toast.error(data.stderr);
