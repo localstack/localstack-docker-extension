@@ -1,4 +1,4 @@
-FROM golang:latest AS builder
+FROM golang:1.21-alpine AS builder
 ENV CGO_ENABLED=0
 WORKDIR /backend
 COPY vm/go.* .
