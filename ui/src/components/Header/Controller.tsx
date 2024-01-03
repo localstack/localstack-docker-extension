@@ -31,7 +31,7 @@ export const Controller = (): ReactElement => {
   const [downloadProps, setDownloadProps] = useState({ open: false, image: COMMUNITY_IMAGE });
   const [isStarting, setIsStarting] = useState<boolean>(false);
   const [isStopping, setIsStopping] = useState<boolean>(false);
-  const ddClient = useDDClient();
+  const { client: ddClient, getBinary } = useDDClient();
   const isRunning = data && data.State === 'running';
   const isUnhealthy = data && data.Status.includes('unhealthy');
   const tooltipLabel = isUnhealthy ? 'Unhealthy' : 'Healthy';
@@ -85,33 +85,6 @@ export const Controller = (): ReactElement => {
       acc[key] = value;
       return acc;
     }, {} as NodeJS.ProcessEnv);
-  };
-
-  const getBinary = () => {
-    let architecture = '';
-    if (ddClient.host.arch === 'x64') {
-      architecture = 'amd';
-    } else if (ddClient.host.arch === 'arm64') {
-      architecture = 'arm';
-    } else {
-      ddClient.desktopUI.toast.error(`Extension does not support ${ddClient.host.arch} architecture`);
-      return null;
-    }
-
-    let os = '';
-    if (ddClient.host.platform === 'darwin' || ddClient.host.platform === 'linux') {
-      os = ddClient.host.platform;
-    } else if (ddClient.host.platform === 'win32' && architecture === 'amd') {
-      os = 'windows';
-    } else {
-      ddClient.desktopUI.toast.error(
-        `Extension does not support ${ddClient.host.platform} operating system platform (${architecture})`,
-      );
-      return null;
-    }
-
-    const fullName = `localstack-${os}-${os === 'windows' ? `${architecture}.exe` : architecture}`;
-    return fullName;
   };
 
   const start = async () => {

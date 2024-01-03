@@ -20,7 +20,7 @@ export const LongMenu = () => {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [openModal, setOpenModal] = useState<boolean>(false);
   const [images, setImages] = useState<string[]>(['Loading...']);
-  const ddClient = useDDClient();
+  const { client: ddClient } = useDDClient();
 
   const open = Boolean(anchorEl);
 

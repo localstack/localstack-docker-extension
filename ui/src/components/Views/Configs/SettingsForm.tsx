@@ -39,7 +39,7 @@ export const SettingsForm = ({ initialState }: MountPointFormProps): ReactElemen
   const [activeStep, setActiveStep] = useState(initialState);
 
   const { setMountPointData, user, os } = useMountPoint();
-  const ddClient = useDDClient();
+  const { client: ddClient } = useDDClient();
 
   const steps = ['Enable Docker Desktop option', 'Launching pro container', 'Set mount point'];
 

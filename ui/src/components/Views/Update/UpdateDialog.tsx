@@ -16,7 +16,7 @@ type Props = {
 
 export const UpdateDialog = ({ open, onClose }: Props): ReactElement => {
   const [logs, setLogs] = useState<string[]>([]);
-  const ddClient = useDDClient();
+  const { client: ddClient } = useDDClient();
   const [isUpdating, setIsUpdating] = useState<boolean>(true);
 
   useEffect(() => {
