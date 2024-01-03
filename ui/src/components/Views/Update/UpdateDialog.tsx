@@ -7,7 +7,6 @@ import {
 } from '@mui/material';
 import React, { ReactElement, useEffect, useState } from 'react';
 import { useDDClient } from '../../../services';
-import { generateCLIArgs } from '../../../services/util/cli';
 
 type Props = {
   open: boolean,
@@ -16,11 +15,15 @@ type Props = {
 
 export const UpdateDialog = ({ open, onClose }: Props): ReactElement => {
   const [logs, setLogs] = useState<string[]>([]);
-  const { client: ddClient } = useDDClient();
+  const { client: ddClient, getBinary } = useDDClient();
   const [isUpdating, setIsUpdating] = useState<boolean>(true);
 
   useEffect(() => {
-    const listener = ddClient.docker.cli.exec('run', generateCLIArgs({ call: 'update' }), {
+    const binary = getBinary();
+    if (!binary) {
+      return;
+    }
+    const listener = ddClient.extension.host?.cli.exec(binary, ['update', 'docker-images'], {
       stream: {
         onOutput(data): void {
           let resultStr = data.stdout
@@ -28,7 +31,7 @@ export const UpdateDialog = ({ open, onClose }: Props): ReactElement => {
             .replaceAll('â', '✅')
             .replaceAll('â', '❌');
 
-          if (data.stdout.includes('Updating docker images')) {
+          if (resultStr.includes('Updating docker images')) {
             resultStr = 'Updating Docker images';
           }
 

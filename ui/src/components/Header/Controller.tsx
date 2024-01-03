@@ -19,7 +19,6 @@ import { LongMenu } from './Menu';
 import { DockerContainer, DockerImage } from '../../types';
 import { DownloadProgressDialog } from '../Feedback/DownloadProgressDialog';
 import { ProgressButton } from '../Feedback';
-// import { generateCLIArgs } from '../../services/util/cli';
 
 const EXCLUDED_ERROR_TOAST = ['INFO', 'WARN', 'DEBUG'];
 
@@ -50,21 +49,17 @@ export const Controller = (): ReactElement => {
 
   const buildHostArgs = (): NodeJS.ProcessEnv => {
     let location = '/tmp/localstack/volume';
-    // let homeDir = `HOME=/home/${user}`;
 
     if (!hasSkippedConfiguration) {
       switch (ddClient.host.platform) {
         case 'win32':
           location = `\\\\wsl$\\${os}\\home\\${user}\\.cache\\localstack\\volume`;
-          // homeDir = `HOME=\\\\wsl$\\${os}\\home\\${user}`;
           break;
         case 'darwin':
           location = `/Users/${user}/Library/Caches/localstack/volume`;
-          // homeDir = `HOME=/Users/${user}`;
           break;
         default:
           location = `/home/${user}/.cache/localstack/volume`;
-        // homeDir = `HOME=/home/${user}`;
       }
     }
     return { LOCALSTACK_VOLUME_DIR: location };
