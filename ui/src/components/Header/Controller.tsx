@@ -107,6 +107,7 @@ export const Controller = (): ReactElement => {
     
     const binary = getBinary();
     if (!binary) {
+      setIsStarting(false);
       return;
     }
 
