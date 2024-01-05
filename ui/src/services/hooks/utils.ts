@@ -34,7 +34,7 @@ export const useDDClient = (): useDDClientReturn => {
       return null;
     }
 
-    const fullName = `localstack-${os}-${os === 'windows' ? `${architecture}.exe` : architecture}`;
+    const fullName = `localstack-${os}-$(architecture}${os === 'windows' ? '.exe' : ''}`;
     return fullName;
   };
 
