@@ -30,7 +30,7 @@ const adaptVersionData = (data: HTTPMessageBody, error: Error) => {
 
 export const useRunConfigs = (): useRunConfigsReturn => {
   const cacheKey = STORAGE_KEY_ENVVARS;
-  const ddClient = useDDClient();
+  const { client: ddClient } = useDDClient();
   const { data, mutate, isValidating, error } = useSWR(
     cacheKey,
     () => (ddClient.extension.vm.service.get('/configs') as Promise<HTTPMessageBody>),
@@ -78,7 +78,7 @@ interface useMountPointReturn {
 }
 
 export const useMountPoint = (): useMountPointReturn => {
-  const ddClient = useDDClient();
+  const { client: ddClient } = useDDClient();
   const cacheKey = STORAGE_KEY_MOUNT;
 
   const { data, mutate, isValidating, error } = useSWR(
@@ -111,7 +111,7 @@ interface useLocalStackReturn {
 }
 
 export const useLocalStack = (): useLocalStackReturn => {
-  const ddClient = useDDClient();
+  const { client: ddClient } = useDDClient();
   const cacheKey = STORAGE_KEY_LOCALSTACK;
 
   const { data, mutate } = useSWR(

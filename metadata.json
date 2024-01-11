@@ -22,11 +22,23 @@
         "darwin": [
           {
             "path": "/darwin/checkUser.sh"
+          },
+          {
+            "path": "/darwin/localstack-darwin-amd"
+          },
+          {
+            "path": "/darwin/localstack-darwin-arm"
           }
         ],
         "linux": [
           {
             "path": "/linux/checkUser.sh"
+          },
+          {
+            "path": "/linux/localstack-linux-amd"
+          },
+          {
+            "path": "/linux/localstack-linux-arm"
           }
         ],
         "windows": [
@@ -35,6 +47,9 @@
           },
           {
             "path": "/windows/checkUser.cmd"
+          },
+          {
+            "path": "/windows/localstack-windows-amd.exe"
           }
         ]
       }

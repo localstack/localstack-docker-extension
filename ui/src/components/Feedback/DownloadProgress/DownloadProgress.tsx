@@ -25,7 +25,7 @@ interface DownloadProgressProps {
 
 export const DownloadProgress = ({ callback, imageName }: DownloadProgressProps): ReactElement => {
 
-  const ddClient = useDDClient();
+  const { client: ddClient } = useDDClient();
   const [statusMap, setStatusMap] = useState<Map<string, string>>(new Map());
   const [isDone, setIsDone] = useState<boolean>(false);
   const percentage = Array.from(statusMap.entries())

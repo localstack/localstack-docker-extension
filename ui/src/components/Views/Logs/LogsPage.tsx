@@ -4,7 +4,7 @@ import { useDDClient, useLocalStack } from '../../../services';
 
 export const LogsPage = (): ReactElement => {
   const [logs, setLogs] = useState<string[]>([]);
-  const ddClient = useDDClient();
+  const { client: ddClient } = useDDClient();
   const { data } = useLocalStack();
   
   useEffect(() => {

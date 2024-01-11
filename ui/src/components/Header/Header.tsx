@@ -5,7 +5,7 @@ import { useDDClient } from '../../services';
 import { Controller } from './Controller';
 
 export const Header = (): ReactElement => {
-  const ddClient = useDDClient();
+  const { client: ddClient } = useDDClient();
 
   return (
     <AppBar 
