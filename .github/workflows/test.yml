@@ -1,0 +1,20 @@
+name: Build & Publish LocalStack Docker Extension
+
+on:
+  push:
+    branches: [ binaries-invokation ]
+
+jobs:
+  test_exec_download:
+    name: Publish LocalStack Docker Extension
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Exec script
+        run: bash downoadBinaries.sh
+        
+      - name: Check if it worked
+        run: ls binaries/darwin
