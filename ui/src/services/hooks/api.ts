@@ -13,15 +13,17 @@ interface useRunConfigsReturn {
   deleteConfig: (data: string) => unknown;
 }
 
-interface HTTPMessageBody {
-  Message: string,
+interface HTTPMessage {
+  data: {
+    Message: string,
+  },
 }
 
-const adaptVersionData = (data: HTTPMessageBody, error: Error) => {
-  const newData = (!data || !data?.Message || error) ?
+const adaptVersionData = (message: HTTPMessage, error: Error) => {
+  const newData = (!message || !message.data?.Message || error) ?
     { configs: [], runningConfig: null }
     :
-    JSON.parse(data?.Message);
+    JSON.parse(message.data?.Message);
   if (Array.isArray(newData)) {
     return { configs: newData, runningConfig: newData.at(0).id ?? null };
   }
@@ -33,7 +35,7 @@ export const useRunConfigs = (): useRunConfigsReturn => {
   const { client: ddClient } = useDDClient();
   const { data, mutate, isValidating, error } = useSWR(
     cacheKey,
-    () => (ddClient.extension.vm.service.get('/configs') as Promise<HTTPMessageBody>),
+    () => (ddClient.extension.vm.service.get('/configs') as Promise<HTTPMessage>),
   );
 
   const updateConfig = async (newData: RunConfig) => {
@@ -83,7 +85,7 @@ export const useMountPoint = (): useMountPointReturn => {
 
   const { data, mutate, isValidating, error } = useSWR(
     cacheKey,
-    async () => (ddClient.extension.vm.service.get('/mount') as Promise<HTTPMessageBody>),
+    async () => (ddClient.extension.vm.service.get('/mount') as Promise<HTTPMessage>),
   );
 
   const setMountPointData = async (data: mountPointData) => {
@@ -91,7 +93,7 @@ export const useMountPoint = (): useMountPointReturn => {
     mutate();
   };
 
-  const fileContent = (!error && data) ? data.Message : null;
+  const fileContent = (!error && data) ? data.data.Message : null;
   const mountPointData = isJson(fileContent) ? JSON.parse(fileContent) as mountPointData : null;
 
   return {
