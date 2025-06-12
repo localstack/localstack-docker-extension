@@ -14,6 +14,8 @@ import {
   PRO_IMAGE,
   COMMUNITY_IMAGE,
   FLAGS_AS_STRING,
+  WIN_OS,
+  MAC_OS,
 } from '../../constants';
 import { LongMenu } from './Menu';
 import { DockerContainer, DockerImage } from '../../types';
@@ -52,10 +54,10 @@ export const Controller = (): ReactElement => {
 
     if (!hasSkippedConfiguration) {
       switch (ddClient.host.platform) {
-        case 'win32':
+        case WIN_OS:
           location = `\\\\wsl$\\${os}\\home\\${user}\\.cache\\localstack\\volume`;
           break;
-        case 'darwin':
+        case MAC_OS:
           location = `/Users/${user}/Library/Caches/localstack/volume`;
           break;
         default:

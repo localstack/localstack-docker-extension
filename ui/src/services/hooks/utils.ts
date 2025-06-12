@@ -1,6 +1,7 @@
 import { DockerDesktopClient } from '@docker/extension-api-client-types/dist/v1';
 import { useContext } from 'react';
 import { GlobalDDContext } from '../context/GlobalDDContext';
+import { MAC_OS, WIN_OS } from '../../constants';
 
 
 export interface useDDClientReturn {
@@ -23,9 +24,9 @@ export const useDDClient = (): useDDClientReturn => {
     }
 
     let os = '';
-    if (client.host.platform === 'darwin' || client.host.platform === 'linux') {
+    if (client.host.platform === MAC_OS || client.host.platform === 'linux') {
       os = client.host.platform;
-    } else if (client.host.platform === 'win32' && architecture === 'amd') {
+    } else if (client.host.platform === WIN_OS && architecture === 'amd') {
       os = 'windows';
     } else {
       client.desktopUI.toast.error(

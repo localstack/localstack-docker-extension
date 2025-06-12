@@ -16,6 +16,9 @@ install-extension: build-extension ## Install the extension
 update-extension: build-extension ## Update the extension
 	docker extension update $(IMAGE):$(TAG)
 
+install-dev:
+	cd ui/ && npm install
+
 debug: ## Start the extension in debug mode
 	docker extension dev debug $(IMAGE)
 
