@@ -77,12 +77,12 @@ export const ConfigPage = (): ReactElement => {
       <ButtonGroup className={classes.addButton}>
         <Button
           endIcon={<AddIcon />}
-          variant='contained'
+          variant='outlined'
           onClick={() => openModalSetup()}
         >
           New
         </Button>
-        <Button onClick={() => mountPoint.setMountPointData({ ...mountPoint, showForm: true })}>
+        <Button variant='outlined' onClick={() => mountPoint.setMountPointData({ ...mountPoint, showForm: true })}>
           Change mount point
         </Button>
       </ButtonGroup>
