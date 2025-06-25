@@ -191,7 +191,7 @@ export const UpsertConfig = ({ config, open, onClose }: Props): ReactElement => 
           Cancel
         </Button>
         <Button
-          variant='contained'
+          variant='outlined'
           onClick={handleSaveButtonPress}
           disabled={!configName}
         >

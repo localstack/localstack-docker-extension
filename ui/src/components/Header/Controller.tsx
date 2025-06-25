@@ -174,7 +174,7 @@ export const Controller = (): ReactElement => {
       <ButtonGroup variant='outlined'>
         {(isRunning && !isStarting) ?
           <ProgressButton
-            variant='contained'
+            variant='outlined'
             loading={isStopping}
             onClick={stop}
             startIcon={<Stop />}>
@@ -196,7 +196,7 @@ export const Controller = (): ReactElement => {
             </FormControl>
             <Box>
               <ProgressButton
-                variant='contained'
+                variant='outlined'
                 loading={isStarting}
                 onClick={start}
                 startIcon={<PlayArrow />}>

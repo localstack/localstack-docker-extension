@@ -25,23 +25,38 @@ import {
 } from '../../../services';
 import { ConfirmableButton } from '../../Feedback';
 
-const ShrinkedCircularProgress = (): ReactElement => <CircularProgress size={20} sx={{ margin: 1 }} />;
+const ShrinkedCircularProgress = (): ReactElement => (
+  <CircularProgress size={20} sx={{ margin: 1 }} />
+);
 
 interface MountPointFormProps {
   initialState: number;
 }
 
-export const SettingsForm = ({ initialState }: MountPointFormProps): ReactElement => {
-
-  const [userState, setUserState] = useState({ loading: false, selectedUser: '', users: [] });
-  const [osState, setOsState] = useState({ loading: false, selectedOS: '', OSs: [] });
+export const SettingsForm = ({
+  initialState,
+}: MountPointFormProps): ReactElement => {
+  const [userState, setUserState] = useState({
+    loading: false,
+    selectedUser: '',
+    users: [],
+  });
+  const [osState, setOsState] = useState({
+    loading: false,
+    selectedOS: '',
+    OSs: [],
+  });
   const [triggerUserCheck, setTriggerUserCheck] = useState(false);
   const [activeStep, setActiveStep] = useState(initialState);
 
   const { setMountPointData, user, os } = useMountPoint();
   const { client: ddClient } = useDDClient();
 
-  const steps = ['Enable Docker Desktop option', 'Launching pro container', 'Set mount point'];
+  const steps = [
+    'Enable Docker Desktop option',
+    'Launching pro container',
+    'Set mount point',
+  ];
 
   const handleNext = () => {
     if (activeStep !== steps.length - 1) {
@@ -55,9 +70,13 @@ export const SettingsForm = ({ initialState }: MountPointFormProps): ReactElemen
 
   const getMountPointPath = (): string => {
     if (ddClient.host.platform === 'darwin') {
-      return `/Users/${userState.selectedUser || 'loading...'}/Library/Caches/localstack/volume`;
+      return `/Users/${
+        userState.selectedUser || 'loading...'
+      }/Library/Caches/localstack/volume`;
     }
-    return `/home/${userState.selectedUser || 'loading...'}/.cache/localstack/volume`;
+    return `/home/${
+      userState.selectedUser || 'loading...'
+    }/.cache/localstack/volume`;
   };
 
   const checkWindowsDistro = async () => {
@@ -67,7 +86,11 @@ export const SettingsForm = ({ initialState }: MountPointFormProps): ReactElemen
 
     const foundOSs = getOSsFromBinary(res.stdout);
 
-    setOsState({ loading: false, selectedOS: os || foundOSs[0], OSs: foundOSs });
+    setOsState({
+      loading: false,
+      selectedOS: os || foundOSs[0],
+      OSs: foundOSs,
+    });
     setTriggerUserCheck(true);
   };
 
@@ -77,7 +100,9 @@ export const SettingsForm = ({ initialState }: MountPointFormProps): ReactElemen
     let res: ExecResult;
     let foundUsers = [];
     if (ddClient.host.platform === 'win32') {
-      res = await ddClient.extension.host?.cli.exec('checkUser.cmd', [osState.selectedOS]);
+      res = await ddClient.extension.host?.cli.exec('checkUser.cmd', [
+        osState.selectedOS,
+      ]);
       foundUsers = getUsersFromBinaryWindows(res.stdout);
     } else {
       res = await ddClient.extension.host?.cli.exec('checkUser.sh', []);
@@ -85,11 +110,17 @@ export const SettingsForm = ({ initialState }: MountPointFormProps): ReactElemen
     }
 
     if (res.stderr || !res.stdout) {
-      ddClient.desktopUI.toast.error(`Error while locating users: ${res.stderr} using /tmp as mount point`);
+      ddClient.desktopUI.toast.error(
+        `Error while locating users: ${res.stderr} using /tmp as mount point`,
+      );
       closeWithoutSetting();
     }
 
-    setUserState({ loading: false, selectedUser: user || foundUsers[0], users: foundUsers });
+    setUserState({
+      loading: false,
+      selectedUser: user || foundUsers[0],
+      users: foundUsers,
+    });
   };
 
   const locateMountPoint = async () => {
@@ -102,8 +133,10 @@ export const SettingsForm = ({ initialState }: MountPointFormProps): ReactElemen
 
   useEffect(() => {
     const execChecks = async () => {
-      if (userState.users.length === 0
-        || (ddClient.host.platform === 'win32' && osState.OSs.length === 0)) {
+      if (
+        userState.users.length === 0 ||
+        (ddClient.host.platform === 'win32' && osState.OSs.length === 0)
+      ) {
         locateMountPoint();
       }
     };
@@ -154,94 +187,117 @@ export const SettingsForm = ({ initialState }: MountPointFormProps): ReactElemen
             <Step key={label}>
               <StepLabel>{label}</StepLabel>
             </Step>
-          ),
-          )}
+          ))}
         </Stepper>
         <Box sx={{ margin: 5 }}>
-          {activeStep === 0 &&
+          {activeStep === 0 && (
             <>
               <Typography>
-                Make sure to have the option &quot;Show Docker Extensions system containers&quot; enabled.
-                To enable it visit your settings:
+                Make sure to have the option &quot;Show Docker Extensions system
+                containers&quot; enabled. To enable it visit your settings:
               </Typography>
               <ul>
                 <li>Navigate to Settings</li>
                 <li>Select the Extensions tab</li>
-                <li>Next to Show Docker Extensions system containers, select the checkbox</li>
+                <li>
+                  Next to Show Docker Extensions system containers, select the
+                  checkbox
+                </li>
                 <li>In the bottom-right corner, select Apply & Restart</li>
               </ul>
             </>
-          }
-          {
-            activeStep === 1 &&
+          )}
+          {activeStep === 1 && (
             <Typography>
-              In order to start the Pro container, add a configuration with the variable LOCALSTACK_AUTH_TOKEN 
-              set to your auth token and select that configuration in the top right corner.
-              API Keys are also supported, but will be deprecated in the future.
+              In order to start the Pro container, add a configuration with the
+              variable LOCALSTACK_AUTH_TOKEN set to your auth token and select
+              that configuration in the top right corner. API Keys are also
+              supported, but will be deprecated in the future.
             </Typography>
-          }
-          {activeStep === 2 &&
+          )}
+          {activeStep === 2 && (
             <>
-              <Typography variant='h3'>
-                Default mount point settings
-              </Typography><br /><Paper sx={{ padding: 1 }}>
-                {ddClient.host.platform === 'win32' &&
+              <Typography variant="h3">Default mount point settings</Typography>
+              <br />
+              <Paper sx={{ padding: 1 }}>
+                {ddClient.host.platform === 'win32' && (
                   <>
-                    <Typography variant='subtitle1'>
-                      WSL distro
-                    </Typography>
-                    <Typography variant='body2'>
+                    <Typography variant="subtitle1">WSL distro</Typography>
+                    <Typography variant="body2">
                       Select in which WSL distro you want to mount the container
                     </Typography>
-                    {osState.loading ?
+                    {osState.loading ? (
                       <ShrinkedCircularProgress />
-                      :
-                      <FormControl sx={{ minWidth: 120 }} size='small' variant='outlined'>
+                    ) : (
+                      <FormControl
+                        sx={{ minWidth: 120 }}
+                        size="small"
+                        variant="outlined"
+                      >
                         <Select
                           value={osState.selectedOS || osState.OSs[0]}
-                          onChange={({ target }) => handleOsChange(target.value)}
+                          onChange={({ target }) =>
+                            handleOsChange(target.value)
+                          }
                         >
-                          {osState.OSs.map(os => (
-                            <MenuItem key={os} value={os}>{os}</MenuItem>
+                          {osState.OSs.map((os) => (
+                            <MenuItem key={os} value={os}>
+                              {os}
+                            </MenuItem>
                           ))}
                         </Select>
-                      </FormControl>}
+                      </FormControl>
+                    )}
                     <Divider />
-                  </>}
+                  </>
+                )}
                 <>
-                  <Typography variant='subtitle1'>
-                    User
-                  </Typography>
-                  <Typography variant='body2'>
+                  <Typography variant="subtitle1">User</Typography>
+                  <Typography variant="body2">
                     Select under which user you want to mount the container
                   </Typography>
-                  {userState.loading || osState.loading ?
+                  {userState.loading || osState.loading ? (
                     <ShrinkedCircularProgress />
-                    :
-                    <FormControl sx={{ minWidth: 120 }} size='small' variant='outlined'>
+                  ) : (
+                    <FormControl
+                      sx={{ minWidth: 120 }}
+                      size="small"
+                      variant="outlined"
+                    >
                       <Select
                         value={userState.selectedUser || userState.users[0]}
-                        onChange={({ target }) => setUserState({
-                          loading: userState.loading,
-                          selectedUser: target.value,
-                          users: userState.users,
-                        })}
+                        onChange={({ target }) =>
+                          setUserState({
+                            loading: userState.loading,
+                            selectedUser: target.value,
+                            users: userState.users,
+                          })
+                        }
                       >
-                        {userState.users.map(user => (
-                          <MenuItem key={user} value={user}>{user}</MenuItem>
+                        {userState.users.map((user) => (
+                          <MenuItem key={user} value={user}>
+                            {user}
+                          </MenuItem>
                         ))}
                       </Select>
-                    </FormControl>}
+                    </FormControl>
+                  )}
                 </>
-              </Paper><br /><Typography variant='body1'>
+              </Paper>
+              <br />
+              <Typography variant="body1">
                 {`The LocalStack container will be mounted under ${getMountPointPath()}`}
-              </Typography><Typography variant='caption' display='block' gutterBottom>
-                *You can still change this by overriding the LOCALSTACK_VOLUME_DIR environment variable
-              </Typography></>
-          }
+              </Typography>
+              <Typography variant="caption" display="block" gutterBottom>
+                *You can still change this by overriding the
+                LOCALSTACK_VOLUME_DIR environment variable
+              </Typography>
+            </>
+          )}
         </Box>
         <Box sx={{ display: 'flex', flexDirection: 'row', pt: 2 }}>
           <Button
+            variant="outlined"
             disabled={activeStep === 0}
             onClick={handleBack}
             sx={{ mr: 1 }}
@@ -249,35 +305,34 @@ export const SettingsForm = ({ initialState }: MountPointFormProps): ReactElemen
             Back
           </Button>
           <Box sx={{ flex: '1 1 auto' }} />
-          {
-            activeStep === steps.length - 1 ?
-              <>
-                <ConfirmableButton
-                  component='Button'
-                  title='Close without setting mount point'
-                  okText='Close'
-                  okColor='error'
-                  cancelColor='primary'
-                  sx={{ marginRight: 1 }}
-                  onClick={closeWithoutSetting}
-                  text="Are you sure you want to close without setting a default mount point?
+          {activeStep === steps.length - 1 ? (
+            <>
+              <ConfirmableButton
+                component="Button"
+                title="Close without setting mount point"
+                okText="Close"
+                okColor="error"
+                cancelColor="primary"
+                sx={{ marginRight: 1 }}
+                onClick={closeWithoutSetting}
+                text="Are you sure you want to close without setting a default mount point?
                         You'll need to use a configuration where LOCALSTACK_VOLUME_DIR is set-up otherwise
                         the LocalStack container will be mounted under /tmp and some features will not work!"
-                >
-                  Close
-                </ConfirmableButton>
-                <Button onClick={saveAndClose}>
-                  Confirm
-                </Button>
-              </>
-              :
-              <Button onClick={handleNext}>
-                Next
+              >
+                Close
+              </ConfirmableButton>
+              <Button variant="outlined" onClick={saveAndClose}>
+                Confirm
               </Button>
-          }
+            </>
+          ) : (
+            <Button variant="outlined" onClick={handleNext}>
+              Next
+            </Button>
+          )}
           <Box />
         </Box>
       </DialogContent>
-    </Dialog >
+    </Dialog>
   );
 };
