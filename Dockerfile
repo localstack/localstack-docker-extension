@@ -1,7 +1,7 @@
 FROM golang:1.25-alpine AS builder
 ENV CGO_ENABLED=0
 WORKDIR /backend
-COPY vm/go.* .
+COPY vm/go.* ./
 RUN --mount=type=cache,target=/go/pkg/mod \
   --mount=type=cache,target=/root/.cache/go-build \
   go mod download
