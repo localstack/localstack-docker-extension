@@ -70,4 +70,4 @@ COPY --chmod=0755 binaries/darwin/localstack-darwin-arm /darwin/localstack-darwi
 COPY --chmod=0755 binaries/linux/localstack-linux-arm /linux/localstack-linux-arm
 COPY --chmod=0755 binaries/linux/localstack-linux-amd /linux/localstack-linux-amd
 
-CMD /service -socket /run/guest-services/extension-LocalStack.sock
+CMD ["/service", "-socket", "/run/guest-services/extension-LocalStack.sock"]
