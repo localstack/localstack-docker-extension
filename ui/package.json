@@ -22,14 +22,12 @@
     "dev": "node ./scripts/esbuild.dev.mjs",
     "build": "node ./scripts/esbuild.build.mjs",
     "lint": "eslint --ext js,ts,tsx src",
-    "test": "playwright test",
     "typecheck": "tsc --noEmit"
   },
   "devDependencies": {
     "@babel/eslint-parser": "^7.19.1",
     "@docker/extension-api-client-types": "^0.3.0",
     "@esbuild-plugins/node-modules-polyfill": "^0.1.4",
-    "@playwright/test": "^1.38.0",
     "@types/node": "^20.14.5",
     "@types/react-dom": "^17.0.25",
     "@typescript-eslint/eslint-plugin": "^7.6.0",
