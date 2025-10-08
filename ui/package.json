@@ -25,39 +25,8 @@
     "test": "playwright test",
     "typecheck": "tsc --noEmit"
   },
-  "eslintConfig": {
-    "extends": [
-      "airbnb",
-      "airbnb/hooks",
-      "plugin:@typescript-eslint/recommended",
-      "plugin:jsx-a11y/recommended",
-      "plugin:react/jsx-runtime",
-      "prettier"
-    ],
-    "parser": "@typescript-eslint/parser",
-    "parserOptions": {
-      "sourceType": "module",
-      "ecmaVersion": "latest",
-      "project": "./tsconfig.json"
-    },
-    "plugins": [
-      "@typescript-eslint"
-    ],
-    "settings": {
-      "import/resolver": {
-        "node": {
-          "extensions": [
-            ".js",
-            ".jsx",
-            ".ts",
-            ".tsx"
-          ]
-        },
-        "typescript": {}
-      }
-    }
-  },
   "devDependencies": {
+    "@babel/eslint-parser": "^7.19.1",
     "@docker/extension-api-client-types": "^0.3.0",
     "@esbuild-plugins/node-modules-polyfill": "^0.1.4",
     "@playwright/test": "^1.38.0",
