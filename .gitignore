@@ -36,6 +36,8 @@ bower_components
 
 # Compiled binary addons (https://nodejs.org/api/addons.html)
 build/Release
+ui/build
+ui/test-results
 
 # Dependency directories
 node_modules/
@@ -101,3 +103,6 @@ dist
 
 # TernJS port file
 .tern-port
+
+# Downloaded binaries
+binaries

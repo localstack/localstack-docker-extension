@@ -21,7 +21,7 @@ debug: ## Start the extension in debug mode
 
 hot-reload: ## Enable hot reloading
 	docker extension dev ui-source $(IMAGE) http://localhost:3000
-	cd ui/ && npm start
+	cd ui/ && npm run dev
 
 stop-hot-realoading: ## Disable hot reloading
 	docker extension dev reset $(IMAGE)
