@@ -211,8 +211,7 @@ export const SettingsForm = ({
             <Typography>
               In order to start the Pro container, add a configuration with the
               variable LOCALSTACK_AUTH_TOKEN set to your auth token and select
-              that configuration in the top right corner. API Keys are also
-              supported, but will be deprecated in the future.
+              that configuration in the top right corner.
             </Typography>
           )}
           {activeStep === 2 && (
