@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file. The format is based on [Keep a Changelog](http://keepachangelog.com/) and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [0.5.8] — 2026-01-27
+
+### Changed
+
+- Dependencies update and api-key text removal
+
+### Changed
+
+- Refactoring and dependencies update
+
 ## [0.5.7] — 2025-10-17
 
 ### Changed
