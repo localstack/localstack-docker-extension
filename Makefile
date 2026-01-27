@@ -1,5 +1,5 @@
 IMAGE?=localstack/localstack-docker-desktop
-TAG?=0.5.7
+TAG?=0.5.8
 
 BUILDER=buildx-multi-arch
 
@@ -8,7 +8,7 @@ NO_COLOR   = \033[m
 
 build-extension: ## Build service image to be deployed as a desktop extension
 	ls binaries/linux/localstack-* > /dev/null 2>&1 || ./downloadBinaries.sh
-	docker build --tag=$(IMAGE):$(TAG) . 
+	docker build --tag=$(IMAGE):$(TAG) .
 
 install-extension: build-extension ## Install the extension
 	docker extension install $(IMAGE):$(TAG)
