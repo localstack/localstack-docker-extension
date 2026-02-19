@@ -1,4 +1,10 @@
-import React, { useState, ReactElement, ReactNode, FunctionComponent, MouseEvent } from 'react';
+import React, {
+  useState,
+  ReactElement,
+  ReactNode,
+  FunctionComponent,
+  MouseEvent,
+} from 'react';
 
 import {
   Button,
@@ -27,14 +33,19 @@ export type BaseProps = {
   cancelColor?: ButtonProps['color'];
   cancelText?: string;
   children?: ReactNode;
-}
+};
+type CleanButtonProps = Omit<ButtonProps, 'component'>;
 
-type ComponentButton = (ButtonProps & { component: 'Button' }) & BaseProps
-type ComponentIconButton = (ButtonProps & { component: 'IconButton' }) & BaseProps
-type ComponentMenuItem = (ButtonProps & { component: 'MenuItem' }) & BaseProps
+type ComponentButton = (CleanButtonProps & { component: 'Button' }) & BaseProps;
+type ComponentIconButton = (CleanButtonProps & { component: 'IconButton' }) &
+  BaseProps;
+type ComponentMenuItem = (CleanButtonProps & { component: 'MenuItem' }) &
+  BaseProps;
 
 export type ConfirmableButtonProps =
-  ComponentButton | ComponentIconButton | ComponentMenuItem;
+  | ComponentButton
+  | ComponentIconButton
+  | ComponentMenuItem;
 
 export const ConfirmableButton = ({
   title,
@@ -50,7 +61,8 @@ export const ConfirmableButton = ({
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
 
   // eslint-disable-next-line
-  const Component: FunctionComponent<any> = COMPONENTS_MAP[component] || COMPONENTS_MAP.fallback;
+  const Component: FunctionComponent<any> =
+    COMPONENTS_MAP[component] || COMPONENTS_MAP.fallback;
 
   return (
     <>
@@ -70,16 +82,16 @@ export const ConfirmableButton = ({
         )}
         <DialogActions>
           <Button
-            color= {cancelColor || 'primary'}
-            variant='outlined'
+            color={cancelColor || 'primary'}
+            variant="outlined"
             onClick={() => setShowConfirmDialog(false)}
           >
             {cancelText || 'Cancel'}
           </Button>
           <Button
             autoFocus
-            color= {okColor || 'error'}
-            variant='outlined'
+            color={okColor || 'error'}
+            variant="outlined"
             onClick={(event: MouseEvent<HTMLButtonElement>) => {
               if (rest.onClick) rest.onClick(event as any); // eslint-disable-line
               setShowConfirmDialog(false);
