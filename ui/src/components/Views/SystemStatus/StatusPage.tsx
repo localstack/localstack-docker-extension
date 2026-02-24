@@ -55,7 +55,7 @@ export const StatusPage = (): ReactElement => {
 
   const isRunning = data && data.State === 'running';
 
-  const showStatus = health && health.edition !== 'community';
+  const isPro = health && health.edition !== 'community';
 
   useEffect(() => mutate(), [isRunning]);
 
@@ -76,7 +76,7 @@ export const StatusPage = (): ReactElement => {
       >
         Refresh
       </Button>
-      {showStatus ? (
+      {isPro ? (
         <div className={classes.servicesBlock}>
           {ORDER.map((status) => (
             <Fragment key={status}>
