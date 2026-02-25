@@ -7,6 +7,12 @@ All notable changes to this project will be documented in this file. The format 
 ### Changed
 
 - Dependencies update and introduction of calendar versioning format
+- 
+## [0.5.9] — 2026-02-18
+
+### Changed
+
+- Security update
 
 ## [0.5.8] — 2026-01-27
 

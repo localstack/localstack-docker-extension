@@ -14,4 +14,5 @@ export interface Health {
     [key: string]: HealthState;
   },
   version: string;
+  edition: string;
 }
