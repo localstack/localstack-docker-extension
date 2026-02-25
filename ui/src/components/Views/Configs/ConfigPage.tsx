@@ -59,15 +59,10 @@ export const ConfigPage = (): ReactElement => {
       flex: 2,
     },
     {
-      field: 'id',
-      headerName: 'ID',
-      flex: 2,
-    },
-    {
       field: 'Configurations',
       headerName: 'Configurations',
       sortable: false,
-      flex: 5,
+      flex: 7,
       renderCell: (params: GridRenderCellParams) =>
         (params.row as RunConfig).vars.map(setting => `${setting.variable}=${setting.value}`).join(', '),
     },
