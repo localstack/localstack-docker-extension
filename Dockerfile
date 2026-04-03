@@ -23,6 +23,7 @@ COPY ui /ui
 RUN npm run build
 
 FROM alpine
+RUN apk upgrade --no-cache
 LABEL org.opencontainers.image.title="LocalStack" \
   org.opencontainers.image.description="Extension of Localstack for Docker desktop" \
   org.opencontainers.image.vendor="LocalStack GmbH" \
