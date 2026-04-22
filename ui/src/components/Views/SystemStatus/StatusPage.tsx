@@ -108,7 +108,6 @@ export const StatusPage = (): ReactElement => {
           ))}
         </div>
       ) : (
-        // Your updated component
         <Alert severity="warning">
           Could not connect to a licensed LocalStack instance.{' '}
           <Link
