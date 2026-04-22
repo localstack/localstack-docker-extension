@@ -17,6 +17,7 @@ import {
   useLocalStackHealth,
   useLocalStack,
   capitalize,
+  useDDClient,
 } from '../../../services';
 import { HealthState } from '../../../types';
 
@@ -47,11 +48,13 @@ const useStyles = makeStyles((theme: Theme) =>
   }),
 );
 
-const LICENSE_DOCS_URL = 'https://docs.localstack.cloud/aws/getting-started/auth-token/#configuring-your-auth-token';
+const LICENSE_DOCS_URL =
+  'https://docs.localstack.cloud/aws/getting-started/auth-token/#configuring-your-auth-token';
 
 export const StatusPage = (): ReactElement => {
   const { health, mutate } = useLocalStackHealth();
   const { data } = useLocalStack();
+  const { client: ddClient } = useDDClient();
 
   const isRunning = data && data.State === 'running';
 
@@ -105,6 +108,7 @@ export const StatusPage = (): ReactElement => {
           ))}
         </div>
       ) : (
+        // Your updated component
         <Alert severity="warning">
           Could not connect to a licensed LocalStack instance.{' '}
           <Link
@@ -113,6 +117,10 @@ export const StatusPage = (): ReactElement => {
             rel="noreferrer"
             color="inherit"
             underline="always"
+            onClick={(event) => {
+              event.preventDefault();
+              ddClient.host.openExternal(LICENSE_DOCS_URL);
+            }}
           >
             Learn how to configure your license
           </Link>
