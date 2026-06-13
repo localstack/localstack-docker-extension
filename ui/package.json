@@ -33,7 +33,7 @@
     "@typescript-eslint/eslint-plugin": "^5.38.1",
     "@typescript-eslint/parser": "^5.38.1",
     "dotenv": "^11.0.0",
-    "esbuild": "^0.19.12",
+    "esbuild": "^0.28.1",
     "esbuild-plugin-clean": "^1.0.1",
     "esbuild-plugin-svgr": "^1.0.0",
     "eslint": "^8.24.0",
