@@ -1,5 +1,5 @@
 IMAGE?=localstack/localstack-docker-desktop
-TAG?=2026.5.1
+TAG?=2026.5.2
 
 BUILDER=buildx-multi-arch
 
