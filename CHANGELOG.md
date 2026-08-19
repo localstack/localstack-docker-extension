@@ -8,10 +8,6 @@ All notable changes to this project will be documented in this file. The format 
 
 - Security update
 
-### Fixed
-
-- `make build-extension` now works on macOS
-
 ## [2026.7.2] — 2026-07-29
 
 ### Changed
