@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file. The format is based on [Keep a Changelog](http://keepachangelog.com/) and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [2026.8.0] — 2026-08-19
+
+### Changed
+
+- Security update
+
+### Fixed
+
+- `make build-extension` now works on macOS
+
 ## [2026.7.2] — 2026-07-29
 
 ### Changed
