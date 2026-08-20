@@ -1,0 +1,15 @@
+version: 2
+updates:
+  # Security updates only. `open-pull-requests-limit: 0` switches off scheduled
+  # version updates; Dependabot security updates are unaffected by it.
+  #
+  # Scoped to gomod on purpose. The only lang-pkg target Trivy finds in the
+  # published image is the `service` gobinary, so vm/go.mod is the only manifest
+  # whose contents can turn into a CVE finding. The UI ships as an esbuild
+  # bundle with no node_modules, so npm advisories never reach the image and
+  # would only add PR noise that can't close a security ticket.
+  - package-ecosystem: gomod
+    directory: /vm
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 0

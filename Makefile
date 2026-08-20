@@ -16,6 +16,9 @@ install-extension: build-extension ## Install the extension
 update-extension: build-extension ## Update the extension
 	docker extension update $(IMAGE):$(TAG)
 
+smoke-test: build-extension ## Verify the built image starts and ships everything it declares
+	./scripts/smoke-test.sh $(IMAGE):$(TAG)
+
 debug: ## Start the extension in debug mode
 	docker extension dev debug $(IMAGE)
 

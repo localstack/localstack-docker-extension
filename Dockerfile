@@ -22,7 +22,7 @@ RUN --mount=type=cache,target=/usr/src/app/.npm \
 COPY ui /ui
 RUN npm run build
 
-FROM alpine
+FROM alpine:3.24
 RUN apk upgrade --no-cache
 LABEL org.opencontainers.image.title="LocalStack" \
   org.opencontainers.image.description="Extension of Localstack for Docker desktop" \

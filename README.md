@@ -56,6 +56,40 @@ To contribute, check out our [issue tracker](https://github.com/localstack/local
     ```bash
     $ make stop-hot-reloading
     ```
+## Security maintenance
+
+Most CVEs reported against this image come from the Go toolchain compiled into
+the `service` binary rather than from any dependency manifest, so they are fixed
+by rebuilding on a newer `golang:1.25-alpine` rather than by bumping anything.
+
+The [weekly security rebuild](.github/workflows/security-rebuild.yml) does this
+automatically: it scans the published image, rebuilds from scratch, and
+republishes a new patch version **only if the rebuild actually clears a CVE**.
+Rebuilds that change nothing are not released, so no update badge appears in
+Docker Desktop for a no-op.
+
+Anything a rebuild cannot fix needs a dependency bump. Dependabot raises those
+against `vm/go.mod` as security updates; they are reviewed and tested by hand,
+and released with the same workflow via `workflow_dispatch`.
+
+### Validating a CVE fix locally
+
+```bash
+# What is currently published?
+trivy image --scanners vuln --severity HIGH,CRITICAL --ignore-unfixed \
+  localstack/localstack-docker-desktop:$(sed -n 's/^TAG?=//p' Makefile)
+
+# Rebuild from scratch and rescan. --pull --no-cache matters: a cached base
+# layer reproduces the old image and clears nothing.
+docker build --pull --no-cache -t dde-candidate .
+trivy image --scanners vuln --severity HIGH,CRITICAL --ignore-unfixed dde-candidate
+
+# Check the rebuild still works before shipping it
+make smoke-test
+```
+
+Test a change end to end in Docker Desktop with `make install-extension`.
+
 ## Releases
 
 Please refer to [`CHANGELOG`](CHANGELOG.md) to see the complete list of changes for each release.
