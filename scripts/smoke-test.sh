@@ -1,12 +1,6 @@
 #!/bin/bash
-# Smoke-test a built extension image without Docker Desktop.
-#
-# Verifies the three things a rebuild could plausibly break:
-#   1. the Go service starts and creates its unix socket
-#   2. every host binary declared in metadata.json is present and executable
-#   3. the UI bundle and compose/metadata files were copied into the image
-#
-# Usage: ./scripts/smoke-test.sh <image>            (or: make smoke-test)
+# Verify a built extension image starts and ships everything metadata.json declares.
+# Usage: ./scripts/smoke-test.sh <image>   (or: make smoke-test)
 
 set -euo pipefail
 
@@ -20,10 +14,7 @@ trap cleanup EXIT
 
 echo "==> Smoke-testing $IMAGE"
 
-# 1. The service starts and listens.
-#
-# The image CMD points at /run/guest-services, which only exists inside Docker
-# Desktop's VM, so point the service at a writable path instead.
+# The image CMD points at /run/guest-services, which only exists inside Docker Desktop's VM.
 docker run -d --name "$CONTAINER" "$IMAGE" /service -socket "$SOCKET" >/dev/null
 
 for _ in $(seq 1 30); do
@@ -41,10 +32,7 @@ docker exec "$CONTAINER" pgrep -f '^/service' >/dev/null \
 
 echo "    ok: /service is listening on $SOCKET"
 
-# 2. Every host binary declared in metadata.json is shipped and executable.
-#
-# Docker Desktop copies these onto the host at install time; a missing or
-# non-executable path is a broken extension that still builds cleanly.
+# Docker Desktop copies these onto the host at install time; a missing one still builds cleanly.
 BINARIES=$(docker run --rm "$IMAGE" cat /metadata.json \
   | jq -r '.host.binaries[]? | to_entries[] | .value[]? | .path')
 
@@ -57,7 +45,6 @@ while read -r path; do
   echo "    ok: $path"
 done <<< "$BINARIES"
 
-# 3. The UI bundle and the files Docker Desktop reads at install time.
 for path in /ui/index.html /docker-compose.yaml /metadata.json /localstack.svg; do
   docker exec "$CONTAINER" test -s "$path" \
     || fail "missing or empty: $path"

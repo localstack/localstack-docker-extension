@@ -1,20 +1,10 @@
 name: Weekly Security Rebuild
 
-# Gated security rebuild (COSY-926).
-#
-# Most CVEs reported against this image come from the Go toolchain baked into
-# the `service` binary, not from anything in a manifest: of the 9 findings on
-# 2026.7.2, 7 were Go stdlib. Those are fixed by rebuilding on the floating
-# `golang:1.25-alpine` tag, which no dependency bot can propose. So once a week
-# we rebuild and republish — but ONLY if the rebuild actually clears a CVE, so
-# users don't get an update badge in Docker Desktop for a no-op release.
-#
-# Modelled on the `security-rebuild` job in localstack-pro's aws_flink.yml.
+# Rebuild weekly to pick up Go toolchain and OS patches, republishing only when it clears a CVE (COSY-926).
 
 on:
   schedule:
-    # Tuesdays 08:00 UTC — ~22h ahead of the secops Wednesday 06:00 UTC CVE
-    # scan, so anything cleared here never gets filed as a finding.
+    # ~22h ahead of the secops Wednesday 06:00 UTC scan, so anything cleared here is never filed.
     - cron: "0 8 * * TUE"
   workflow_dispatch:
     inputs:
@@ -36,8 +26,7 @@ jobs:
     env:
       IMAGE: localstack/localstack-docker-desktop
       PLATFORMS: linux/amd64,linux/arm64
-      # Mirror the Trivy vuln DBs to dodge GHCR rate limits — same workaround
-      # the secops weekly scan and aws_flink.yml use (trivy-action issue #389).
+      # Mirror the Trivy DBs to dodge GHCR rate limits (trivy-action#389), as aws_flink.yml does.
       TRIVY_DB_REPOSITORY: "ghcr.io/aquasecurity/trivy-db,public.ecr.aws/aquasecurity/trivy-db"
       TRIVY_JAVA_DB_REPOSITORY: "ghcr.io/aquasecurity/trivy-java-db,public.ecr.aws/aquasecurity/trivy-java-db"
 
@@ -53,9 +42,7 @@ jobs:
           echo "tag=${TAG}" >> "$GITHUB_OUTPUT"
 
       - name: Scan published image (before)
-        # exit-code is left unset: findings are the signal to rebuild, not a
-        # failure. --ignore-unfixed matches what the secops pipeline files, so
-        # an unfixable advisory (e.g. GO-2026-5932) can't loop here forever.
+        # --ignore-unfixed matches what the secops pipeline files, so an unfixable advisory can't loop here forever.
         uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
         with:
           image-ref: ${{ env.IMAGE }}:${{ steps.version.outputs.tag }}
@@ -93,9 +80,7 @@ jobs:
 
       - name: Build candidate (amd64, for scanning)
         if: steps.before.outputs.proceed == 'true'
-        # --pull --no-cache is the whole point of the job: a cached base layer
-        # would reproduce the same image and clear nothing. Correctness over
-        # the few minutes a warm cache would save on a weekly run.
+        # Uncached on purpose: a cached base layer would reproduce the same image and clear nothing.
         run: |
           docker buildx build --load --pull --no-cache \
             --platform linux/amd64 \
@@ -125,8 +110,7 @@ jobs:
           comm -13 before_cves.txt after_cves.txt > introduced.txt
 
           echo "Cleared by the rebuild:"; cat cleared.txt || true
-          # Refreshing to newer upstream rarely adds CVEs, and when it does we'd
-          # still rather ship the net improvement — so this is reported, not gated.
+          # Reported, not gated: we'd still rather ship a net improvement.
           if [ -s introduced.txt ]; then
             echo "::warning::Rebuild introduced new CVEs: $(paste -sd', ' introduced.txt)"
           fi
@@ -138,10 +122,7 @@ jobs:
           fi
 
       - name: Report CVEs a rebuild cannot fix
-        # A rebuild only moves the base image and the Go toolchain. Anything
-        # left needs a dependency bump, which is Dependabot's half of COSY-926
-        # — surface it instead of silently no-op'ing every week until the SLA
-        # on the secops ticket burns.
+        # Surface these instead of no-op'ing weekly until the SLA on the secops ticket burns.
         if: steps.before.outputs.proceed == 'true' && steps.delta.outputs.cleared == 'false'
         run: |
           echo "::warning::Rebuild cleared nothing; these need a dependency bump: $(paste -sd', ' before_cves.txt)"
@@ -163,15 +144,13 @@ jobs:
 
       - name: Commit and tag
         if: steps.delta.outputs.cleared == 'true' && !inputs.dry_run
-        env:
-          NEW: ${{ steps.bump.outputs.version }}
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add Makefile Dockerfile CHANGELOG.md
-          git commit -m "Security rebuild ${NEW}"
-          git tag "v${NEW}"
-          git push origin HEAD:main "v${NEW}"
+          git commit -m "Security rebuild ${{ steps.bump.outputs.version }}"
+          git tag "v${{ steps.bump.outputs.version }}"
+          git push origin HEAD:main "v${{ steps.bump.outputs.version }}"
 
       - name: Login to Docker Hub
         if: steps.delta.outputs.cleared == 'true' && !inputs.dry_run
@@ -181,8 +160,7 @@ jobs:
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
       - name: Publish (multi-arch)
-        # Published from here rather than by letting build-push-docker.yml pick
-        # up the tag: pushes made with GITHUB_TOKEN don't trigger workflows.
+        # Published here rather than via build-push-docker.yml: GITHUB_TOKEN pushes don't trigger workflows.
         if: steps.delta.outputs.cleared == 'true' && !inputs.dry_run
         env:
           NEW: ${{ steps.bump.outputs.version }}
