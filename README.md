@@ -69,8 +69,14 @@ Rebuilds that change nothing are not released, so no update badge appears in
 Docker Desktop for a no-op.
 
 Anything a rebuild cannot fix needs a dependency bump. Dependabot raises those
-against `vm/go.mod` as security updates; they are reviewed and tested by hand,
-and released with the same workflow via `workflow_dispatch`.
+against `vm/go.mod` as security updates; they are reviewed and released with the
+same workflow via `workflow_dispatch`.
+
+Every PR builds the image and runs the smoke test via
+[PR CI](.github/workflows/pr.yml), so a bump is verified on its own branch
+before it lands. Testing before the merge matters here: if you test afterwards,
+the next weekly rebuild sees the CVE count drop and releases the bump without
+the test ever having run.
 
 ### Validating a CVE fix locally
 
