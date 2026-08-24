@@ -74,21 +74,9 @@ jobs:
         with:
           platforms: linux/amd64,linux/arm64
 
-      - name: Download CLI binaries
+      - name: Build and smoke-test candidate (amd64, for scanning)
         if: steps.before.outputs.proceed == 'true'
-        run: bash downloadBinaries.sh
-
-      - name: Build candidate (amd64, for scanning)
-        if: steps.before.outputs.proceed == 'true'
-        # Uncached on purpose: a cached base layer would reproduce the same image and clear nothing.
-        run: |
-          docker buildx build --load --pull --no-cache \
-            --platform linux/amd64 \
-            --tag dde-candidate:scan .
-
-      - name: Smoke-test candidate
-        if: steps.before.outputs.proceed == 'true'
-        run: ./scripts/smoke-test.sh dde-candidate:scan
+        run: make smoke-test IMAGE=dde-candidate TAG=scan
 
       - name: Scan candidate (after)
         if: steps.before.outputs.proceed == 'true'

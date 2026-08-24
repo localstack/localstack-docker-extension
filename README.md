@@ -85,13 +85,11 @@ the test ever having run.
 trivy image --scanners vuln --severity HIGH,CRITICAL --ignore-unfixed \
   localstack/localstack-docker-desktop:$(sed -n 's/^TAG?=//p' Makefile)
 
-# Rebuild from scratch and rescan. --pull --no-cache matters: a cached base
-# layer reproduces the old image and clears nothing.
-docker build --pull --no-cache -t dde-candidate .
-trivy image --scanners vuln --severity HIGH,CRITICAL --ignore-unfixed dde-candidate
-
-# Check the rebuild still works before shipping it
-make smoke-test
+# Rebuild a candidate from scratch and check it still works. Builds are always
+# --pull --no-cache, so a cached base layer cannot reproduce the old image and
+# clear nothing. This is the same command CI runs.
+make smoke-test IMAGE=dde-candidate TAG=scan
+trivy image --scanners vuln --severity HIGH,CRITICAL --ignore-unfixed dde-candidate:scan
 ```
 
 Test a change end to end in Docker Desktop with `make install-extension`.
