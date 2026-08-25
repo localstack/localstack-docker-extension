@@ -12,6 +12,10 @@ on:
         description: "Scan and rebuild, but never publish"
         type: boolean
         default: false
+      image:
+        description: "Image to scan and republish. Override to test in a fork."
+        type: string
+        default: localstack/localstack-docker-desktop
 
 concurrency:
   group: security-rebuild
@@ -24,7 +28,7 @@ jobs:
     permissions:
       contents: write
     env:
-      IMAGE: localstack/localstack-docker-desktop
+      IMAGE: ${{ inputs.image || 'localstack/localstack-docker-desktop' }}
       PLATFORMS: linux/amd64,linux/arm64
       # Mirror the Trivy DBs to dodge GHCR rate limits (trivy-action#389), as aws_flink.yml does.
       TRIVY_DB_REPOSITORY: "ghcr.io/aquasecurity/trivy-db,public.ecr.aws/aquasecurity/trivy-db"
