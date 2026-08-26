@@ -28,7 +28,7 @@ jobs:
     permissions:
       contents: write
     env:
-      IMAGE: ${{ inputs.image || 'localstack/localstack-docker-desktop' }}
+      PUBLISHED_IMAGE: ${{ inputs.image || 'localstack/localstack-docker-desktop' }}
       PLATFORMS: linux/amd64,linux/arm64
       # Mirror the Trivy DBs to dodge GHCR rate limits (trivy-action#389), as aws_flink.yml does.
       TRIVY_DB_REPOSITORY: "ghcr.io/aquasecurity/trivy-db,public.ecr.aws/aquasecurity/trivy-db"
@@ -42,26 +42,26 @@ jobs:
         id: version
         run: |
           TAG=$(sed -n 's/^TAG?=\(.*\)$/\1/p' Makefile)
-          echo "Currently published: ${IMAGE}:${TAG}"
+          echo "Currently published: ${PUBLISHED_IMAGE}:${TAG}"
           echo "tag=${TAG}" >> "$GITHUB_OUTPUT"
 
-      - name: Scan published image (before)
+      - name: Scan published image
         # --ignore-unfixed matches what the secops pipeline files, so an unfixable advisory can't loop here forever.
         uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
         with:
-          image-ref: ${{ env.IMAGE }}:${{ steps.version.outputs.tag }}
+          image-ref: ${{ env.PUBLISHED_IMAGE }}:${{ steps.version.outputs.tag }}
           scanners: vuln
           severity: HIGH,CRITICAL
           ignore-unfixed: true
           format: json
-          output: before.json
+          output: published.json
 
-      - name: Determine fixable CVEs (before)
+      - name: Determine fixable CVEs on the published image
         id: before
         run: |
-          jq -r '[.Results[]?.Vulnerabilities[]?.VulnerabilityID] | unique | .[]' before.json | sort -u > before_cves.txt
-          echo "Fixable HIGH/CRITICAL CVEs on the published image:"; cat before_cves.txt || true
-          if [ -s before_cves.txt ]; then
+          jq -r '[.Results[]?.Vulnerabilities[]?.VulnerabilityID] | unique | .[]' published.json | sort -u > published_cves.txt
+          echo "Fixable HIGH/CRITICAL CVEs on the published image:"; cat published_cves.txt || true
+          if [ -s published_cves.txt ]; then
             echo "proceed=true" >> "$GITHUB_OUTPUT"
           else
             echo "Published image is clean — nothing to rebuild."
@@ -80,26 +80,26 @@ jobs:
 
       - name: Build and smoke-test candidate (amd64, for scanning)
         if: steps.before.outputs.proceed == 'true'
-        run: make smoke-test IMAGE=dde-candidate TAG=scan
+        run: make smoke-test IMAGE=localstack-docker-desktop TAG=candidate
 
-      - name: Scan candidate (after)
+      - name: Scan candidate
         if: steps.before.outputs.proceed == 'true'
         uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
         with:
-          image-ref: dde-candidate:scan
+          image-ref: localstack-docker-desktop:candidate
           scanners: vuln
           severity: HIGH,CRITICAL
           ignore-unfixed: true
           format: json
-          output: after.json
+          output: candidate.json
 
-      - name: Compute cleared CVEs (before - after)
+      - name: Compute cleared CVEs (published - candidate)
         id: delta
         if: steps.before.outputs.proceed == 'true'
         run: |
-          jq -r '[.Results[]?.Vulnerabilities[]?.VulnerabilityID] | unique | .[]' after.json | sort -u > after_cves.txt
-          comm -23 before_cves.txt after_cves.txt > cleared.txt
-          comm -13 before_cves.txt after_cves.txt > introduced.txt
+          jq -r '[.Results[]?.Vulnerabilities[]?.VulnerabilityID] | unique | .[]' candidate.json | sort -u > candidate_cves.txt
+          comm -23 published_cves.txt candidate_cves.txt > cleared.txt
+          comm -13 published_cves.txt candidate_cves.txt > introduced.txt
 
           echo "Cleared by the rebuild:"; cat cleared.txt || true
           # Reported, not gated: we'd still rather ship a net improvement.
@@ -117,13 +117,13 @@ jobs:
         # Surface these instead of no-op'ing weekly until the SLA on the secops ticket burns.
         if: steps.before.outputs.proceed == 'true' && steps.delta.outputs.cleared == 'false'
         run: |
-          echo "::warning::Rebuild cleared nothing; these need a dependency bump: $(paste -sd', ' before_cves.txt)"
+          echo "::warning::Rebuild cleared nothing; these need a dependency bump: $(paste -sd', ' published_cves.txt)"
           {
             echo "### Rebuild cleared no CVEs"
             echo
             echo "Still present after a clean rebuild — these need a \`vm/go.mod\` bump, not a rebuild:"
             echo
-            sed 's/^/- /' before_cves.txt
+            sed 's/^/- /' published_cves.txt
           } >> "$GITHUB_STEP_SUMMARY"
 
       - name: Bump version
@@ -147,10 +147,10 @@ jobs:
         env:
           NEW: ${{ steps.bump.outputs.version }}
         run: |
-          echo "Publishing ${IMAGE}:${NEW}, clearing:"; cat cleared.txt
+          echo "Publishing ${PUBLISHED_IMAGE}:${NEW}, clearing:"; cat cleared.txt
           docker buildx build --push --pull --no-cache \
             --platform "${PLATFORMS}" \
-            --tag "${IMAGE}:${NEW}" .
+            --tag "${PUBLISHED_IMAGE}:${NEW}" .
 
       # After the publish on purpose: a failed publish must not leave TAG pointing at an unpushed image.
       - name: Commit and tag
@@ -169,8 +169,8 @@ jobs:
           {
             echo "### Weekly security rebuild"
             echo
-            echo "- Published image: \`${IMAGE}:${{ steps.version.outputs.tag }}\`"
-            echo "- Fixable HIGH/CRITICAL before: $(wc -l < before_cves.txt 2>/dev/null || echo 0)"
+            echo "- Published image: \`${PUBLISHED_IMAGE}:${{ steps.version.outputs.tag }}\`"
+            echo "- Fixable HIGH/CRITICAL on the published image: $(wc -l < published_cves.txt 2>/dev/null || echo 0)"
             echo "- Cleared by rebuild: $(wc -l < cleared.txt 2>/dev/null || echo 0)"
             echo "- Released: ${{ steps.bump.outputs.version || 'no (nothing cleared)' }}"
           } >> "$GITHUB_STEP_SUMMARY"
