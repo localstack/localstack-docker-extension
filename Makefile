@@ -8,13 +8,16 @@ NO_COLOR   = \033[m
 
 build-extension: ## Build service image to be deployed as a desktop extension
 	ls binaries/linux/localstack-* > /dev/null 2>&1 || ./downloadBinaries.sh
-	docker build --tag=$(IMAGE):$(TAG) .
+	docker build --pull --no-cache --tag=$(IMAGE):$(TAG) .
 
 install-extension: build-extension ## Install the extension
 	docker extension install $(IMAGE):$(TAG)
 
 update-extension: build-extension ## Update the extension
 	docker extension update $(IMAGE):$(TAG)
+
+smoke-test: build-extension ## Verify the built image starts and ships everything it declares
+	./scripts/smoke-test.sh $(IMAGE):$(TAG)
 
 debug: ## Start the extension in debug mode
 	docker extension dev debug $(IMAGE)

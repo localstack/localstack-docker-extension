@@ -56,6 +56,44 @@ To contribute, check out our [issue tracker](https://github.com/localstack/local
     ```bash
     $ make stop-hot-reloading
     ```
+## Security maintenance
+
+Most CVEs reported against this image come from the Go toolchain compiled into
+the `service` binary rather than from any dependency manifest, so they are fixed
+by rebuilding on a newer `golang:1.25-alpine` rather than by bumping anything.
+
+The [weekly security rebuild](.github/workflows/security-rebuild.yml) does this
+automatically: it scans the published image, rebuilds from scratch, and
+republishes a new patch version **only if the rebuild actually clears a CVE**.
+Rebuilds that change nothing are not released, so no update badge appears in
+Docker Desktop for a no-op.
+
+Anything a rebuild cannot fix needs a dependency bump. Dependabot raises those
+against `vm/go.mod` as security updates; they are reviewed and released with the
+same workflow via `workflow_dispatch`.
+
+Every PR builds the image and runs the smoke test via
+[PR CI](.github/workflows/pr.yml), so a bump is verified on its own branch
+before it lands. Testing before the merge matters here: if you test afterwards,
+the next weekly rebuild sees the CVE count drop and releases the bump without
+the test ever having run.
+
+### Validating a CVE fix locally
+
+```bash
+# What is currently published?
+trivy image --scanners vuln --severity HIGH,CRITICAL --ignore-unfixed \
+  localstack/localstack-docker-desktop:$(sed -n 's/^TAG?=//p' Makefile)
+
+# Rebuild a candidate from scratch and check it still works. Builds are always
+# --pull --no-cache, so a cached base layer cannot reproduce the old image and
+# clear nothing. This is the same command CI runs.
+make smoke-test IMAGE=dde-candidate TAG=scan
+trivy image --scanners vuln --severity HIGH,CRITICAL --ignore-unfixed dde-candidate:scan
+```
+
+Test a change end to end in Docker Desktop with `make install-extension`.
+
 ## Releases
 
 Please refer to [`CHANGELOG`](CHANGELOG.md) to see the complete list of changes for each release.

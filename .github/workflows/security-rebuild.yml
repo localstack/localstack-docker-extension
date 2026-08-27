@@ -1,0 +1,178 @@
+name: Weekly Security Rebuild
+
+# Rebuild weekly to pick up Go toolchain and OS patches, republishing only when it clears a CVE (COSY-926).
+
+on:
+  schedule:
+    # ~22h ahead of the secops Wednesday 06:00 UTC scan, so anything cleared here is never filed.
+    - cron: "0 8 * * TUE"
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: "Scan and rebuild, but never publish"
+        type: boolean
+        default: false
+      image:
+        description: "Image to scan and republish. Override to test in a fork."
+        type: string
+        default: localstack/localstack-docker-desktop
+
+concurrency:
+  group: security-rebuild
+  cancel-in-progress: false
+
+jobs:
+  security-rebuild:
+    name: Rebuild and republish if CVEs clear
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    env:
+      PUBLISHED_IMAGE: ${{ inputs.image || 'localstack/localstack-docker-desktop' }}
+      PLATFORMS: linux/amd64,linux/arm64
+      GIT_AUTHOR_NAME: localstack[bot]
+      GIT_AUTHOR_EMAIL: 88328844+localstack-bot@users.noreply.github.com
+      GIT_COMMITTER_NAME: localstack[bot]
+      GIT_COMMITTER_EMAIL: 88328844+localstack-bot@users.noreply.github.com
+      # Mirror the Trivy DBs to dodge GHCR rate limits (trivy-action#389), as aws_flink.yml does.
+      TRIVY_DB_REPOSITORY: "ghcr.io/aquasecurity/trivy-db,public.ecr.aws/aquasecurity/trivy-db"
+      TRIVY_JAVA_DB_REPOSITORY: "ghcr.io/aquasecurity/trivy-java-db,public.ecr.aws/aquasecurity/trivy-java-db"
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Read published version
+        id: version
+        run: |
+          TAG=$(sed -n 's/^TAG?=\(.*\)$/\1/p' Makefile)
+          echo "Currently published: ${PUBLISHED_IMAGE}:${TAG}"
+          echo "tag=${TAG}" >> "$GITHUB_OUTPUT"
+
+      - name: Scan published image
+        # --ignore-unfixed matches what the secops pipeline files, so an unfixable advisory can't loop here forever.
+        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
+        with:
+          image-ref: ${{ env.PUBLISHED_IMAGE }}:${{ steps.version.outputs.tag }}
+          scanners: vuln
+          severity: HIGH,CRITICAL
+          ignore-unfixed: true
+          format: json
+          output: published.json
+
+      - name: Determine fixable CVEs on the published image
+        id: before
+        run: |
+          jq -r '[.Results[]?.Vulnerabilities[]?.VulnerabilityID] | unique | .[]' published.json | sort -u > published_cves.txt
+          echo "Fixable HIGH/CRITICAL CVEs on the published image:"; cat published_cves.txt || true
+          if [ -s published_cves.txt ]; then
+            echo "proceed=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "Published image is clean — nothing to rebuild."
+            echo "proceed=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Set up QEMU
+        if: steps.before.outputs.proceed == 'true'
+        uses: docker/setup-qemu-action@96fe6ef7f33517b61c61be40b68a1882f3264fb8 # v4.2.0
+
+      - name: Set up Buildx
+        if: steps.before.outputs.proceed == 'true'
+        uses: docker/setup-buildx-action@bb05f3f5519dd87d3ba754cc423b652a5edd6d2c # v4.2.0
+        with:
+          platforms: linux/amd64,linux/arm64
+
+      - name: Build and smoke-test candidate (amd64, for scanning)
+        if: steps.before.outputs.proceed == 'true'
+        run: make smoke-test IMAGE=localstack-docker-desktop TAG=candidate
+
+      - name: Scan candidate
+        if: steps.before.outputs.proceed == 'true'
+        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
+        with:
+          image-ref: localstack-docker-desktop:candidate
+          scanners: vuln
+          severity: HIGH,CRITICAL
+          ignore-unfixed: true
+          format: json
+          output: candidate.json
+
+      - name: Compute cleared CVEs (published - candidate)
+        id: delta
+        if: steps.before.outputs.proceed == 'true'
+        run: |
+          jq -r '[.Results[]?.Vulnerabilities[]?.VulnerabilityID] | unique | .[]' candidate.json | sort -u > candidate_cves.txt
+          comm -23 published_cves.txt candidate_cves.txt > cleared.txt
+          comm -13 published_cves.txt candidate_cves.txt > introduced.txt
+
+          echo "Cleared by the rebuild:"; cat cleared.txt || true
+          # Reported, not gated: we'd still rather ship a net improvement.
+          if [ -s introduced.txt ]; then
+            echo "::warning::Rebuild introduced new CVEs: $(paste -sd', ' introduced.txt)"
+          fi
+
+          if [ -s cleared.txt ]; then
+            echo "cleared=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "cleared=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Report CVEs a rebuild cannot fix
+        # Surface these instead of no-op'ing weekly until the SLA on the secops ticket burns.
+        if: steps.before.outputs.proceed == 'true' && steps.delta.outputs.cleared == 'false'
+        run: |
+          echo "::warning::Rebuild cleared nothing; these need a dependency bump: $(paste -sd', ' published_cves.txt)"
+          {
+            echo "### Rebuild cleared no CVEs"
+            echo
+            echo "Still present after a clean rebuild — these need a \`vm/go.mod\` bump, not a rebuild:"
+            echo
+            sed 's/^/- /' published_cves.txt
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Bump version
+        id: bump
+        if: steps.delta.outputs.cleared == 'true' && !inputs.dry_run
+        run: |
+          NEW=$(./scripts/bump-version.sh cleared.txt)
+          echo "Releasing ${NEW}"
+          echo "version=${NEW}" >> "$GITHUB_OUTPUT"
+
+      - name: Login to Docker Hub
+        if: steps.delta.outputs.cleared == 'true' && !inputs.dry_run
+        uses: docker/login-action@dbcb813823bdd20940b903addbd779551569679f # v4.6.0
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Publish (multi-arch)
+        # Published here rather than via build-push-docker.yml: GITHUB_TOKEN pushes don't trigger workflows.
+        if: steps.delta.outputs.cleared == 'true' && !inputs.dry_run
+        env:
+          NEW: ${{ steps.bump.outputs.version }}
+        run: |
+          echo "Publishing ${PUBLISHED_IMAGE}:${NEW}, clearing:"; cat cleared.txt
+          docker buildx build --push --pull --no-cache \
+            --platform "${PLATFORMS}" \
+            --tag "${PUBLISHED_IMAGE}:${NEW}" .
+
+      # After the publish on purpose: a failed publish must not leave TAG pointing at an unpushed image.
+      - name: Commit and tag
+        if: steps.delta.outputs.cleared == 'true' && !inputs.dry_run
+        run: |
+          git add Makefile Dockerfile CHANGELOG.md
+          git commit -m "Security rebuild ${{ steps.bump.outputs.version }}"
+          git tag "v${{ steps.bump.outputs.version }}"
+          git push origin HEAD:main "v${{ steps.bump.outputs.version }}"
+
+      - name: Summary
+        if: always()
+        run: |
+          {
+            echo "### Weekly security rebuild"
+            echo
+            echo "- Published image: \`${PUBLISHED_IMAGE}:${{ steps.version.outputs.tag }}\`"
+            echo "- Fixable HIGH/CRITICAL on the published image: $(wc -l < published_cves.txt 2>/dev/null || echo 0)"
+            echo "- Cleared by rebuild: $(wc -l < cleared.txt 2>/dev/null || echo 0)"
+            echo "- Released: ${{ steps.bump.outputs.version || 'no (nothing cleared)' }}"
+          } >> "$GITHUB_STEP_SUMMARY"
