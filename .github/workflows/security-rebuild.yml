@@ -31,9 +31,9 @@ jobs:
       PUBLISHED_IMAGE: ${{ inputs.image || 'localstack/localstack-docker-desktop' }}
       PLATFORMS: linux/amd64,linux/arm64
       GIT_AUTHOR_NAME: localstack[bot]
-      GIT_AUTHOR_EMAIL: localstack-bot@users.noreply.github.com
+      GIT_AUTHOR_EMAIL: 88328844+localstack-bot@users.noreply.github.com
       GIT_COMMITTER_NAME: localstack[bot]
-      GIT_COMMITTER_EMAIL: localstack-bot@users.noreply.github.com
+      GIT_COMMITTER_EMAIL: 88328844+localstack-bot@users.noreply.github.com
       # Mirror the Trivy DBs to dodge GHCR rate limits (trivy-action#389), as aws_flink.yml does.
       TRIVY_DB_REPOSITORY: "ghcr.io/aquasecurity/trivy-db,public.ecr.aws/aquasecurity/trivy-db"
       TRIVY_JAVA_DB_REPOSITORY: "ghcr.io/aquasecurity/trivy-java-db,public.ecr.aws/aquasecurity/trivy-java-db"
