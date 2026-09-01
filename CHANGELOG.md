@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file. The format is based on [Keep a Changelog](http://keepachangelog.com/) and this project uses calendar versioning (`<year>.<month>.<patch>`).
 
+## [2026.9.0] — 2026-09-01
+
+### Changed
+
+- Security update — clears CVE-2026-14456
+
 ## [2026.8.0] — 2026-08-19
 
 ### Changed
