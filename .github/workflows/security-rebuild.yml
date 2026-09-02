@@ -146,24 +146,44 @@ jobs:
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
       - name: Publish (multi-arch)
-        # Published here rather than via build-push-docker.yml: GITHUB_TOKEN pushes don't trigger workflows.
+        # Published here rather than via build-push-docker.yml: GITHUB_TOKEN pushes don't trigger workflows,
+        # so the v* tag pushed below never reaches it and we have to mint its tag set ourselves.
+        # v${NEW} is the load-bearing one — it is what the secops scan resolves a GitHub release to
+        # (see the release step below). latest is for humans: `docker pull` and the Docker Desktop
+        # marketplace read it, and leaving it on the superseded image hands them the CVE we just fixed.
+        # Only type=sha is dropped: the candidate predates the version commit, so sha-* would mislead.
         if: steps.delta.outputs.cleared == 'true' && !inputs.dry_run
         env:
           NEW: ${{ steps.bump.outputs.version }}
         run: |
-          echo "Publishing ${PUBLISHED_IMAGE}:${NEW}, clearing:"; cat cleared.txt
+          echo "Publishing ${PUBLISHED_IMAGE}:${NEW} (also v${NEW}, latest), clearing:"; cat cleared.txt
           docker buildx build --push --pull --no-cache \
             --platform "${PLATFORMS}" \
-            --tag "${PUBLISHED_IMAGE}:${NEW}" .
+            --tag "${PUBLISHED_IMAGE}:${NEW}" \
+            --tag "${PUBLISHED_IMAGE}:v${NEW}" \
+            --tag "${PUBLISHED_IMAGE}:latest" .
 
       # After the publish on purpose: a failed publish must not leave TAG pointing at an unpushed image.
-      - name: Commit and tag
+      - name: Commit, tag and release
         if: steps.delta.outputs.cleared == 'true' && !inputs.dry_run
+        env:
+          NEW: ${{ steps.bump.outputs.version }}
+          GH_TOKEN: ${{ github.token }}
         run: |
           git add Makefile Dockerfile CHANGELOG.md
-          git commit -m "Security rebuild ${{ steps.bump.outputs.version }}"
-          git tag "v${{ steps.bump.outputs.version }}"
-          git push origin HEAD:main "v${{ steps.bump.outputs.version }}"
+          git commit -m "Security rebuild ${NEW}"
+          git tag "v${NEW}"
+          git push origin HEAD:main "v${NEW}"
+
+          # A git tag alone is invisible to the scan. secops resolves this product's targets from
+          # our last github_releases_fetch_limit=2 GitHub *releases* (localstack/secops,
+          # localstack_products.json: type=github), looking each release's tag_name up verbatim on
+          # Docker Hub -- hence the v-prefixed tag in the publish step above. Skip the release and
+          # the scan window stays on the previous version: that is why 2026.9.0's fix went unseen
+          # and CVE-2026-14456 was refiled as BEE-1172/BEE-1173. Title matches the existing
+          # releases, which drop the v.
+          gh release create "v${NEW}" --title "${NEW}" \
+            --notes "Weekly security rebuild (COSY-926). Cleared: $(paste -sd', ' cleared.txt)."
 
       - name: Summary
         if: always()
