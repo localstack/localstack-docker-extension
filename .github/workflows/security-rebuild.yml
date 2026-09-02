@@ -147,23 +147,33 @@ jobs:
 
       - name: Publish (multi-arch)
         # Published here rather than via build-push-docker.yml: GITHUB_TOKEN pushes don't trigger workflows.
+        # v${NEW} is what the secops scan resolves; latest is what docker pull and the marketplace read.
         if: steps.delta.outputs.cleared == 'true' && !inputs.dry_run
         env:
           NEW: ${{ steps.bump.outputs.version }}
         run: |
-          echo "Publishing ${PUBLISHED_IMAGE}:${NEW}, clearing:"; cat cleared.txt
+          echo "Publishing ${PUBLISHED_IMAGE}:${NEW} (also v${NEW}, latest), clearing:"; cat cleared.txt
           docker buildx build --push --pull --no-cache \
             --platform "${PLATFORMS}" \
-            --tag "${PUBLISHED_IMAGE}:${NEW}" .
+            --tag "${PUBLISHED_IMAGE}:${NEW}" \
+            --tag "${PUBLISHED_IMAGE}:v${NEW}" \
+            --tag "${PUBLISHED_IMAGE}:latest" .
 
       # After the publish on purpose: a failed publish must not leave TAG pointing at an unpushed image.
-      - name: Commit and tag
+      - name: Commit, tag and release
         if: steps.delta.outputs.cleared == 'true' && !inputs.dry_run
+        env:
+          NEW: ${{ steps.bump.outputs.version }}
+          GH_TOKEN: ${{ github.token }}
         run: |
           git add Makefile Dockerfile CHANGELOG.md
-          git commit -m "Security rebuild ${{ steps.bump.outputs.version }}"
-          git tag "v${{ steps.bump.outputs.version }}"
-          git push origin HEAD:main "v${{ steps.bump.outputs.version }}"
+          git commit -m "Security rebuild ${NEW}"
+          git tag "v${NEW}"
+          git push origin HEAD:main "v${NEW}"
+
+          # The secops scan reads our GitHub releases, not our tags; a bare tag leaves it on the old version.
+          gh release create "v${NEW}" --title "${NEW}" \
+            --notes "Weekly security rebuild (COSY-926). Cleared: $(paste -sd', ' cleared.txt)."
 
       - name: Summary
         if: always()
