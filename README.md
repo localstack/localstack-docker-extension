@@ -60,7 +60,7 @@ To contribute, check out our [issue tracker](https://github.com/localstack/local
 
 Most CVEs reported against this image come from the Go toolchain compiled into
 the `service` binary rather than from any dependency manifest, so they are fixed
-by rebuilding on a newer `golang:1.25-alpine` rather than by bumping anything.
+by rebuilding on a newer `golang:1.26-alpine` rather than by bumping anything.
 
 The [weekly security rebuild](.github/workflows/security-rebuild.yml) does this
 automatically: it scans the published image, rebuilds from scratch, and
