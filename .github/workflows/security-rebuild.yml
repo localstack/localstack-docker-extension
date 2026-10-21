@@ -4,7 +4,7 @@ name: Weekly Security Rebuild
 
 on:
   schedule:
-    # ~22h ahead of the secops Wednesday 06:00 UTC scan, so anything cleared here is never filed.
+    # Ahead of the Wednesday 06:00 UTC secops scan, the one the weekly customer report is built from.
     - cron: "0 8 * * TUE"
   workflow_dispatch:
     inputs:
