@@ -62,7 +62,7 @@ Most CVEs reported against this image come from the Go toolchain compiled into
 the `service` binary rather than from any dependency manifest, so they are fixed
 by rebuilding on a newer `golang:1.26-alpine` rather than by bumping anything.
 
-The [weekly security rebuild](.github/workflows/security-rebuild.yml) does this
+The [daily security rebuild](.github/workflows/security-rebuild.yml) does this
 automatically: it scans the published image, rebuilds from scratch, and
 republishes a new patch version **only if the rebuild actually clears a CVE**.
 Rebuilds that change nothing are not released, so no update badge appears in
@@ -75,7 +75,7 @@ same workflow via `workflow_dispatch`.
 Every PR builds the image and runs the smoke test via
 [PR CI](.github/workflows/pr.yml), so a bump is verified on its own branch
 before it lands. Testing before the merge matters here: if you test afterwards,
-the next weekly rebuild sees the CVE count drop and releases the bump without
+the next daily rebuild sees the CVE count drop and releases the bump without
 the test ever having run.
 
 ### Validating a CVE fix locally
