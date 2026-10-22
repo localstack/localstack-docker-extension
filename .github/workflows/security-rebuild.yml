@@ -4,7 +4,6 @@ name: Weekly Security Rebuild
 
 on:
   schedule:
-    # ~22h ahead of the secops Wednesday 06:00 UTC scan, so anything cleared here is never filed.
     - cron: "0 8 * * TUE"
   workflow_dispatch:
     inputs:
@@ -55,7 +54,6 @@ jobs:
         with:
           image-ref: ${{ env.PUBLISHED_IMAGE }}:${{ steps.version.outputs.tag }}
           scanners: vuln
-          severity: HIGH,CRITICAL
           ignore-unfixed: true
           format: json
           output: published.json
@@ -64,7 +62,7 @@ jobs:
         id: before
         run: |
           jq -r '[.Results[]?.Vulnerabilities[]?.VulnerabilityID] | unique | .[]' published.json | sort -u > published_cves.txt
-          echo "Fixable HIGH/CRITICAL CVEs on the published image:"; cat published_cves.txt || true
+          echo "Fixable CVEs on the published image:"; cat published_cves.txt || true
           if [ -s published_cves.txt ]; then
             echo "proceed=true" >> "$GITHUB_OUTPUT"
           else
@@ -92,7 +90,6 @@ jobs:
         with:
           image-ref: localstack-docker-desktop:candidate
           scanners: vuln
-          severity: HIGH,CRITICAL
           ignore-unfixed: true
           format: json
           output: candidate.json
@@ -182,7 +179,7 @@ jobs:
             echo "### Weekly security rebuild"
             echo
             echo "- Published image: \`${PUBLISHED_IMAGE}:${{ steps.version.outputs.tag }}\`"
-            echo "- Fixable HIGH/CRITICAL on the published image: $(wc -l < published_cves.txt 2>/dev/null || echo 0)"
+            echo "- Fixable CVEs on the published image: $(wc -l < published_cves.txt 2>/dev/null || echo 0)"
             echo "- Cleared by rebuild: $(wc -l < cleared.txt 2>/dev/null || echo 0)"
             echo "- Released: ${{ steps.bump.outputs.version || 'no (nothing cleared)' }}"
           } >> "$GITHUB_STEP_SUMMARY"
