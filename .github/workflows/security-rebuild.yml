@@ -1,10 +1,10 @@
-name: Weekly Security Rebuild
+name: Daily Security Rebuild
 
-# Rebuild weekly to pick up Go toolchain and OS patches, republishing only when it clears a CVE (COSY-926).
+# Rebuild daily to pick up Go toolchain and OS patches, republishing only when it clears a CVE (COSY-926).
 
 on:
   schedule:
-    - cron: "0 8 * * TUE"
+    - cron: "0 8 * * *"
   workflow_dispatch:
     inputs:
       dry_run:
@@ -115,7 +115,7 @@ jobs:
           fi
 
       - name: Report CVEs a rebuild cannot fix
-        # Surface these instead of no-op'ing weekly until the SLA on the secops ticket burns.
+        # Surface these instead of no-op'ing daily until the SLA on the secops ticket burns.
         if: steps.before.outputs.proceed == 'true' && steps.delta.outputs.cleared == 'false'
         run: |
           echo "::warning::Rebuild cleared nothing; these need a dependency bump: $(paste -sd', ' published_cves.txt)"
@@ -170,13 +170,13 @@ jobs:
 
           # The secops scan reads our GitHub releases, not our tags; a bare tag leaves it on the old version.
           gh release create "v${NEW}" --title "${NEW}" \
-            --notes "Weekly security rebuild (COSY-926). Cleared: $(paste -sd', ' cleared.txt)."
+            --notes "Daily security rebuild (COSY-926). Cleared: $(paste -sd', ' cleared.txt)."
 
       - name: Summary
         if: always()
         run: |
           {
-            echo "### Weekly security rebuild"
+            echo "### Daily security rebuild"
             echo
             echo "- Published image: \`${PUBLISHED_IMAGE}:${{ steps.version.outputs.tag }}\`"
             echo "- Fixable CVEs on the published image: $(wc -l < published_cves.txt 2>/dev/null || echo 0)"
