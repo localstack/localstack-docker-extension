@@ -23,9 +23,12 @@ const removeDockerTag = (imageString: string) => {
   // If there is a tag, return the part before the last ":" (image without tag)
   return parts.slice(0, -1).join(':');
 };
-export function removeTagFromImage(image: DockerImage){
-
-  return removeDockerTag(image.RepoTags?.at(0) || '');
+/**
+ * An image can carry several tags (e.g. localstack/localstack-pro:latest and
+ * localstack/localstack:latest share one image), so return every repository name.
+ */
+export function getImageRepositories(image: DockerImage): string[] {
+  return (image.RepoTags ?? []).map(removeDockerTag);
 }
 
 export const isALocalStackContainer = (container: DockerContainer) => {

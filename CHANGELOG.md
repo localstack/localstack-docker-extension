@@ -1,6 +1,66 @@
 # Change Log
 
-All notable changes to this project will be documented in this file. The format is based on [Keep a Changelog](http://keepachangelog.com/) and this project adheres to [Semantic Versioning](http://semver.org/).
+All notable changes to this project will be documented in this file. The format is based on [Keep a Changelog](http://keepachangelog.com/) and this project uses calendar versioning (`<year>.<month>.<patch>`).
+
+## [2026.11.2] — 2026-11-12
+
+### Changed
+
+- Security update — clears CVE-2026-97054
+
+## [2026.11.1] — 2026-11-07
+
+### Changed
+
+- Security update — clears CVE-2026-4738
+
+## [2026.11.0] — 2026-11-04
+
+### Changed
+
+- Security update — clears CVE-2026-78661, CVE-2026-97045, GO-2026-5932
+
+## [2026.10.1] — 2026-10-27
+
+### Changed
+
+- Security update — clears CVE-2026-107891, CVE-2026-111943
+
+## [2026.10.0] — 2026-10-14
+
+### Changed
+
+- Security update — clears CVE-2026-78667, CVE-2026-78669, CVE-2026-97031
+
+## [2026.9.0] — 2026-09-01
+
+### Changed
+
+- Security update — clears CVE-2026-14456
+
+## [2026.8.0] — 2026-08-19
+
+### Changed
+
+- Security update
+
+## [2026.7.2] — 2026-07-29
+
+### Changed
+
+- Security update
+
+## [2026.7.1] — 2026-07-21
+
+### Changed
+
+- Security update
+
+## [2026.7.0] — 2026-07-06
+
+### Changed
+
+- Security update
 
 ## [2026.6.0] — 2026-06-22
 

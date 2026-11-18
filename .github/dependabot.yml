@@ -1,0 +1,18 @@
+version: 2
+updates:
+  # Security updates only: open-pull-requests-limit 0 disables scheduled version updates.
+  # gomod only — vm/go.mod is the sole manifest Trivy sees, the UI ships as a bundle with no node_modules.
+  - package-ecosystem: gomod
+    directory: /vm
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 0
+
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+    groups:
+      actions:
+        patterns:
+          - "*"
