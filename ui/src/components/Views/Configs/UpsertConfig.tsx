@@ -13,7 +13,6 @@ import {
 } from '@mui/material';
 import { Add, Remove, Settings } from '@mui/icons-material';
 import React, { ReactElement, useState } from 'react';
-import { v4 as uuid } from 'uuid';
 import { createStyles, makeStyles } from '@mui/styles';
 import { useRunConfigs } from '../../../services/hooks';
 import { RunConfig } from '../../../types';
@@ -58,11 +57,11 @@ export const UpsertConfig = ({
     config ||
       ({
         name: '',
-        id: uuid(),
+        id: crypto.randomUUID(),
         vars: COMMON_CONFIGURATIONS.map(([variable, value, description]) => ({
           variable,
           value,
-          id: uuid(),
+          id: crypto.randomUUID(),
           description,
         })),
       } as RunConfig),
@@ -72,10 +71,10 @@ export const UpsertConfig = ({
   const handleAddButtonPress = () => {
     setNewConfig({
       name: newConfig.name,
-      id: newConfig.id || uuid(),
+      id: newConfig.id || crypto.randomUUID(),
       vars: [
         ...newConfig.vars,
-        { variable: newVar, value: newValue, id: uuid() },
+        { variable: newVar, value: newValue, id: crypto.randomUUID() },
       ],
     });
     setNewVar('');
@@ -90,7 +89,7 @@ export const UpsertConfig = ({
         newVar && newValue
           ? [
             ...newConfig.vars,
-            { variable: newVar, value: newValue, id: uuid() },
+            { variable: newVar, value: newValue, id: crypto.randomUUID() },
           ]
           : newConfig.vars,
     });
@@ -100,7 +99,7 @@ export const UpsertConfig = ({
   const handleRemoveButtonPress = (id: string) => {
     setNewConfig({
       name: newConfig.name,
-      id: newConfig.id || uuid(),
+      id: newConfig.id || crypto.randomUUID(),
       vars: newConfig.vars?.filter((item) => item?.id !== id) || [],
     });
   };

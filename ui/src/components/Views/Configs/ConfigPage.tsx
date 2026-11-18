@@ -3,7 +3,6 @@ import { Box, Button, ButtonGroup, IconButton, Theme } from '@mui/material';
 import React, { ReactElement, useState } from 'react';
 import { createStyles, makeStyles } from '@mui/styles';
 import { DataGrid, GridColDef, GridRenderCellParams } from '@mui/x-data-grid';
-import { v4 as uuid } from 'uuid';
 import { useMountPoint, useRunConfigs } from '../../../services';
 import { DEFAULT_CONFIGURATION_ID } from '../../../constants';
 import { RunConfig, Optional } from '../../../types';
@@ -86,7 +85,7 @@ export const ConfigPage = (): ReactElement => {
           autoHeight
           rows={configData?.configs?.filter(config => config.id !== DEFAULT_CONFIGURATION_ID) || []}
           columns={columns}
-          getRowId={(row) => (row).id as string || uuid()}
+          getRowId={(row) => (row).id as string || crypto.randomUUID()}
           disableSelectionOnClick
         />
       </Box>
