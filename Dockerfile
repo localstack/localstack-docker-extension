@@ -1,4 +1,4 @@
-FROM golang:1.25-alpine AS builder
+FROM golang:1.26-alpine AS builder
 ENV CGO_ENABLED=0
 WORKDIR /backend
 COPY vm/go.* ./
@@ -22,14 +22,14 @@ RUN --mount=type=cache,target=/usr/src/app/.npm \
 COPY ui /ui
 RUN npm run build
 
-FROM alpine
+FROM alpine:3.24
 RUN apk upgrade --no-cache
 LABEL org.opencontainers.image.title="LocalStack" \
   org.opencontainers.image.description="Extension of Localstack for Docker desktop" \
   org.opencontainers.image.vendor="LocalStack GmbH" \
   com.docker.desktop.extension.api.version=">= 0.2.3" \
   org.opencontainers.image.licenses=Apache-2.0 \
-  org.opencontainers.image.version=0.3.1 \
+  org.opencontainers.image.version=2026.11.2 \
   com.docker.extension.categories="cloud-development,testing-tools" \
   com.docker.desktop.extension.icon="https://avatars.githubusercontent.com/u/28732122?v=4" \
   com.docker.extension.screenshots="[ \
