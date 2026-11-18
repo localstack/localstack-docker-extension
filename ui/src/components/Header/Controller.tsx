@@ -12,7 +12,7 @@ import {
 import { PlayArrow, Stop } from '@mui/icons-material';
 import {
   isALocalStackContainer,
-  removeTagFromImage,
+  getImageRepositories,
   useDDClient,
   useLocalStack,
   useMountPoint,
@@ -125,11 +125,9 @@ export const Controller = (): ReactElement => {
       return;
     }
     
-    const haveImage = images.some(
-      (image) => removeTagFromImage(image) === LOCALSTACK_IMAGE,
+    const haveImage = images.some((image) =>
+      getImageRepositories(image).includes(LOCALSTACK_IMAGE),
     );
-
-  
     if (!haveImage) {
       setDownloadProps({ open: true, image: LOCALSTACK_IMAGE });
       return;

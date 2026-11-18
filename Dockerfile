@@ -1,4 +1,4 @@
-FROM golang:1.25-alpine AS builder
+FROM golang:1.26-alpine AS builder
 ENV CGO_ENABLED=0
 WORKDIR /backend
 COPY vm/go.* ./
@@ -29,7 +29,7 @@ LABEL org.opencontainers.image.title="LocalStack" \
   org.opencontainers.image.vendor="LocalStack GmbH" \
   com.docker.desktop.extension.api.version=">= 0.2.3" \
   org.opencontainers.image.licenses=Apache-2.0 \
-  org.opencontainers.image.version=2026.9.0 \
+  org.opencontainers.image.version=2026.11.2 \
   com.docker.extension.categories="cloud-development,testing-tools" \
   com.docker.desktop.extension.icon="https://avatars.githubusercontent.com/u/28732122?v=4" \
   com.docker.extension.screenshots="[ \
